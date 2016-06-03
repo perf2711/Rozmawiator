@@ -59,12 +59,12 @@ namespace Rozmawiator.ClientApi
 
         public RemoteClient GetRemoteClient(short id)
         {
-            return Participants.FirstOrDefault(p => p.Id == id);
+            return _participants.FirstOrDefault(p => p.Id == id);
         }
 
         public RemoteClient GetSender(Message message)
         {
-            return Participants.FirstOrDefault(p => p.Id == message.Sender);
+            return _participants.FirstOrDefault(p => p.Id == message.Sender);
         }
 
         private void HandleTextMessage(Message message)
@@ -128,6 +128,11 @@ namespace Rozmawiator.ClientApi
         {
             message.Receiver = id;
             Send(message);
+        }
+
+        public void Disconnect()
+        {
+            Client.DisconnectFromConversation("Disconnect");
         }
     }
 }

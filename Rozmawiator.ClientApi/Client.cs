@@ -24,10 +24,10 @@ namespace Rozmawiator.ClientApi
         public ClientState State { get; private set; } = ClientState.Disconnected;
         public IPEndPoint ServerEndPoint { get; private set; }
 
-        public Conversation JoinedConversation { get; private set; }
+        public Conversation Conversation { get; private set; }
 
         public ReadOnlyObservableCollection<CallRequest> PendingCallRequests { get; }
-        private ObservableCollection<CallRequest> _pendingCallRequests;
+        private readonly ObservableCollection<CallRequest> _pendingCallRequests;
 
         public event Action<Client, Message> Connected;
         public event Action<Client, Message> NewMessage;
@@ -108,12 +108,40 @@ namespace Rozmawiator.ClientApi
 
         public void Call(string nickname)
         {
-            if (JoinedConversation != null)
+            if (Conversation != null)
             {
                 throw new InvalidOperationException("User is already in conversation. Disconnect first.");
             }
 
+            Conversation = new Conversation(this);
             Send(new Message().Call(nickname));
+        }
+
+        public void DisconnectFromConversation(string reason)
+        {
+            Conversation.SendToAll(new Message().ByeConversation(reason));
+            Conversation = null;
+        }
+
+        public void RespondToRequest(CallRequest request)
+        {
+            if (request.Response == null)
+            {
+                return;
+            }
+
+            switch (request.Response.Value)
+            {
+                case Message.CallResponseType.RequestDenied:
+                case Message.CallResponseType.RequestAccepted:
+                    Send(new Message().CallResponse(request.CallerId, request.Response.Value));
+                    break;
+                case Message.CallResponseType.TargetIsOffline:
+                case Message.CallResponseType.ExpiredCall:
+                    throw new InvalidOperationException("Invalid response. Client can only send Accepted and Denied.");
+            }
+
+            _pendingCallRequests.Remove(request);
         }
 
         private void ReceiveLoop()
@@ -156,7 +184,7 @@ namespace Rozmawiator.ClientApi
                 case Message.MessageType.CloseConversation:
                 case Message.MessageType.Text:
                 case Message.MessageType.Audio:
-                    JoinedConversation?.HandleMessage(message);
+                    Conversation?.HandleMessage(message);
                     break;
                 case Message.MessageType.CallRequest:
                     HandleCallRequest(message);
@@ -172,6 +200,7 @@ namespace Rozmawiator.ClientApi
         private void HandleCallRequest(Message message)
         {
             var request = new CallRequest(message.Sender, message.GetTextContent(), this);
+            _pendingCallRequests.Add(request);
             NewCallRequest?.Invoke(this, request, message);
         }
 

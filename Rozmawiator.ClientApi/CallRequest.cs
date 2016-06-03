@@ -13,6 +13,7 @@ namespace Rozmawiator.ClientApi
         private readonly Client _client;
         public short CallerId { get; }
         public string CallerNickname { get; }
+        public Message.CallResponseType? Response { get; private set; }
 
         public CallRequest(short callerId, string callerNickname, Client client)
         {
@@ -23,12 +24,16 @@ namespace Rozmawiator.ClientApi
 
         public void Accept()
         {
-            _client.Send(new Message().CallResponse(CallerId, Message.CallResponseType.RequestAccepted));
+            //_client.Send(new Message().CallResponse(CallerId, Message.CallResponseType.RequestAccepted));
+            Response = Message.CallResponseType.RequestAccepted;
+            _client.RespondToRequest(this);
         }
 
         public void Decline()
         {
-            _client.Send(new Message().CallResponse(CallerId, Message.CallResponseType.RequestDenied));
+            Response = Message.CallResponseType.RequestDenied;
+            _client.RespondToRequest(this);
+            //_client.Send(new Message().CallResponse(CallerId, Message.CallResponseType.RequestDenied));
         }
     }
 }

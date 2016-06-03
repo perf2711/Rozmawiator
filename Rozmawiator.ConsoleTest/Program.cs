@@ -13,7 +13,7 @@ namespace Rozmawiator.ConsoleTest
     {
         private static Client _client;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Console.Write("Nickname: ");
             _client = new Client(Console.ReadLine());
