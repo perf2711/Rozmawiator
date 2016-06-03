@@ -1,0 +1,92 @@
+﻿<Window x:Class="Rozmawiator.Server.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Rozmawiator.Server"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="525"
+        Closing="OnClose">
+    <Window.Resources>
+        <Color x:Key="Base">Gray</Color>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="20px"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.Background>
+                <SolidColorBrush Color="{DynamicResource Base}"/>
+            </Grid.Background>
+            <StackPanel Orientation="Horizontal" Margin="5,5">
+                <Button x:Name="StartButton" Content="Start" Width="80" Margin="0,0,5,0" HorizontalAlignment="Left" Height="20" VerticalAlignment="Bottom" Click="StartButton_Click"/>
+                <Button x:Name="StopButton" Content="Stop" Width="80" Margin="0,0,5,0" HorizontalAlignment="Left" IsEnabled="False" Click="StopButton_Click"/>
+            </StackPanel>
+            <Button Content="Settings" Width="80" Margin="5,5,5,5" HorizontalAlignment="Right" Click="SettingsButton_Click"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" Content="Clients" HorizontalAlignment="Center" Padding="2" VerticalAlignment="Center"/>
+                    <ListView Grid.Column="0" x:Name="ClientListView" Grid.Row="1" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="ID" Width="30" DisplayMemberBinding="{Binding Id}"/>
+                                <GridViewColumn Header="Nickname" Width="100" DisplayMemberBinding="{Binding Nickname}"/>
+                                <GridViewColumn Header="Endpoint" Width="100" DisplayMemberBinding="{Binding Endpoint}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                    <Label Grid.Row="0" Grid.Column="1" Content="Conversations" HorizontalAlignment="Center" Padding="2" VerticalAlignment="Center"/>
+                    <ListView Grid.Column="1" x:Name="ConversationListView" Grid.Row="1" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="ID" Width="30" DisplayMemberBinding="{Binding Id}"/>
+                                <GridViewColumn Header="Owner" Width="150" DisplayMemberBinding="{Binding OwnerNickname}"/>
+                                <GridViewColumn Header="Clients" Width="50" DisplayMemberBinding="{Binding ClientCount}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+                <Grid Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBox x:Name="ConsoleBox" HorizontalAlignment="Stretch" Margin="5,2" TextWrapping="Wrap" AcceptsReturn="True" VerticalAlignment="Stretch" IsReadOnly="True"/>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="60"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="ConsoleSendBox" HorizontalAlignment="Stretch" Height="20" Margin="5,2" VerticalAlignment="Center" KeyDown="ConsoleSendBox_KeyDown" IsEnabled="false"/>
+                        <Button x:Name="ConsoleSendButton" Grid.Column="1" Margin="5,2,0,2" Content="Send" FontSize="11" HorizontalAlignment="Left" Width="50" Click="SendButton_Click" IsEnabled="false"/>
+                    </Grid>
+
+
+                </Grid>
+            </Grid>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.Background>
+                <SolidColorBrush Color="{DynamicResource Base}"/>
+            </Grid.Background>
+            <Label x:Name="StatusLabel" Content="Server is offline." Padding="5,2" FontSize="10" Foreground="White"/>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,11 @@
+﻿{
+    "Server": {
+        "ListenPort": 28234,
+        "MaxClients": 100,
+        "Motd": "Message of the day"
+    },
+    "kaszanka" :  "abc" ,
+    "Client": {
+        "Timeout" : 30000 
+    }
+}
