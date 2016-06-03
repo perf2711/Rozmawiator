@@ -73,6 +73,16 @@ namespace Rozmawiator.Shared
         {
         }
 
+        public Message() :this(0,0, MessageType.Text, "")
+        {
+            
+        }
+
+        public void SetTextContent(string content)
+        {
+            Content = Encoding.Unicode.GetBytes(content);
+        }
+
         public string GetTextContent()
         {
             return Encoding.Unicode.GetString(Content);

@@ -115,6 +115,9 @@ namespace Rozmawiator.Server.Api
                 case Message.MessageType.Bye:
                 case Message.MessageType.KeepAlive:
                 case Message.MessageType.Call:
+                case Message.MessageType.CallRequest:
+                case Message.MessageType.CallResponse:
+                case Message.MessageType.CloseConversation:
                     return;
                 case Message.MessageType.Text:
                     break;
@@ -128,7 +131,7 @@ namespace Rozmawiator.Server.Api
                     throw new ArgumentOutOfRangeException();
             }
 
-            Broadcast(message);
+            Resend(message);
         }
 
         public void Resend(Message message)
@@ -136,6 +139,10 @@ namespace Rozmawiator.Server.Api
             if (message.Receiver == 0)
             {
                 Broadcast(message);
+            }
+            else
+            {
+                Server.Send(Server.GetClient(message.Receiver), message);
             }
         }
         

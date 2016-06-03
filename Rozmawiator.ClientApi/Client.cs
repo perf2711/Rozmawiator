@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -22,10 +23,17 @@ namespace Rozmawiator.ClientApi
         public string Nickname { get; }
         public ClientState State { get; private set; } = ClientState.Disconnected;
         public IPEndPoint ServerEndPoint { get; private set; }
-        
+
+        public Conversation JoinedConversation { get; private set; }
+
+        public ReadOnlyObservableCollection<CallRequest> PendingCallRequests { get; }
+        private ObservableCollection<CallRequest> _pendingCallRequests;
 
         public event Action<Client, Message> Connected;
         public event Action<Client, Message> NewMessage;
+
+        public event Action<Client, CallRequest, Message> NewCallRequest;
+        public event Action<Client, Message> NewCallResponse;
 
         private readonly UdpClient _client;
         private const int KeepAliveSpan = 1000;
@@ -35,6 +43,9 @@ namespace Rozmawiator.ClientApi
         {
             Nickname = nickname;
             _client = new UdpClient();
+
+            _pendingCallRequests = new ObservableCollection<CallRequest>();
+            PendingCallRequests = new ReadOnlyObservableCollection<CallRequest>(_pendingCallRequests);
         }
 
         public void Connect(IPEndPoint ipEndPoint)
@@ -95,6 +106,16 @@ namespace Rozmawiator.ClientApi
             await _client.SendAsync(bytes, bytes.Length);
         }
 
+        public void Call(string nickname)
+        {
+            if (JoinedConversation != null)
+            {
+                throw new InvalidOperationException("User is already in conversation. Disconnect first.");
+            }
+
+            Send(new Message().Call(nickname));
+        }
+
         private void ReceiveLoop()
         {
             while (State == ClientState.Connecting)
@@ -117,38 +138,41 @@ namespace Rozmawiator.ClientApi
                 var msg = _client.Receive(ref from);
 
                 var message = Message.FromBytes(msg);
-
-                /*
-                switch (message.Type)
-                {
-                    case Message.MessageType.Hello:
-                        break;
-                    case Message.MessageType.Bye:
-                        break;
-                    case Message.MessageType.KeepAlive:
-                        break;
-                    case Message.MessageType.Text:
-                        break;
-                    case Message.MessageType.Audio:
-                        break;
-                    case Message.MessageType.Call:
-                        break;
-                    case Message.MessageType.CallRequest:
-                        break;
-                    case Message.MessageType.CallResponse:
-                        break;
-                    case Message.MessageType.HelloConversation:
-                        break;
-                    case Message.MessageType.ByeConversation:
-                        break;
-                    case Message.MessageType.CloseConversation:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                */
-                Task.Factory.StartNew(() => NewMessage?.Invoke(this, message));
+                Task.Factory.StartNew(() => HandleMessage(message));
             }
+        }
+
+        private void HandleMessage(Message message)
+        {
+            switch (message.Type)
+            {
+                case Message.MessageType.Hello:
+                case Message.MessageType.Bye:
+                case Message.MessageType.KeepAlive:
+                case Message.MessageType.Call:
+                    break;
+                case Message.MessageType.HelloConversation:
+                case Message.MessageType.ByeConversation:
+                case Message.MessageType.CloseConversation:
+                case Message.MessageType.Text:
+                case Message.MessageType.Audio:
+                    JoinedConversation?.HandleMessage(message);
+                    break;
+                case Message.MessageType.CallRequest:
+                    HandleCallRequest(message);
+                    break;
+                case Message.MessageType.CallResponse:
+                    NewCallResponse?.Invoke(this, message);
+                    break;
+            }
+
+            NewMessage?.Invoke(this, message);
+        }
+
+        private void HandleCallRequest(Message message)
+        {
+            var request = new CallRequest(message.Sender, message.GetTextContent(), this);
+            NewCallRequest?.Invoke(this, request, message);
         }
 
         private void SendHeartbeat(object state)
