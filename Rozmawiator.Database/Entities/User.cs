@@ -27,5 +27,7 @@ namespace Rozmawiator.Database.Entities
         public virtual ICollection<CallRequest> CallerCallRequests { get; set; }
         public virtual ICollection<CallRequest> CalleeCallRequests { get; set; }
         public virtual ICollection<Message> Messages { get; set; }
+        public virtual ICollection<FriendRequest> RequestedFriendRequests { get; set; }
+        public virtual ICollection<FriendRequest> FriendRequests { get; set; }
     }
 }

@@ -41,6 +41,16 @@ namespace Rozmawiator.Database
                 .HasMany(u => u.CalleeCallRequests)
                 .WithRequired(u => u.Callee);
 
+            /* Friend request mapping */
+            modelBuilder
+                .Entity<User>()
+                .HasMany(u => u.FriendRequests)
+                .WithRequired(r => r.TargetUser);
+            modelBuilder
+                .Entity<User>()
+                .HasMany(u => u.RequestedFriendRequests)
+                .WithRequired(r => r.RequestingUser);
+
             base.OnModelCreating(modelBuilder);
 
             /* Rename Identity tables */
@@ -52,6 +62,7 @@ namespace Rozmawiator.Database
         }
 
         public DbSet<CallRequest> CallRequests { get; set; }
+        public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<Conversation> Conversations { get; set; }
         public DbSet<ConversationParticipant> ConversationParticipants { get; set; }
         public DbSet<Message> Messages { get; set; }

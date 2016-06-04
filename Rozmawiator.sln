@@ -29,6 +29,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{F7
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rozmawiator.Database", "Rozmawiator.Database\Rozmawiator.Database.csproj", "{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{D32111DD-0737-4298-AAB0-BE0B73F12E06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rozmawiator.Rest", "Rozmawiator.Rest\Rozmawiator.Rest.csproj", "{E6CC44F7-C91B-4E30-BA91-9C35C425CF10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rozmawiator.Database.ViewModels", "Rozmawiator.Database.ViewModels\Rozmawiator.Database.ViewModels.csproj", "{216B81AA-F4A4-46AE-8AAE-7B07B84B476D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +77,14 @@ Global
 		{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6CC44F7-C91B-4E30-BA91-9C35C425CF10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6CC44F7-C91B-4E30-BA91-9C35C425CF10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6CC44F7-C91B-4E30-BA91-9C35C425CF10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6CC44F7-C91B-4E30-BA91-9C35C425CF10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{216B81AA-F4A4-46AE-8AAE-7B07B84B476D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{216B81AA-F4A4-46AE-8AAE-7B07B84B476D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{216B81AA-F4A4-46AE-8AAE-7B07B84B476D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{216B81AA-F4A4-46AE-8AAE-7B07B84B476D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -85,5 +99,7 @@ Global
 		{8F2E073A-C63F-4A9E-9909-876C17E47276} = {B2797B12-E5CC-4A67-92EE-3B60069CE2A3}
 		{E115E75E-FE6B-4CE2-923F-81F963E2B720} = {B2797B12-E5CC-4A67-92EE-3B60069CE2A3}
 		{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9} = {F71AFA87-EC9F-4A19-8C68-FE5D7F4DC194}
+		{E6CC44F7-C91B-4E30-BA91-9C35C425CF10} = {D32111DD-0737-4298-AAB0-BE0B73F12E06}
+		{216B81AA-F4A4-46AE-8AAE-7B07B84B476D} = {F71AFA87-EC9F-4A19-8C68-FE5D7F4DC194}
 	EndGlobalSection
 EndGlobal

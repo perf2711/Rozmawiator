@@ -206,6 +206,12 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\Database\CallRequestController.cs" />
+    <Compile Include="Controllers\Database\ConversationController.cs" />
+    <Compile Include="Controllers\Database\FriendController.cs" />
+    <Compile Include="Controllers\Database\MessageController.cs" />
+    <Compile Include="Controllers\Database\ServerController.cs" />
+    <Compile Include="Controllers\Database\UserController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
@@ -284,6 +290,16 @@
     <Content Include="packages.config" />
     <None Include="Project_Readme.html" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Rozmawiator.Database.ViewModels\Rozmawiator.Database.ViewModels.csproj">
+      <Project>{216b81aa-f4a4-46ae-8aae-7b07b84b476d}</Project>
+      <Name>Rozmawiator.Database.ViewModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rozmawiator.Database\Rozmawiator.Database.csproj">
+      <Project>{81f4bf3e-7481-41fe-a3f4-0395eb1a71a9}</Project>
+      <Name>Rozmawiator.Database</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

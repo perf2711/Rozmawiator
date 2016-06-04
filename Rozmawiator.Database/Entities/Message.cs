@@ -24,6 +24,6 @@ namespace Rozmawiator.Database.Entities
         [ForeignKey("SenderId")]
         public virtual User Sender { get; set; }
         [ForeignKey("ConversationId")]
-        public Guid Conversation { get; set; }
+        public virtual Conversation Conversation { get; set; }
     }
 }
