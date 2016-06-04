@@ -23,9 +23,13 @@ namespace Rozmawiator.ConsoleTest
 
             while (true)
             {
+                Console.Write("Receiver: ");
+                var receiver = Console.ReadLine();
+                Console.Write("Message: ");
                 var text = Console.ReadLine();
-                var message = new Message(Message.MessageType.Text, text);
+                var message = new Message().DirectText(receiver, text);
                 _client.Send(message);
+                LogSelfMessage(message);
             }
         }
 
@@ -36,7 +40,7 @@ namespace Rozmawiator.ConsoleTest
 
         private static void LogMessage(Message message, bool appendContent = true)
         {
-            Log($"<{message.Type}> " + (appendContent ? message.GetTextContent() : ""));
+            Log($"<{message.Type}> {message.GetDirectTextNickname() ?? ""} " +  (appendContent ? message.GetTextContent() : ""));
         }
 
         private static void LogSelfMessage(Message message, bool appendContent = true)

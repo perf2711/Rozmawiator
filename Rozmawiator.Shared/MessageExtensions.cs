@@ -191,5 +191,21 @@ namespace Rozmawiator.Shared
         {
             return message.Type(Message.MessageType.CloseConversation).Content(reason);
         }
+
+        /// <summary>
+        /// Conversation-less message.
+        /// </summary>
+        /// <param name="message">Message to modify</param>
+        /// <param name="nickname">Receiver's nickname</param>
+        /// <param name="content">Message content</param>
+        /// <returns></returns>
+        public static Message DirectText(this Message message, string nickname, string content)
+        {   
+            var nicknameBytes = Encoding.Unicode.GetBytes(nickname);
+            var contentBytes = Encoding.Unicode.GetBytes(content);
+
+            var bytes = nicknameBytes.Concat(new byte[] {0x0, 0x0}).Concat(contentBytes).ToArray();
+            return message.Type(Message.MessageType.DirectText).Content(bytes);
+        }
     }
 }

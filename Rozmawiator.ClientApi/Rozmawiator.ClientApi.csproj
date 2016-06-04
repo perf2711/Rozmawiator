@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CallRequest.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="Conversation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

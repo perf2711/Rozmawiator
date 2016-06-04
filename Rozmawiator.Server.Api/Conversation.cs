@@ -118,6 +118,7 @@ namespace Rozmawiator.Server.Api
                 case Message.MessageType.CallRequest:
                 case Message.MessageType.CallResponse:
                 case Message.MessageType.CloseConversation:
+                case Message.MessageType.DirectText:
                     return;
                 case Message.MessageType.Text:
                     break;

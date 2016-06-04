@@ -29,11 +29,15 @@ namespace Rozmawiator.ClientApi
         public ReadOnlyObservableCollection<CallRequest> PendingCallRequests { get; }
         private readonly ObservableCollection<CallRequest> _pendingCallRequests;
 
+        public List<PassiveConversation> PassiveConversations { get; }
+
         public event Action<Client, Message> Connected;
         public event Action<Client, Message> NewMessage;
 
         public event Action<Client, CallRequest, Message> NewCallRequest;
         public event Action<Client, Message> NewCallResponse;
+
+        public event Action<Client, PassiveConversation> NewPassiveConversation;
 
         private readonly UdpClient _client;
         private const int KeepAliveSpan = 1000;
@@ -46,6 +50,8 @@ namespace Rozmawiator.ClientApi
 
             _pendingCallRequests = new ObservableCollection<CallRequest>();
             PendingCallRequests = new ReadOnlyObservableCollection<CallRequest>(_pendingCallRequests);
+
+            PassiveConversations = new List<PassiveConversation>();
         }
 
         public void Connect(IPEndPoint ipEndPoint)
@@ -81,6 +87,7 @@ namespace Rozmawiator.ClientApi
         private void ForceSend(Message message)
         {
             var bytes = message.GetBytes();
+            message.Origin = Message.MessageOrigin.Sent;
             _client.Send(bytes, bytes.Length);
         }
 
@@ -92,6 +99,7 @@ namespace Rozmawiator.ClientApi
             }
 
             var bytes = message.GetBytes();
+            message.Origin = Message.MessageOrigin.Sent;
             _client.Send(bytes, bytes.Length);
         }
 
@@ -103,6 +111,7 @@ namespace Rozmawiator.ClientApi
             }
 
             var bytes = message.GetBytes();
+            message.Origin = Message.MessageOrigin.Sent;
             await _client.SendAsync(bytes, bytes.Length);
         }
 
@@ -166,6 +175,7 @@ namespace Rozmawiator.ClientApi
                 var msg = _client.Receive(ref from);
 
                 var message = Message.FromBytes(msg);
+                message.Origin = Message.MessageOrigin.Received;
                 Task.Factory.StartNew(() => HandleMessage(message));
             }
         }
@@ -178,6 +188,9 @@ namespace Rozmawiator.ClientApi
                 case Message.MessageType.Bye:
                 case Message.MessageType.KeepAlive:
                 case Message.MessageType.Call:
+                    break;
+                case Message.MessageType.DirectText:
+                    HandleDirectText(message);
                     break;
                 case Message.MessageType.HelloConversation:
                 case Message.MessageType.ByeConversation:
@@ -195,6 +208,23 @@ namespace Rozmawiator.ClientApi
             }
 
             NewMessage?.Invoke(this, message);
+        }
+
+
+        private void HandleDirectText(Message message)
+        {
+            var senderNickname = message.GetDirectTextNickname();
+            var passiveConversation = PassiveConversations.FirstOrDefault(p => p.ParticipantsNicknames.Any(n => n == senderNickname));
+
+            if (passiveConversation == null)
+            {
+                passiveConversation = new PassiveConversation(this);
+                PassiveConversations.Add(passiveConversation);
+                passiveConversation.ParticipantsNicknames.Add(senderNickname);
+                NewPassiveConversation?.Invoke(this, passiveConversation);
+            }
+
+            passiveConversation.HandleMessage(message);
         }
 
         private void HandleCallRequest(Message message)

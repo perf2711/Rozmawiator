@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 
 namespace Rozmawiator.Shared
@@ -17,7 +18,8 @@ namespace Rozmawiator.Shared
             CallResponse,
             HelloConversation,
             ByeConversation,
-            CloseConversation
+            CloseConversation,
+            DirectText
         }
 
         public enum CallResponseType
@@ -28,6 +30,12 @@ namespace Rozmawiator.Shared
             ExpiredCall
         }
 
+        public enum MessageOrigin
+        {
+            Received,
+            Sent
+        }
+
         public const int Mtu = 65535;
         public const int HeaderLength = 5;
 
@@ -35,6 +43,9 @@ namespace Rozmawiator.Shared
         public short Receiver { get; set; }
         public MessageType Type { get; set; }
         public byte[] Content { get; set; }
+
+        public DateTime Timestamp { get; }
+        public MessageOrigin Origin { get; set; }
 
         public int Length => HeaderLength + Content.Length;
 
@@ -44,6 +55,8 @@ namespace Rozmawiator.Shared
             Receiver = receiver;
             Type = type;
             Content = content;
+
+            Timestamp = DateTime.Now;
         }
 
         public Message(short sender, short receiver, MessageType type, string content)
@@ -83,8 +96,47 @@ namespace Rozmawiator.Shared
             Content = Encoding.Unicode.GetBytes(content);
         }
 
+        public string GetDirectTextNickname()
+        {
+            if (Type != MessageType.DirectText)
+            {
+                return null;
+            }
+
+            byte[] nicknameBytes = null;
+
+            for (var i = 0; i < Content.Length; i+=2)
+            {
+                if (Content[i] == 0x0 && Content[i + 1] == 0x0)
+                {
+                    nicknameBytes = Content.Take(i).ToArray();
+                }
+            }
+
+            return nicknameBytes == null ? null : Encoding.Unicode.GetString(nicknameBytes);
+        }
+
+        public string GetDirectTextContent()
+        {
+            byte[] textBytes = null;
+
+            for (var i = 0; i < Content.Length; i+=2)
+            {
+                if (Content[i] == 0x0 && Content[i + 1] == 0x0)
+                {
+                    textBytes = Content.Skip(i + 2).ToArray();
+                }
+            }
+
+            return textBytes == null ? null : Encoding.Unicode.GetString(textBytes);
+        }
+
         public string GetTextContent()
         {
+            if (Type == MessageType.DirectText)
+            {
+                return GetDirectTextContent();
+            }
             return Encoding.Unicode.GetString(Content);
         }
 

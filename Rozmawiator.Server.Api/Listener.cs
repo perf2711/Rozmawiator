@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -18,11 +19,12 @@ namespace Rozmawiator.Server.Api
         }
     
         private UdpClient _listener;
-        private List<Client> _clients;
-        private List<Conversation> _conversations;
+        private readonly ObservableCollection<Client> _clients;
+        private readonly ObservableCollection<Conversation> _conversations;
 
-        public IReadOnlyCollection<Client> Clients => _clients.AsReadOnly();
-        public IReadOnlyCollection<Conversation> Conversations => _conversations.AsReadOnly();
+        public ReadOnlyObservableCollection<Client> Clients { get; }
+        public ReadOnlyObservableCollection<Conversation> Conversations { get; }
+        
 
         private short _nextId = 1;
         private int _nextConversationId = 1;
@@ -34,9 +36,11 @@ namespace Rozmawiator.Server.Api
         public event Action<IPEndPoint, Message> NewMessage;
         public event Action<DateTime, string> DebugMessage;
 
+        public event NotifyCollectionChangedEventHandler ClientListChanged;
         public event Action<Client> ClientConnected;
         public event Action<Client> ClientDisconnected;
 
+        public event NotifyCollectionChangedEventHandler ConversationListChanged;
         public event Action<Conversation> ConversationCreated;
         public event Action<Conversation> ConversationClosed;
         public event Action<Conversation> ConversationUpdate;
@@ -46,7 +50,13 @@ namespace Rozmawiator.Server.Api
 
         public Listener()
         {
-            
+            _clients = new ObservableCollection<Client>();
+            _conversations = new ObservableCollection<Conversation>();
+            Clients = new ReadOnlyObservableCollection<Client>(_clients);
+            Conversations = new ReadOnlyObservableCollection<Conversation>(_conversations);
+
+            _clients.CollectionChanged += OnClientCollectionChanged;
+            _conversations.CollectionChanged += OnConversationCollectionChanged;
         }
 
         public void Start()
@@ -55,8 +65,8 @@ namespace Rozmawiator.Server.Api
             TimeoutSpan = Configuration.Client.Timeout;
 
             _listener = new UdpClient(Port);
-            _clients = new List<Client>();
-            _conversations = new List<Conversation>();
+            _clients.Clear();
+            _conversations.Clear();
 
             State = ListenerState.Listening;
 
@@ -202,11 +212,32 @@ namespace Rozmawiator.Server.Api
                         conversation?.HandleMessage(message);
                     }
                     break;
+                case Message.MessageType.DirectText:
+                    HandleDirectText(sender, message);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
             NewMessage?.Invoke(endpoint, message);
+        }
+
+        private void HandleDirectText(Client sender, Message message)
+        {
+            if (sender == null)
+            {
+                return;
+            }
+
+            var targetNickname = message.GetDirectTextNickname();
+            var targetClient = GetClient(targetNickname);
+            if (targetClient == null)
+            {
+                Debug($"Undelivered message from {sender.Nickname} to {targetNickname}, target client offline.");
+                return;
+            }
+
+            SendAsClient(sender, targetClient, message);
         }
 
         private void HandleHello(IPEndPoint endpoint, Message message)
@@ -360,6 +391,16 @@ namespace Rozmawiator.Server.Api
             Debug($"Removing conversation {conversation.Id}");
             _conversations.Remove(conversation);
             ConversationClosed?.Invoke(conversation);
+        }
+
+        private void OnClientCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            ClientListChanged?.Invoke(this, args);
+        }
+
+        private void OnConversationCollectionChanged(object sender, NotifyCollectionChangedEventArgs args)
+        {
+            ConversationListChanged?.Invoke(this, args);
         }
     }
 }

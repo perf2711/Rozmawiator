@@ -12,6 +12,7 @@ namespace Rozmawiator.ClientApi
     {
         public Client Client { get; }
         public ReadOnlyObservableCollection<RemoteClient> Participants { get; }
+        public IReadOnlyList<Message> TextMessages => _textMessages.AsReadOnly();
 
         public event Action<Conversation, RemoteClient> ParticipantConnected;
         public event Action<Conversation, RemoteClient> ParticipantDisconnected;
@@ -20,11 +21,13 @@ namespace Rozmawiator.ClientApi
         public event Action<Conversation, RemoteClient, Message> NewAudioMessage;
 
         private readonly ObservableCollection<RemoteClient> _participants;
+        private readonly List<Message> _textMessages;
 
         public Conversation(Client client)
         {
             Client = client;
             _participants = new ObservableCollection<RemoteClient>();
+            _textMessages = new List<Message>();
             Participants = new ReadOnlyObservableCollection<RemoteClient>(_participants);
         }
 
@@ -69,6 +72,7 @@ namespace Rozmawiator.ClientApi
 
         private void HandleTextMessage(Message message)
         {
+            _textMessages.Add(message);
             NewTextMessage?.Invoke(this, GetSender(message), message);
         }
 
@@ -103,6 +107,10 @@ namespace Rozmawiator.ClientApi
 
         public void Send(Message message)
         {
+            if (message.Type == Message.MessageType.Text)
+            {
+                _textMessages.Add(message);
+            }
             Client.Send(message);
         }
 

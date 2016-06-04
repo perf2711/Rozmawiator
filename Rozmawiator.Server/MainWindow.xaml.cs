@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Net;
@@ -107,6 +108,9 @@ namespace Rozmawiator.Server
                 case Message.MessageType.Text:
                     LogMessage(ipEndPoint, message);
                     break;
+                case Message.MessageType.DirectText:
+                    LogDirectText(ipEndPoint, message);
+                    break;
                 case Message.MessageType.KeepAlive:
                 case Message.MessageType.Audio:
                 case Message.MessageType.CallResponse:
@@ -122,6 +126,11 @@ namespace Rozmawiator.Server
         private void LogMessage(IPEndPoint endpoint, Message message, bool appendContent = true)
         {
             Log($"{App.Server.GetClient(message.Sender)?.Nickname ?? "?"} [{endpoint}] <{message.Type}> " + (appendContent ? message.GetTextContent() : ""));
+        }
+
+        private void LogDirectText(IPEndPoint endpoint, Message message, bool appendContent = true)
+        {
+            Log($"{App.Server.GetClient(message.Sender)?.Nickname ?? "?"} [{endpoint}] => {message.GetDirectTextNickname()} <{message.Type}> " + (appendContent ? message.GetDirectTextContent() : ""));
         }
 
         private void LogSelfMessage(Message message, bool appendContent = true)

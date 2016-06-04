@@ -5,9 +5,46 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Rozmawiator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="450" Width="655">
     <Grid>
-        <Button x:Name="recordButton" Content="DOVEJ" HorizontalAlignment="Left" Margin="205,94,0,0" VerticalAlignment="Top" Width="75" Click="recordButton_Click"/>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Menu Grid.Row="0" Grid.ColumnSpan="2">
+            <MenuItem Header="Rozmawiator">
+                <MenuItem Header="Wyloguj"/>
+                <MenuItem Header="Wyjdź"/>
+            </MenuItem>
+            <MenuItem Header="Opcje">
+                <MenuItem Header="Ustawienia"/>
+            </MenuItem>
+            <MenuItem Header="Pomoc">
+                <MenuItem Header="Status"/>
+                <Separator/>
+                <MenuItem Header="O Rozmawiatorze"/>
+            </MenuItem>
+        </Menu>
+        
+        <GridSplitter Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="5"/>
+        
+        <Grid Grid.Row="1" Grid.Column="0" x:Name="PassiveConversationList">
+            
+        </Grid>
+        
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+            <Grid x:Name="UserInfoGrid"></Grid>
+            <StackPanel x:Name="MessagesPanel" Grid.Row="1"></StackPanel>
+        </Grid>
     </Grid>
 </Window>

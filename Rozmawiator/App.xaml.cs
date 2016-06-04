@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using Rozmawiator.Models;
 
 namespace Rozmawiator
 {
@@ -13,5 +14,6 @@ namespace Rozmawiator
     /// </summary>
     public partial class App : Application
     {
+        public static List<User> Users = new List<User>();
     }
 }

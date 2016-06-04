@@ -13,6 +13,6 @@ namespace Rozmawiator.Server.ViewModels
 
         public int Id => Conversation.Id;
         public string OwnerNickname => Conversation.Owner.Nickname;
-        public int ClientCount => Conversation.Participants.Count();
+        public IEnumerable<ClientViewModel> Participants => Conversation.Participants.Select(c => new ClientViewModel {Client = c});
     }
 }

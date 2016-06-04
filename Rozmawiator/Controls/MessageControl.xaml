@@ -1,0 +1,29 @@
+﻿<UserControl x:Class="Rozmawiator.Controls.MessageControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Rozmawiator.Controls"
+             mc:Ignorable="d"
+             MinHeight="26"
+             Height="Auto"
+             d:DesignWidth="300">
+    <UserControl.Resources>
+        <ImageSource x:Key="DefaultAvatar" >../Images/DefaultAvatar.png</ImageSource>
+    </UserControl.Resources>
+    <Grid Background="White">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="26"/>
+            <ColumnDefinition />
+            <ColumnDefinition Width="50"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label x:Name="SenderNickname" Grid.Column="1" Grid.ColumnSpan="2" Content="Jan Kowalski" Padding="2" FontSize="10"/>
+        <Image x:Name="SenderAvatar" Grid.Row="1" Source="{DynamicResource DefaultAvatar}" Margin="2" VerticalAlignment="Top"/>
+        <local:MessageBubbleControl x:Name="Bubble" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left"/>
+        <Label x:Name="TimeStamp" Foreground="SlateGray" Grid.Row="1" Grid.Column="2" Content="16:42:23" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2"/>
+    </Grid>
+</UserControl>
