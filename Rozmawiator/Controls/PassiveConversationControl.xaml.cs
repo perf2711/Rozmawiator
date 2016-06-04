@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Rozmawiator.ClientApi;
+using Rozmawiator.Extensions;
 
 namespace Rozmawiator.Controls
 {
@@ -20,9 +22,43 @@ namespace Rozmawiator.Controls
     /// </summary>
     public partial class PassiveConversationControl : UserControl
     {
+        private PassiveConversation _conversation;
+
+        public PassiveConversation Conversation
+        {
+            get { return _conversation; }
+            set
+            {
+                _conversation = value;
+                SetLayout();
+            }
+        }
+
         public PassiveConversationControl()
         {
             InitializeComponent();
+        }
+
+        private void SetLayout()
+        {
+            var users = _conversation.GetUsers().ToArray();
+            if (!users.Any())
+            {
+                return;
+            }
+
+            if (users.Count() == 1)
+            {
+                var user = users.First();
+                if (user.Avatar != null)
+                {
+                    Icon.Source = user.Avatar;
+                }
+
+                Participants.Content = user.Nickname;
+            }
+
+            Participants.Content = users.Select(u => u.Nickname).Aggregate((a, b) => a + ", " + b);
         }
     }
 }

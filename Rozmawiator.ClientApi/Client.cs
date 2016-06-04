@@ -20,7 +20,7 @@ namespace Rozmawiator.ClientApi
             Connected
         }
 
-        public string Nickname { get; }
+        public string Nickname { get; set; }
         public ClientState State { get; private set; } = ClientState.Disconnected;
         public IPEndPoint ServerEndPoint { get; private set; }
 
@@ -43,9 +43,8 @@ namespace Rozmawiator.ClientApi
         private const int KeepAliveSpan = 1000;
         private Timer _keepAliveTimer;
         
-        public Client(string nickname)
+        public Client()
         {
-            Nickname = nickname;
             _client = new UdpClient();
 
             _pendingCallRequests = new ObservableCollection<CallRequest>();
@@ -56,6 +55,11 @@ namespace Rozmawiator.ClientApi
 
         public void Connect(IPEndPoint ipEndPoint)
         {
+            if (string.IsNullOrEmpty(Nickname))
+            {
+                throw new InvalidOperationException("Nickname cannot be empty.");
+            }
+
             if (State != ClientState.Disconnected)
             {
                 return;

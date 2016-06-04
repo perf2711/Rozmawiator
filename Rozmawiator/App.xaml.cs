@@ -14,6 +14,9 @@ namespace Rozmawiator
     /// </summary>
     public partial class App : Application
     {
-        public static List<User> Users = new List<User>();
+        public App()
+        {
+            
+        }
     }
 }

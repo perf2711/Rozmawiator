@@ -15,8 +15,9 @@ namespace Rozmawiator.ConsoleTest
 
         private static void Main(string[] args)
         {
+            _client = new Client();
             Console.Write("Nickname: ");
-            _client = new Client(Console.ReadLine());
+            _client.Nickname = Console.ReadLine();
             _client.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 1234));
             _client.Connected += ClientOnConnected;
             _client.NewMessage += ClientOnNewMessage;
