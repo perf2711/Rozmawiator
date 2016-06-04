@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="CallRequestViewModel.cs" />
     <Compile Include="ConversationViewModel.cs" />
+    <Compile Include="FriendRequestViewModel.cs" />
     <Compile Include="MessageViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServerViewModel.cs" />
