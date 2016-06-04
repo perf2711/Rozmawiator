@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rozmawiator.ClientApi", "Ro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rozmawiator.ConsoleTest", "Rozmawiator.ConsoleTest\Rozmawiator.ConsoleTest.csproj", "{E115E75E-FE6B-4CE2-923F-81F963E2B720}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{F71AFA87-EC9F-4A19-8C68-FE5D7F4DC194}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rozmawiator.Database", "Rozmawiator.Database\Rozmawiator.Database.csproj", "{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,10 @@ Global
 		{E115E75E-FE6B-4CE2-923F-81F963E2B720}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E115E75E-FE6B-4CE2-923F-81F963E2B720}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E115E75E-FE6B-4CE2-923F-81F963E2B720}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,5 +84,6 @@ Global
 		{42D8F708-44F2-4CC3-A764-6E7B420D2515} = {B8BC6D5E-1F15-4155-9D84-FF281923E6EE}
 		{8F2E073A-C63F-4A9E-9909-876C17E47276} = {B2797B12-E5CC-4A67-92EE-3B60069CE2A3}
 		{E115E75E-FE6B-4CE2-923F-81F963E2B720} = {B2797B12-E5CC-4A67-92EE-3B60069CE2A3}
+		{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9} = {F71AFA87-EC9F-4A19-8C68-FE5D7F4DC194}
 	EndGlobalSection
 EndGlobal

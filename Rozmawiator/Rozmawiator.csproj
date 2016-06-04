@@ -63,6 +63,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\PassiveConversationControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="PartialViews\ChatInputControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -85,6 +89,12 @@
     <Compile Include="Controls\MessageControl.xaml.cs">
       <DependentUpon>MessageControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\PassiveConversationControl.xaml.cs">
+      <DependentUpon>PassiveConversationControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ClientService.cs" />
+    <Compile Include="Data\UserService.cs" />
+    <Compile Include="Extensions\PassiveConversationExtensions.cs" />
     <Compile Include="Models\ChatMessage.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="PartialViews\ChatInputControl.xaml.cs">
@@ -129,6 +139,14 @@
     <ProjectReference Include="..\Rozmawiator.Audio\Rozmawiator.Audio.csproj">
       <Project>{cd5a48cb-ac2b-43e9-bb05-136e8bac188f}</Project>
       <Name>Rozmawiator.Audio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rozmawiator.ClientApi\Rozmawiator.ClientApi.csproj">
+      <Project>{8f2e073a-c63f-4a9e-9909-876c17e47276}</Project>
+      <Name>Rozmawiator.ClientApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rozmawiator.Shared\Rozmawiator.Shared.csproj">
+      <Project>{ed52d6a8-fe5b-48e4-a66f-e8cea78205fb}</Project>
+      <Name>Rozmawiator.Shared</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
