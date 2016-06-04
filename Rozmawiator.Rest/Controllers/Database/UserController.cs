@@ -16,9 +16,9 @@ namespace Rozmawiator.Rest.Controllers.Database
 
         [HttpGet]
         [Route("{id}")]
-        public UserViewModel GetUser(Guid id)
+        public UserViewModel GetUser(string username)
         {
-            var user = _database.Users.FirstOrDefault(m => m.Id == id);
+            var user = _database.Users.FirstOrDefault(m => m.UserName == username);
             if (user == null)
             {
                 return null;

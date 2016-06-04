@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Rozmawiator.Database.Identity;
 
@@ -29,5 +31,14 @@ namespace Rozmawiator.Database.Entities
         public virtual ICollection<Message> Messages { get; set; }
         public virtual ICollection<FriendRequest> RequestedFriendRequests { get; set; }
         public virtual ICollection<FriendRequest> FriendRequests { get; set; }
+
+        /* Methods */
+        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<User, Guid> manager, string authenticationType)
+        {
+            // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
+            var userIdentity = await manager.CreateIdentityAsync(this, authenticationType);
+            // Add custom user claims here
+            return userIdentity;
+        }
     }
 }

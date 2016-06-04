@@ -13,9 +13,11 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
+using Rozmawiator.Database.Entities;
 using Rozmawiator.Rest.Models;
 using Rozmawiator.Rest.Providers;
 using Rozmawiator.Rest.Results;
+using IdentityExtensions = Rozmawiator.Database.Identity.IdentityExtensions;
 
 namespace Rozmawiator.Rest.Controllers
 {
@@ -60,7 +62,7 @@ namespace Rozmawiator.Rest.Controllers
 
             return new UserInfoViewModel
             {
-                Email = User.Identity.GetUserName(),
+                UserName = User.Identity.GetUserName(),
                 HasRegistered = externalLogin == null,
                 LoginProvider = externalLogin?.LoginProvider
             };
@@ -78,7 +80,7 @@ namespace Rozmawiator.Rest.Controllers
         [Route("ManageInfo")]
         public async Task<ManageInfoViewModel> GetManageInfo(string returnUrl, bool generateState = false)
         {
-            IdentityUser user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
+            User user = await UserManager.FindByIdAsync(IdentityExtensions.GetUserId(User.Identity));
 
             if (user == null)
             {
@@ -123,7 +125,7 @@ namespace Rozmawiator.Rest.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword,
+            var result = await UserManager.ChangePasswordAsync(IdentityExtensions.GetUserId(User.Identity), model.OldPassword,
                 model.NewPassword);
             
             if (!result.Succeeded)
@@ -143,7 +145,7 @@ namespace Rozmawiator.Rest.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await UserManager.AddPasswordAsync(User.Identity.GetUserId(), model.NewPassword);
+            var result = await UserManager.AddPasswordAsync(IdentityExtensions.GetUserId(User.Identity), model.NewPassword);
 
             if (!result.Succeeded)
             {
@@ -178,7 +180,7 @@ namespace Rozmawiator.Rest.Controllers
                 return BadRequest("The external login is already associated with an account.");
             }
 
-            var result = await UserManager.AddLoginAsync(User.Identity.GetUserId(),
+            var result = await UserManager.AddLoginAsync(IdentityExtensions.GetUserId(User.Identity),
                 new UserLoginInfo(externalData.LoginProvider, externalData.ProviderKey));
 
             if (!result.Succeeded)
@@ -202,11 +204,11 @@ namespace Rozmawiator.Rest.Controllers
 
             if (model.LoginProvider == LocalLoginProvider)
             {
-                result = await UserManager.RemovePasswordAsync(User.Identity.GetUserId());
+                result = await UserManager.RemovePasswordAsync(IdentityExtensions.GetUserId(User.Identity));
             }
             else
             {
-                result = await UserManager.RemoveLoginAsync(User.Identity.GetUserId(),
+                result = await UserManager.RemoveLoginAsync(IdentityExtensions.GetUserId(User.Identity),
                     new UserLoginInfo(model.LoginProvider, model.ProviderKey));
             }
 
@@ -326,7 +328,7 @@ namespace Rozmawiator.Rest.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+            var user = new User() { UserName = model.UserName, Email = model.UserName };
 
             var result = await UserManager.CreateAsync(user, model.Password);
 
@@ -355,7 +357,7 @@ namespace Rozmawiator.Rest.Controllers
                 return InternalServerError();
             }
 
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
+            var user = new User() { UserName = model.Email, Email = model.Email };
 
             var result = await UserManager.CreateAsync(user);
             if (!result.Succeeded)

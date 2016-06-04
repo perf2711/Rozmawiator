@@ -9,6 +9,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
+using Rozmawiator.Database.Entities;
 using Rozmawiator.Rest.Models;
 
 namespace Rozmawiator.Rest.Providers
@@ -31,7 +32,7 @@ namespace Rozmawiator.Rest.Providers
         {
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
 
-            ApplicationUser user = await userManager.FindAsync(context.UserName, context.Password);
+            User user = await userManager.FindAsync(context.UserName, context.Password);
 
             if (user == null)
             {
