@@ -20,6 +20,7 @@ namespace Rozmawiator.Database
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             /* Friends mapping */
+            /*
             modelBuilder
                 .Entity<User>()
                 .HasMany(u => u.Friends)
@@ -30,6 +31,7 @@ namespace Rozmawiator.Database
                     m.MapLeftKey("User1Id");
                     m.MapRightKey("User2Id");
                 });
+                */
 
             /* Caller and callee mapping */
             modelBuilder
@@ -42,6 +44,7 @@ namespace Rozmawiator.Database
                 .WithRequired(u => u.Callee);
 
             /* Friend request mapping */
+            /*
             modelBuilder
                 .Entity<User>()
                 .HasMany(u => u.FriendRequests)
@@ -50,6 +53,7 @@ namespace Rozmawiator.Database
                 .Entity<User>()
                 .HasMany(u => u.RequestedFriendRequests)
                 .WithRequired(r => r.RequestingUser);
+                */
 
             base.OnModelCreating(modelBuilder);
 
@@ -62,7 +66,7 @@ namespace Rozmawiator.Database
         }
 
         public DbSet<CallRequest> CallRequests { get; set; }
-        public DbSet<FriendRequest> FriendRequests { get; set; }
+        //public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<Conversation> Conversations { get; set; }
         public DbSet<ConversationParticipant> ConversationParticipants { get; set; }
         public DbSet<Message> Messages { get; set; }

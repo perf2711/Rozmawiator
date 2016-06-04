@@ -10,6 +10,7 @@ using Rozmawiator.Database.ViewModels;
 
 namespace Rozmawiator.Rest.Controllers.Database
 {
+    /*
     [Authorize]
     [RoutePrefix("api/Friends")]
     public class FriendController : ApiController
@@ -70,4 +71,5 @@ namespace Rozmawiator.Rest.Controllers.Database
                     });
         }
     }
+    */
 }

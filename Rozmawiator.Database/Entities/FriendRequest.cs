@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Rozmawiator.Database.Entities
 {
+    /*
     public class FriendRequest
     {
         [Key]
@@ -22,4 +23,5 @@ namespace Rozmawiator.Database.Entities
         [ForeignKey("TargetUserId")]
         public virtual User TargetUser { get; set; }
     }
+    */
 }
