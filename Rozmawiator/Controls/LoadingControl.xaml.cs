@@ -20,6 +20,12 @@ namespace Rozmawiator.Controls
     /// </summary>
     public partial class LoadingControl : UserControl
     {
+        public string Text
+        {
+            get { return (string) LoadingLabel.GetValue(ContentProperty); }
+            set { LoadingLabel.SetValue(ContentProperty, value); }
+        }
+
         public LoadingControl()
         {
             InitializeComponent();

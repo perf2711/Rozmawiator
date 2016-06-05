@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Rozmawiator.RestClient.Errors;
 
 namespace Rozmawiator.RestClient.Helpers
 {
@@ -28,6 +29,21 @@ namespace Rozmawiator.RestClient.Helpers
         public T GetModel<T>()
         {
             return JsonConvert.DeserializeObject<T>(ResponseString);
+        }
+
+        public IRestError GetError()
+        {
+            IRestError error;
+            if (AuthenticationError.TryGetModel(GetModel(), out error))
+            {
+                return error;
+            }
+            if (ModelStateError.TryGetModel(GetModel(), out error))
+            {
+                return error;
+            }
+
+            return null;
         }
     }
 }

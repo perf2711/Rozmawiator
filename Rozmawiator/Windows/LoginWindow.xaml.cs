@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Rozmawiator.Data;
+using Rozmawiator.Database.ViewModels;
 using Rozmawiator.Extensions;
 using Rozmawiator.RestClient.Models;
 
@@ -26,14 +27,17 @@ namespace Rozmawiator.Windows
 
         private void Login()
         {
+            Login(LoginUsernameBox.Text, LoginPasswordBox.Password);
+        }
+
+        private void Login(string username, string password)
+        {
+            LoadingControl.Text = "Logowanie...";
             LoadingControl.Visibility = Visibility.Visible;
 
             LoginUsernameBox.IsEnabled = false;
             LoginPasswordBox.IsEnabled = false;
             LoginButton.IsEnabled = false;
-
-            var username = LoginUsernameBox.Text;
-            var password = LoginPasswordBox.Password;
 
             new Task(async () =>
             {
@@ -48,9 +52,8 @@ namespace Rozmawiator.Windows
                         LoginPasswordBox.IsEnabled = true;
                         LoginButton.IsEnabled = true;
 
-                        var error = response.GetModel();
-                        var errorDescription = error["error_description"] as string ?? "Nieznany błąd.";
-                        this.ShowError("Uwaga", errorDescription);
+                        var error = response.GetError();
+                        this.ShowError("Uwaga", error.ToString());
                     });
                     return;
                 }
@@ -86,7 +89,48 @@ namespace Rozmawiator.Windows
 
         private void Register()
         {
-            
+            LoadingControl.Text = "Rejestrowanie...";
+            LoadingControl.Visibility = Visibility.Visible;
+
+            RegisterUsernameBox.IsEnabled = false;
+            RegisterEmailBox.IsEnabled = false;
+            RegisterPasswordBox.IsEnabled = false;
+            RegisterConfirmPasswordBox.IsEnabled = false;
+            RegisterButton.IsEnabled = false;
+
+            var registerModel = new RegisterViewModel
+            {
+                UserName = RegisterUsernameBox.Text,
+                Email = RegisterEmailBox.Text,
+                Password = RegisterPasswordBox.Password,
+                ConfirmPassword = RegisterPasswordBox.Password
+            };
+
+            new Task(async () =>
+            {
+                var response = await RestService.UserApi.Register(registerModel);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        LoadingControl.Visibility = Visibility.Collapsed;
+                        RegisterUsernameBox.IsEnabled = true;
+                        RegisterEmailBox.IsEnabled = true;
+                        RegisterPasswordBox.IsEnabled = true;
+                        RegisterConfirmPasswordBox.IsEnabled = true;
+                        RegisterButton.IsEnabled = true;
+
+                        var error = response.GetError();
+                        this.ShowError("Uwaga", error.ToString());
+                    });
+                    return;
+                }
+                Dispatcher.Invoke(() =>
+                {
+                    Login(registerModel.UserName, registerModel.Password);
+                });
+            }).Start();
         }
 
         private void Register_KeyDown(object sender, KeyEventArgs e)

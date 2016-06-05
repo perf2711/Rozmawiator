@@ -47,6 +47,9 @@
     <Compile Include="BaseApi.cs" />
     <Compile Include="CallRequestApi.cs" />
     <Compile Include="ConversationApi.cs" />
+    <Compile Include="Errors\AuthenticationError.cs" />
+    <Compile Include="Errors\IRestError.cs" />
+    <Compile Include="Errors\ModelStateError.cs" />
     <Compile Include="Helpers\HttpHelper.cs" />
     <Compile Include="Helpers\HttpResponse.cs" />
     <Compile Include="MessageApi.cs" />
