@@ -60,8 +60,8 @@ namespace Rozmawiator.Windows
 
                 Dispatcher.Invoke(() =>
                 {
-                    Close();
                     new MainWindow().Show();
+                    Close();
                 });
 
             }).Start();

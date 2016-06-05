@@ -25,6 +25,9 @@ namespace Rozmawiator.Extensions
                 ErrorMessage = message,
             };
 
+            Grid.SetColumnSpan(errorControl, 99);
+            Grid.SetRowSpan(errorControl, 99);
+
             if (headerBackground != null)
             {
                 errorControl.ErrorHeaderBackground = headerBackground;
@@ -45,6 +48,9 @@ namespace Rozmawiator.Extensions
                 ErrorHeader = header,
                 ErrorMessage = message,
             };
+
+            Grid.SetColumnSpan(errorControl, 99);
+            Grid.SetRowSpan(errorControl, 99);
 
             if (callback != null)
             {
