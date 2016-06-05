@@ -44,6 +44,7 @@
     <Compile Include="CallRequestViewModel.cs" />
     <Compile Include="ConversationViewModel.cs" />
     <Compile Include="Filter.cs" />
+    <Compile Include="FilterExtensions.cs" />
     <Compile Include="FriendRequestViewModel.cs" />
     <Compile Include="MessageViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

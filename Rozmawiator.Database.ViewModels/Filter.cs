@@ -8,6 +8,8 @@ namespace Rozmawiator.Database.ViewModels
 {
     public class Filter
     {
+        public static Filter CreateNew => new Filter();
+
         public Filter()
         {
             Filters = new Dictionary<string, object>();
@@ -18,7 +20,7 @@ namespace Rozmawiator.Database.ViewModels
             Filters = filters;
         }
 
-        public readonly Dictionary<string, object> Filters;
+        public Dictionary<string, object> Filters { get; }
 
         public object this[string propertyName]
         {

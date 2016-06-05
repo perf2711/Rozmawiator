@@ -64,7 +64,9 @@
     <Compile Include="Controls\LoadingControl.xaml.cs">
       <DependentUpon>LoadingControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Data\PassiveConversationService.cs" />
     <Compile Include="Extensions\WindowExtensions.cs" />
+    <Compile Include="Models\Conversation.cs" />
     <Compile Include="Windows\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -177,6 +179,10 @@
     <ProjectReference Include="..\Rozmawiator.Database.ViewModels\Rozmawiator.Database.ViewModels.csproj">
       <Project>{216B81AA-F4A4-46AE-8AAE-7B07B84B476D}</Project>
       <Name>Rozmawiator.Database.ViewModels</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rozmawiator.Database\Rozmawiator.Database.csproj">
+      <Project>{81F4BF3E-7481-41FE-A3F4-0395EB1A71A9}</Project>
+      <Name>Rozmawiator.Database</Name>
     </ProjectReference>
     <ProjectReference Include="..\Rozmawiator.RestClient\Rozmawiator.RestClient.csproj">
       <Project>{b98dbbbb-5964-418e-b222-c1e369062314}</Project>

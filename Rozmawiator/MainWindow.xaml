@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Rozmawiator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="655">
+        Title="MainWindow" Height="450" Width="655" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -44,7 +44,8 @@
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
             <Grid x:Name="UserInfoGrid"></Grid>
-            <StackPanel x:Name="MessagesPanel" Grid.Row="1"></StackPanel>
+            <StackPanel x:Name="MessagesPanel" Grid.Row="1">
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

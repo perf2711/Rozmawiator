@@ -50,6 +50,8 @@
     <Compile Include="Errors\AuthenticationError.cs" />
     <Compile Include="Errors\IRestError.cs" />
     <Compile Include="Errors\ModelStateError.cs" />
+    <Compile Include="Errors\RestErrorException.cs" />
+    <Compile Include="Errors\UnknownError.cs" />
     <Compile Include="Helpers\HttpHelper.cs" />
     <Compile Include="Helpers\HttpResponse.cs" />
     <Compile Include="MessageApi.cs" />

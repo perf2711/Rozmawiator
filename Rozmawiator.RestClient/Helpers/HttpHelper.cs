@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -24,8 +25,11 @@ namespace Rozmawiator.RestClient.Helpers
                 var response = await client.GetAsync(url);
                 var responseCode = response.StatusCode;
                 var responseContent = response.Content;
+                var mediaType = response.Content?.Headers?.ContentType?.MediaType;
 
-                return new HttpResponse(responseCode, await responseContent.ReadAsStringAsync());
+                return mediaType == "application/json"
+                    ? new HttpResponse(responseCode, await responseContent.ReadAsStringAsync(), mediaType)
+                    : new HttpResponse(responseCode, await responseContent.ReadAsByteArrayAsync(), mediaType);
             }
         }
 
@@ -48,8 +52,11 @@ namespace Rozmawiator.RestClient.Helpers
                 var response = await client.PostAsync(url, content);
                 var responseCode = response.StatusCode;
                 var responseContent = response.Content;
+                var mediaType = response.Content?.Headers?.ContentType?.MediaType;
 
-                return new HttpResponse(responseCode, await responseContent.ReadAsStringAsync());
+                return mediaType == "application/json"
+                    ? new HttpResponse(responseCode, await responseContent.ReadAsStringAsync(), mediaType)
+                    : new HttpResponse(responseCode, await responseContent.ReadAsByteArrayAsync(), mediaType);
             }
         }
 
@@ -67,8 +74,11 @@ namespace Rozmawiator.RestClient.Helpers
                 var response = await client.PostAsync(url, content);
                 var responseCode = response.StatusCode;
                 var responseContent = response.Content;
+                var mediaType = response.Content?.Headers?.ContentType?.MediaType;
 
-                return new HttpResponse(responseCode, await responseContent.ReadAsStringAsync());
+                return mediaType == "application/json"
+                    ? new HttpResponse(responseCode, await responseContent.ReadAsStringAsync(), mediaType)
+                    : new HttpResponse(responseCode, await responseContent.ReadAsByteArrayAsync(), mediaType);
             }
         }
     }

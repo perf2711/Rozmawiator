@@ -31,7 +31,8 @@ namespace Rozmawiator.Rest.Controllers.Database
                 Id = conversation.Id,
                 Type = conversation.Type,
                 Creator = conversation.Creator.UserName,
-                Owner = conversation.Owner.UserName
+                Owner = conversation.Owner.UserName,
+                Participants = conversation.ConversationParticipants.Select(cp => cp.User.UserName).ToArray()
             };
         }
 
@@ -49,8 +50,9 @@ namespace Rozmawiator.Rest.Controllers.Database
                     {
                         Id = conversation.Id,
                         Type = conversation.Type,
-                        Creator = conversation.Creator.UserName,
-                        Owner = conversation.Owner.UserName
+                        Creator = conversation.Creator?.UserName,
+                        Owner = conversation.Owner?.UserName,
+                        Participants = conversation.ConversationParticipants.Select(cp => cp.User.UserName).ToArray()
                     });
         }
     }

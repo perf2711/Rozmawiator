@@ -52,8 +52,7 @@ namespace Rozmawiator.Windows
                         LoginPasswordBox.IsEnabled = true;
                         LoginButton.IsEnabled = true;
 
-                        var error = response.GetError();
-                        this.ShowError("Uwaga", error.ToString());
+                        this.ShowError("Uwaga", response.Error.ToString());
                     });
                     return;
                 }
@@ -121,8 +120,7 @@ namespace Rozmawiator.Windows
                         RegisterConfirmPasswordBox.IsEnabled = true;
                         RegisterButton.IsEnabled = true;
 
-                        var error = response.GetError();
-                        this.ShowError("Uwaga", error.ToString());
+                        this.ShowError("Uwaga", response.Error.ToString());
                     });
                     return;
                 }

@@ -12,23 +12,31 @@ namespace Rozmawiator.RestClient.Helpers
     public class HttpResponse
     {
         public HttpStatusCode ResponseCode { get; }
-        public string ResponseString { get; }
+        public object ResponseObject { get; }
+        public string ContentType { get; }
         public bool IsSuccessStatusCode => ResponseCode == HttpStatusCode.OK;
+        public IRestError Error { get; }
 
-        public HttpResponse(HttpStatusCode responseCode, string responseString)
+        public HttpResponse(HttpStatusCode responseCode, object responseObject, string contentType)
         {
             ResponseCode = responseCode;
-            ResponseString = responseString;
+            ResponseObject = responseObject;
+            ContentType = contentType;
+
+            if (ResponseCode != HttpStatusCode.OK && ContentType == "application/json")
+            {
+                Error = GetError();
+            }
         }
 
         public Dictionary<string, object> GetModel()
         {
-            return JsonConvert.DeserializeObject<Dictionary<string, object>>(ResponseString);
+            return JsonConvert.DeserializeObject<Dictionary<string, object>>(ResponseObject.ToString());
         }
 
         public T GetModel<T>()
         {
-            return JsonConvert.DeserializeObject<T>(ResponseString);
+            return JsonConvert.DeserializeObject<T>(ResponseObject.ToString());
         }
 
         public IRestError GetError()
@@ -43,7 +51,7 @@ namespace Rozmawiator.RestClient.Helpers
                 return error;
             }
 
-            return null;
+            return new UnknownError(GetModel());
         }
     }
 }

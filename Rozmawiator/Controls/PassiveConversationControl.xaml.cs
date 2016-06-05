@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Rozmawiator.ClientApi;
+using Rozmawiator.Data;
 using Rozmawiator.Extensions;
 
 namespace Rozmawiator.Controls
@@ -41,7 +42,7 @@ namespace Rozmawiator.Controls
 
         private void SetLayout()
         {
-            var users = _conversation.GetUsers().ToArray();
+            var users = _conversation.GetUsers().Where(u => u.Nickname != UserService.LoggedUser.Nickname).ToArray();
             if (!users.Any())
             {
                 return;

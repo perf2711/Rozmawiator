@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Rozmawiator.Audio;
+using Rozmawiator.Data;
 
 namespace Rozmawiator
 {
@@ -26,5 +27,15 @@ namespace Rozmawiator
             InitializeComponent();
         }
 
+        private async Task UpdateData()
+        {
+            await UserService.UpdateLoggedUser();
+            await PassiveConversationService.UpdateConversations();
+        }
+
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            await UpdateData();
+        }
     }
 }
