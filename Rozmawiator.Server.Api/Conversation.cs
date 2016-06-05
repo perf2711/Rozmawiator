@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using Rozmawiator.Shared;
+using Rozmawiator.Database;
+using Rozmawiator.Database.Entities;
+using Message = Rozmawiator.Shared.Message;
 
 namespace Rozmawiator.Server.Api
 {
@@ -12,6 +15,7 @@ namespace Rozmawiator.Server.Api
         public Listener Server { get; }
         private readonly List<Client> _participants;
         private readonly List<CallRequest> _callRequests;
+        private readonly Guid _conversationId = Guid.Empty;
         public IEnumerable<Client> Participants => _participants.AsReadOnly();
         public IEnumerable<CallRequest> CallRequests => _callRequests.AsReadOnly();
 
@@ -19,7 +23,6 @@ namespace Rozmawiator.Server.Api
 
         public event Action<Conversation> CloseConversation;
         
-
         public Conversation(int id, Listener server, Client owner)
         {
             Id = id;
@@ -30,6 +33,33 @@ namespace Rozmawiator.Server.Api
                 owner
             };
             _callRequests = new List<CallRequest>();
+
+            using (var database = new RozmawiatorDb())
+            {
+                var ownerUser = database.Users.FirstOrDefault(u => u.UserName == owner.Nickname);
+                if (ownerUser == null)
+                {
+                    return;
+                }
+
+                var conversation = new Database.Entities.Conversation
+                {
+                    Id = Guid.Empty,
+                    Type = ConversationType.Active,
+                    Owner = ownerUser,
+                    Creator = ownerUser,
+                    ConversationParticipants = new[]
+                    {
+                        new ConversationParticipant
+                        {
+                            User = ownerUser
+                        }
+                    }
+                };
+                _conversationId = conversation.Id;
+                database.Conversations.Add(conversation);
+                database.SaveChanges();
+            }
         }
 
         public bool IsMember(Client client)
@@ -73,6 +103,34 @@ namespace Rozmawiator.Server.Api
         public void Join(Client client)
         {
             _participants.Add(client);
+
+            using (var database = new RozmawiatorDb())
+            {
+                var user =
+                    database.Users.Select(u => new {u.Id, u.UserName})
+                        .FirstOrDefault(u => u.UserName == client.Nickname);
+                if (user != null)
+                {
+                    var conversation = database.Conversations.First(c => c.Id == _conversationId);
+                    var participant = conversation.ConversationParticipants.FirstOrDefault(p => p.UserId == user.Id);
+                    if (participant != null)
+                    {
+                        participant.IsActive = true;
+                    }
+                    else
+                    {
+                        participant = new ConversationParticipant
+                        {
+                            Conversation = conversation,
+                            UserId = user.Id
+                        };
+                        conversation.ConversationParticipants.Add(participant);
+                    }
+                }
+
+                database.SaveChanges();
+            }
+
             Broadcast(new Message(client.Id, 0, Message.MessageType.HelloConversation, client.Nickname));
             ParticipantsUpdate?.Invoke(this);
         }
@@ -81,10 +139,39 @@ namespace Rozmawiator.Server.Api
         {
             Server.Debug($"{client.Nickname} disconnected from {Owner.Nickname}'s conversation.");
             _participants.Remove(client);
-            if (Owner == client)
+            using (var database = new RozmawiatorDb())
             {
-                Owner = _participants.FirstOrDefault();
+                var conversation = database.Conversations.First(c => c.Id == _conversationId);
+
+                if (Owner == client)
+                {
+                    Owner = _participants.FirstOrDefault();
+                    if (Owner != null)
+                    {
+                        var newOwnerUser = database.Users.Select(u => new { u.Id, u.UserName })
+                            .FirstOrDefault(u => u.UserName == Owner.Nickname);
+                        conversation.OwnerId = newOwnerUser?.Id ?? Guid.Empty;
+                    }
+                }
+
+                var user =
+                    database.Users.Select(u => new { u.Id, u.UserName })
+                        .FirstOrDefault(u => u.UserName == client.Nickname);
+
+                if (user != null)
+                {
+                    var conversationParticipant =
+                        conversation.ConversationParticipants.FirstOrDefault(p => p.UserId == user.Id);
+
+                    if (conversationParticipant != null)
+                    {
+                        conversationParticipant.IsActive = false;
+                    }
+                }
+
+                database.SaveChanges();
             }
+
             //Broadcast(new Message(client.Id, 0, Message.MessageType.ByeConversation, client.Nickname));
             Server.SendAsClient(client, _participants, new Message(Message.MessageType.ByeConversation, client.Nickname));
             ParticipantsUpdate?.Invoke(this);
@@ -121,11 +208,10 @@ namespace Rozmawiator.Server.Api
                 case Message.MessageType.DirectText:
                     return;
                 case Message.MessageType.Text:
+                    SaveMessage(message);
                     break;
                 case Message.MessageType.Audio:
-                    break;
                 case Message.MessageType.HelloConversation:
-                    break;
                 case Message.MessageType.ByeConversation:
                     break;
                 default:
@@ -137,6 +223,9 @@ namespace Rozmawiator.Server.Api
 
         public void Resend(Message message)
         {
+            Broadcast(message);
+            return;
+            /*
             if (message.Receiver == 0)
             {
                 Broadcast(message);
@@ -145,14 +234,39 @@ namespace Rozmawiator.Server.Api
             {
                 Server.Send(Server.GetClient(message.Receiver), message);
             }
+            */
         }
-        
 
         public void Broadcast(Message message)
         {
             foreach (var client in _participants)
             {
                 client.Send(message);
+            }
+        }
+
+        private void SaveMessage(Message message)
+        {
+            var sender = _participants.FirstOrDefault(p => p.Id == message.Sender);
+            using (var database = new RozmawiatorDb())
+            {
+                var senderUser = database.Users.FirstOrDefault(u => u.UserName == sender.Nickname);
+                if (senderUser == null)
+                {
+                    return;
+                }
+
+                var conversation = database.Conversations.First(c => c.Id == _conversationId);
+
+                var msg = new Database.Entities.Message
+                {
+                    Content = message.GetTextContent(),
+                    Conversation = conversation,
+                    Sender = senderUser,
+                    Timestamp = DateTime.Now
+                };
+                database.Messages.Add(msg);
+                database.SaveChanges();
             }
         }
     }

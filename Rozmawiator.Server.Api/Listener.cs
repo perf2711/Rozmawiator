@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.IO.Ports;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using Rozmawiator.Shared;
+using Rozmawiator.Database;
+using Rozmawiator.Database.Entities;
+using Message = Rozmawiator.Shared.Message;
 
 namespace Rozmawiator.Server.Api
 {
@@ -17,6 +20,8 @@ namespace Rozmawiator.Server.Api
             Idle,
             Listening
         }
+
+        private readonly Guid _serverGuid = Guid.Parse("20238f7a-4dcb-405b-ac8d-f72ae7591bcb");
     
         private UdpClient _listener;
         private readonly ObservableCollection<Client> _clients;
@@ -61,6 +66,24 @@ namespace Rozmawiator.Server.Api
 
         public void Start()
         {
+            using (var database = new RozmawiatorDb())
+            {
+                var server = database.Servers.Find(_serverGuid);
+                if (server == null)
+                {
+                    server = new Database.Entities.Server
+                    {
+                        Id = _serverGuid,
+                        IpAddress = "192.168.100.135",
+                        Port = Configuration.Host.ListenPort,
+                        State = ServerState.Online
+                    };
+                    database.Servers.Add(server);
+                }
+                server.State = ServerState.Online;
+                database.SaveChanges();
+            }
+
             Port = Configuration.Host.ListenPort;
             TimeoutSpan = Configuration.Client.Timeout;
 
@@ -75,6 +98,15 @@ namespace Rozmawiator.Server.Api
 
         public void Stop()
         {
+            using (var database = new RozmawiatorDb())
+            {
+                var server = database.Servers.Find(_serverGuid);
+                if (server != null)
+                {
+                    server.State = ServerState.Offline;
+                }
+            }
+
             foreach (var conversation in _conversations.ToArray())
             {
                 conversation.Close();
@@ -145,7 +177,7 @@ namespace Rozmawiator.Server.Api
                 var endpoint = new IPEndPoint(0, 0);
                 var msg = _listener.Receive(ref endpoint);
 
-                HandleMessage(endpoint, Message.FromBytes(msg));
+                Task.Factory.StartNew(() => HandleMessage(endpoint, Message.FromBytes(msg)));
             }
         }
 
@@ -196,7 +228,7 @@ namespace Rozmawiator.Server.Api
                     HandleKeepAlive(sender, message);
                     break;
                 case Message.MessageType.Call:
-                    HandleCallTo(sender, message);
+                    HandleCall(sender, message);
                     break;
                 case Message.MessageType.CallRequest:
                     break;
@@ -237,6 +269,59 @@ namespace Rozmawiator.Server.Api
                 return;
             }
 
+            using (var database = new RozmawiatorDb())
+            {
+                var conversation =
+                    database.Conversations.FirstOrDefault(
+                        c => c.ConversationParticipants.Any(cp => cp.User.UserName == targetNickname));
+
+                var senderUser = database.Users.FirstOrDefault(u => u.UserName == sender.Nickname);
+                if (senderUser == null)
+                {
+                    SendAsClient(sender, targetClient, message);
+                    return;
+                }
+
+                if (conversation == null)
+                {
+                    var targetUser = database.Users.FirstOrDefault(u => u.UserName == targetNickname);
+                    if (targetUser == null)
+                    {
+                        SendAsClient(sender, targetClient, message);
+                        return;
+                    }
+
+                    conversation = new Database.Entities.Conversation
+                    {
+                        Type = ConversationType.Passive,
+                        ConversationParticipants = new[]
+                        {
+                        new ConversationParticipant {User = senderUser},
+                        new ConversationParticipant {User = targetUser}
+                    }
+                    };
+                    database.Conversations.Add(conversation);
+                }
+
+                var msg = new Database.Entities.Message
+                {
+                    Conversation = conversation,
+                    Content = message.GetDirectTextContent(),
+                    Timestamp = DateTime.Now,
+                    Sender = senderUser
+                };
+
+                database.Messages.Add(msg);
+                try
+                {
+                    database.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+            }
+
             SendAsClient(sender, targetClient, message);
         }
 
@@ -250,7 +335,18 @@ namespace Rozmawiator.Server.Api
             }
 
             var nickname = message.GetTextContent();
-            var newClient = AddClient(endpoint, nickname);
+
+            using (var database = new RozmawiatorDb())
+            {
+                var user = database.Users.FirstOrDefault(u => u.UserName == nickname);
+                if (user == null)
+                {
+                    Debug($"Client {nickname} with endpoint {endpoint.Address}:{endpoint.Port} does not exist in database.");
+                    return;
+                }
+            }
+
+                var newClient = AddClient(endpoint, nickname);
             Send(newClient, Message.Hello(Configuration.Host.Name));
 
             Debug($"{nickname} connected ({endpoint.Address}:{endpoint.Port})");
@@ -273,10 +369,27 @@ namespace Rozmawiator.Server.Api
             sender?.KeepAlive();
         }
 
-        private void HandleCallTo(Client sender, Message message)
+        private void HandleCall(Client sender, Message message)
         {
             var calledNickname = message.GetTextContent();
             var calledUser = GetClient(calledNickname);
+
+            var callRequest = new Database.Entities.CallRequest
+            {
+                State = CallRequestState.NoResponse
+            };
+
+            using (var database = new RozmawiatorDb())
+            {
+                var callee =
+                    database.Users.Select(u => new {u.Id, u.UserName}).FirstOrDefault(u => u.UserName == calledNickname);
+                var caller =
+                    database.Users.Select(u => new {u.Id, u.UserName})
+                        .FirstOrDefault(u => u.UserName == sender.Nickname);
+
+                callRequest.CalleeId = callee?.Id ?? Guid.Empty;
+                callRequest.CallerId = caller?.Id ?? Guid.Empty;
+            }
 
             Debug($"{sender.Nickname} is trying to call {calledNickname} ({sender.EndPoint.Address}:{sender.EndPoint.Port} -> ?)");
 
@@ -284,6 +397,7 @@ namespace Rozmawiator.Server.Api
             {
                 Debug($"{sender.Nickname} was trying to call {calledNickname}, but {calledNickname} is offline.");
                 Send(sender, Message.CallResponse(0, 0, Message.CallResponseType.TargetIsOffline));
+                SaveCall(callRequest);
                 return;
             }
 
@@ -294,13 +408,23 @@ namespace Rozmawiator.Server.Api
                 currentConversation?.Disconnect(sender);
                 conversation = NewConversation(sender);
             }
-            
+
+            SaveCall(callRequest);
             conversation.AddRequest(calledUser);
             conversation.SendRequests();
         }
 
+        private void SaveCall(Database.Entities.CallRequest callRequest)
+        {
+            using (var database = new RozmawiatorDb())
+            {
+                database.CallRequests.Add(callRequest);
+                database.SaveChanges();
+            }
+        }
+
         private void HandleCallResponse(Client sender, Message message)
-        { 
+        {
             var callingClient = GetClient(message.Receiver);
             if (callingClient == null)
             {
@@ -327,6 +451,8 @@ namespace Rozmawiator.Server.Api
 
             var response = request.ResolveRequest(message);
 
+            
+
             switch (response)
             {
                 case Message.CallResponseType.RequestDenied:
@@ -342,6 +468,20 @@ namespace Rozmawiator.Server.Api
                 default:
                     Debug($"Exception: Caller: {callingClient.Nickname}, Target: {sender.Nickname} - unexpected message {response}");
                     break;
+            }
+
+            using (var database = new RozmawiatorDb())
+            {
+                var callRequest =
+                    database.CallRequests.LastOrDefault(
+                        c => c.Callee.UserName == sender.Nickname && c.Caller.UserName == message.GetTextContent());
+                if (callRequest != null)
+                {
+                    callRequest.State = response == Message.CallResponseType.RequestAccepted
+                        ? CallRequestState.RequestAccepted
+                        : CallRequestState.RequestDenied;
+                    database.SaveChanges();
+                }
             }
 
             SendAsClient(sender, callingClient, Message.CallResponse(0, 0, response));
