@@ -55,6 +55,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\ExtendedTextBox.xaml.cs">
+      <DependentUpon>ExtendedTextBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\LoadingControl.xaml.cs">
+      <DependentUpon>LoadingControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\LoginWindow.xaml.cs">
+      <DependentUpon>LoginWindow.xaml</DependentUpon>
+    </Compile>
+    <Page Include="Controls\ExtendedTextBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\LoadingControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\MessageBubbleControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -93,6 +110,7 @@
       <DependentUpon>PassiveConversationControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Data\ClientService.cs" />
+    <Compile Include="Data\RestService.cs" />
     <Compile Include="Data\UserService.cs" />
     <Compile Include="Extensions\PassiveConversationExtensions.cs" />
     <Compile Include="Models\ChatMessage.cs" />
@@ -107,6 +125,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Windows\LoginWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -143,6 +165,10 @@
     <ProjectReference Include="..\Rozmawiator.ClientApi\Rozmawiator.ClientApi.csproj">
       <Project>{8f2e073a-c63f-4a9e-9909-876c17e47276}</Project>
       <Name>Rozmawiator.ClientApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rozmawiator.RestClient\Rozmawiator.RestClient.csproj">
+      <Project>{b98dbbbb-5964-418e-b222-c1e369062314}</Project>
+      <Name>Rozmawiator.RestClient</Name>
     </ProjectReference>
     <ProjectReference Include="..\Rozmawiator.Shared\Rozmawiator.Shared.csproj">
       <Project>{ed52d6a8-fe5b-48e4-a66f-e8cea78205fb}</Project>

@@ -64,7 +64,6 @@
     <Compile Include="Entities\Message.cs" />
     <Compile Include="Entities\Server.cs" />
     <Compile Include="Entities\User.cs" />
-    <Compile Include="Filter.cs" />
     <Compile Include="Identity\GuidRole.cs" />
     <Compile Include="Identity\GuidUserClaim.cs" />
     <Compile Include="Identity\GuidUserLogin.cs" />

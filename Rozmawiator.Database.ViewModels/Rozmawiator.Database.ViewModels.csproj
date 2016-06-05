@@ -30,6 +30,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -42,9 +43,11 @@
   <ItemGroup>
     <Compile Include="CallRequestViewModel.cs" />
     <Compile Include="ConversationViewModel.cs" />
+    <Compile Include="Filter.cs" />
     <Compile Include="FriendRequestViewModel.cs" />
     <Compile Include="MessageViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegisterViewModel.cs" />
     <Compile Include="ServerViewModel.cs" />
     <Compile Include="UserViewModel.cs" />
   </ItemGroup>
