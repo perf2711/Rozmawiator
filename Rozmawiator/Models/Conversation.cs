@@ -14,5 +14,6 @@ namespace Rozmawiator.Models
         public User Owner { get; set; }
         public User Creator { get; set; }
         public User[] Participants { get; set; }
+        public List<TextMessage> Messages { get; } = new List<TextMessage>();
     }
 }

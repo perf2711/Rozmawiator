@@ -32,8 +32,7 @@ namespace Rozmawiator.Windows
 
         private void Login(string username, string password)
         {
-            LoadingControl.Text = "Logowanie...";
-            LoadingControl.Visibility = Visibility.Visible;
+            this.ShowLoading("Logowanie...");
 
             LoginUsernameBox.IsEnabled = false;
             LoginPasswordBox.IsEnabled = false;
@@ -47,7 +46,7 @@ namespace Rozmawiator.Windows
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        LoadingControl.Visibility = Visibility.Collapsed;
+                        this.HideLoading();
                         LoginUsernameBox.IsEnabled = true;
                         LoginPasswordBox.IsEnabled = true;
                         LoginButton.IsEnabled = true;
@@ -88,8 +87,7 @@ namespace Rozmawiator.Windows
 
         private void Register()
         {
-            LoadingControl.Text = "Rejestrowanie...";
-            LoadingControl.Visibility = Visibility.Visible;
+            this.ShowLoading("Rejestrowanie...");
 
             RegisterUsernameBox.IsEnabled = false;
             RegisterEmailBox.IsEnabled = false;
@@ -113,7 +111,7 @@ namespace Rozmawiator.Windows
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        LoadingControl.Visibility = Visibility.Collapsed;
+                        this.HideLoading();
                         RegisterUsernameBox.IsEnabled = true;
                         RegisterEmailBox.IsEnabled = true;
                         RegisterPasswordBox.IsEnabled = true;

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Rozmawiator"
+        xmlns:controls="clr-namespace:Rozmawiator.Controls"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="655" Loaded="Window_Loaded">
     <Grid>
@@ -33,10 +34,10 @@
         
         <GridSplitter Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="5"/>
         
-        <Grid Grid.Row="1" Grid.Column="0" x:Name="PassiveConversationList">
-            
+        <Grid Grid.Row="1" Grid.Column="0">
+            <ListBox x:Name="PassiveConversationList"/>
         </Grid>
-        
+
         <Grid Grid.Row="1" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="40" />

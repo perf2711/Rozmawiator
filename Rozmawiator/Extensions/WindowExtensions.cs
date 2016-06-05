@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Rozmawiator.Controls;
 
 namespace Rozmawiator.Extensions
@@ -62,6 +63,52 @@ namespace Rozmawiator.Extensions
             }
 
             panel.Children.Add(errorControl);
+        }
+
+        public static void ShowLoading(this Window window, string text, bool hideOtherLoadings = true)
+        {
+            if (hideOtherLoadings)
+            {
+                window.HideLoading();
+            }
+
+            window.Dispatcher.Invoke(() =>
+            {
+                var panel = window.Content as Panel;
+                if (panel == null)
+                {
+                    return;
+                }
+
+                var loadingControl = new LoadingControl
+                {
+                    Text = text
+                };
+
+                Grid.SetColumnSpan(loadingControl, 99);
+                Grid.SetRowSpan(loadingControl, 99);
+                
+                panel.Children.Add(loadingControl);
+            });
+        }
+
+        public static void HideLoading(this Window window)
+        {
+            window.Dispatcher.Invoke(() =>
+            {
+                var panel = window.Content as Panel;
+                if (panel == null)
+                {
+                    return;
+                }
+
+                var loadingControls = panel.Children.OfType<LoadingControl>().ToArray();
+
+                foreach (var loadingControl in loadingControls)
+                {
+                    panel.Children.Remove(loadingControl);
+                }
+            });
         }
     }
 }

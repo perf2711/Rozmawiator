@@ -21,10 +21,10 @@ namespace Rozmawiator.Controls
     /// </summary>
     public partial class MessageControl : UserControl
     {
-        private ChatMessage _message;
+        private TextMessage _message;
         private bool _senderInfoVisibility = true;
 
-        public ChatMessage Message
+        public TextMessage Message
         {
             get { return _message; }
             set

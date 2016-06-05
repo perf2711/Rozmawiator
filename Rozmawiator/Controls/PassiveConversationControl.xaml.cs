@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using Rozmawiator.ClientApi;
 using Rozmawiator.Data;
 using Rozmawiator.Extensions;
+using Conversation = Rozmawiator.Models.Conversation;
 
 namespace Rozmawiator.Controls
 {
@@ -23,9 +24,9 @@ namespace Rozmawiator.Controls
     /// </summary>
     public partial class PassiveConversationControl : UserControl
     {
-        private PassiveConversation _conversation;
+        private Conversation _conversation;
 
-        public PassiveConversation Conversation
+        public Conversation Conversation
         {
             get { return _conversation; }
             set
@@ -42,13 +43,13 @@ namespace Rozmawiator.Controls
 
         private void SetLayout()
         {
-            var users = _conversation.GetUsers().Where(u => u.Nickname != UserService.LoggedUser.Nickname).ToArray();
+            var users = _conversation.Participants.Where(u => u.Nickname != UserService.LoggedUser.Nickname).ToArray();
             if (!users.Any())
             {
                 return;
             }
 
-            if (users.Count() == 1)
+            if (users.Length == 1)
             {
                 var user = users.First();
                 if (user.Avatar != null)
@@ -57,6 +58,7 @@ namespace Rozmawiator.Controls
                 }
 
                 Participants.Content = user.Nickname;
+                return;
             }
 
             Participants.Content = users.Select(u => u.Nickname).Aggregate((a, b) => a + ", " + b);

@@ -35,6 +35,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MoreLinq, Version=1.4.18916.0, Culture=neutral, PublicKeyToken=384d532d7e88985d, processorArchitecture=MSIL">
+      <HintPath>..\packages\morelinq.1.4.0\lib\net35\MoreLinq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -64,6 +68,7 @@
     <Compile Include="Controls\LoadingControl.xaml.cs">
       <DependentUpon>LoadingControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Data\TextMessageService.cs" />
     <Compile Include="Data\PassiveConversationService.cs" />
     <Compile Include="Extensions\WindowExtensions.cs" />
     <Compile Include="Models\Conversation.cs" />
@@ -123,7 +128,7 @@
     <Compile Include="Data\RestService.cs" />
     <Compile Include="Data\UserService.cs" />
     <Compile Include="Extensions\PassiveConversationExtensions.cs" />
-    <Compile Include="Models\ChatMessage.cs" />
+    <Compile Include="Models\TextMessage.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="PartialViews\ChatInputControl.xaml.cs">
       <DependentUpon>ChatInputControl.xaml</DependentUpon>
@@ -158,6 +163,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

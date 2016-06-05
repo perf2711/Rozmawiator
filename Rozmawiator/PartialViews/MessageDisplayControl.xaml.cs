@@ -15,16 +15,16 @@ namespace Rozmawiator.PartialViews
     /// </summary>
     public partial class MessageDisplayControl : UserControl
     {
-        public ObservableCollection<ChatMessage> Messages { get; }
+        public ObservableCollection<TextMessage> Messages { get; }
 
         public MessageDisplayControl()
         {
             InitializeComponent();
-            Messages = new ObservableCollection<ChatMessage>();
+            Messages = new ObservableCollection<TextMessage>();
             Messages.CollectionChanged += OnMessagesChanged;
         }
 
-        private void AddMessageControl(ChatMessage message)
+        private void AddMessageControl(TextMessage message)
         {
             var bubble = new MessageControl
             {
@@ -35,7 +35,7 @@ namespace Rozmawiator.PartialViews
             MessagesPanel.Children.Add(bubble);
         }
 
-        private void RemoveMessageControl(ChatMessage message)
+        private void RemoveMessageControl(TextMessage message)
         {
             var bubble = MessagesPanel.Children.OfType<MessageControl>().FirstOrDefault(b => b.Message == message);
             if (bubble != null)
@@ -63,8 +63,8 @@ namespace Rozmawiator.PartialViews
 
         private void OnMessagesChanged(object sender, NotifyCollectionChangedEventArgs args)
         {
-            var oldMessages = args.OldItems as IList<ChatMessage>;
-            var newMessages = args.NewItems as IList<ChatMessage>;
+            var oldMessages = args.OldItems as IList<TextMessage>;
+            var newMessages = args.NewItems as IList<TextMessage>;
 
             if (oldMessages != null)
             {

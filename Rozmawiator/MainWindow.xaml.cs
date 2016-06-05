@@ -13,7 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Rozmawiator.Audio;
+using Rozmawiator.Controls;
 using Rozmawiator.Data;
+using Rozmawiator.Extensions;
 
 namespace Rozmawiator
 {
@@ -29,13 +31,29 @@ namespace Rozmawiator
 
         private async Task UpdateData()
         {
+            this.ShowLoading("Aktualizowanie danych...");
             await UserService.UpdateLoggedUser();
             await PassiveConversationService.UpdateConversations();
+
+            Dispatcher.Invoke(UpdateViews);
+
+            this.HideLoading();
         }
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        private void UpdateViews()
         {
-            await UpdateData();
+            foreach (var conversation in PassiveConversationService.Conversations)
+            {
+                var control = new PassiveConversationControl
+                {
+                    Conversation = conversation
+                };
+            }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            new Task(async () => await UpdateData()).Start();
         }
     }
 }

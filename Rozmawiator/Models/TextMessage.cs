@@ -8,19 +8,21 @@ using System.Windows.Media.Imaging;
 
 namespace Rozmawiator.Models
 {
-    public class ChatMessage
+    public class TextMessage
     {
+        public Guid Id { get; protected set; }
         public User Sender { get; protected set; }
         public DateTime Timestamp { get; protected set; }
         public string Content { get; protected set; }
 
-        public ChatMessage(string content, DateTime timestamp, User sender) : this(content, timestamp)
+        public TextMessage(Guid id, string content, DateTime timestamp, User sender) : this(id, content, timestamp)
         {
             Sender = sender;
         }
 
-        public ChatMessage(string content, DateTime timestamp)
+        public TextMessage(Guid id, string content, DateTime timestamp)
         {
+            Id = id;
             Content = content;
             Timestamp = timestamp;
         }
