@@ -312,14 +312,7 @@ namespace Rozmawiator.Server.Api
                 };
 
                 database.Messages.Add(msg);
-                try
-                {
-                    database.SaveChanges();
-                }
-                catch (Exception ex)
-                {
-                    throw;
-                }
+                database.SaveChanges();
             }
 
             SendAsClient(sender, targetClient, message);

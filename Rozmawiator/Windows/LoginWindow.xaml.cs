@@ -11,6 +11,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Rozmawiator.Data;
+using Rozmawiator.Extensions;
+using Rozmawiator.RestClient.Models;
 
 namespace Rozmawiator.Windows
 {
@@ -23,19 +26,58 @@ namespace Rozmawiator.Windows
 
         private void Login()
         {
+            LoadingControl.Visibility = Visibility.Visible;
+
+            LoginUsernameBox.IsEnabled = false;
+            LoginPasswordBox.IsEnabled = false;
+            LoginButton.IsEnabled = false;
+
             var username = LoginUsernameBox.Text;
             var password = LoginPasswordBox.Password;
 
+            new Task(async () =>
+            {
+                var response = await RestService.UserApi.Login(username, password);
 
+                if (!response.IsSuccessStatusCode)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        LoadingControl.Visibility = Visibility.Collapsed;
+                        LoginUsernameBox.IsEnabled = true;
+                        LoginPasswordBox.IsEnabled = true;
+                        LoginButton.IsEnabled = true;
+
+                        var error = response.GetModel();
+                        var errorDescription = error["error_description"] as string ?? "Nieznany błąd.";
+                        this.ShowError("Uwaga", errorDescription);
+                    });
+                    return;
+                }
+
+                var token = response.GetModel<TokenModel>();
+                RestService.CurrentToken = token;
+
+                Dispatcher.Invoke(() =>
+                {
+                    Close();
+                    new MainWindow().Show();
+                });
+
+            }).Start();
         }
+
         private void Login_KeyDown(object sender, KeyEventArgs e)
         {
-
+            if (e.Key == Key.Return)
+            {
+                Login();
+            }
         }
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-
+            Login();
         }
 
         #endregion
@@ -49,12 +91,15 @@ namespace Rozmawiator.Windows
 
         private void Register_KeyDown(object sender, KeyEventArgs e)
         {
-
+            if (e.Key == Key.Return)
+            {
+                Register();
+            }
         }
 
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
         {
-
+            Register();
         }
 
         #endregion

@@ -10,7 +10,12 @@ namespace Rozmawiator.Data
 {
     public static class RestService
     {
-        public static string BaseUrl = "http://192.168.100.135";
+        public static class ErrorParser
+        {
+            
+        }
+
+        public static string BaseUrl = "http://192.168.100.135:6831";
 
         public static TokenModel CurrentToken { get; set; }
 
