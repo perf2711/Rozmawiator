@@ -18,7 +18,7 @@ namespace Rozmawiator.Database.Entities
     public class CallRequest
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         public CallRequestState State { get; set; }
         [Required]

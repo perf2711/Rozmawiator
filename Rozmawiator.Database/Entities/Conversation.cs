@@ -17,7 +17,7 @@ namespace Rozmawiator.Database.Entities
     public class Conversation
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         public ConversationType Type { get; set; }
         public Guid? OwnerId { get; set; }

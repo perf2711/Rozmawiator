@@ -16,7 +16,7 @@ namespace Rozmawiator.Database.Entities
     public class Server
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
         public string IpAddress { get; set; }
