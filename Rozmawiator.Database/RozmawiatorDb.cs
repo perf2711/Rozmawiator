@@ -17,6 +17,11 @@ namespace Rozmawiator.Database
             
         }
 
+        public static RozmawiatorDb Create()
+        {
+            return new RozmawiatorDb();
+        }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             /* Friends mapping */

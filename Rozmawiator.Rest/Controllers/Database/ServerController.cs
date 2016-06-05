@@ -36,7 +36,7 @@ namespace Rozmawiator.Rest.Controllers.Database
         }
 
         [HttpGet]
-        [Route("")]
+        [Route("Online")]
         public ServerViewModel GetOnlineServer()
         {
             var server =  _database.Servers.FirstOrDefault(s => s.State == ServerState.Online);

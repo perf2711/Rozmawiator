@@ -328,7 +328,7 @@ namespace Rozmawiator.Rest.Controllers
                 return BadRequest(ModelState);
             }
 
-            var user = new User() { UserName = model.UserName, Email = model.UserName };
+            var user = new User() { Id = Guid.NewGuid(), UserName = model.UserName, Email = model.Email };
 
             var result = await UserManager.CreateAsync(user, model.Password);
 
@@ -357,7 +357,7 @@ namespace Rozmawiator.Rest.Controllers
                 return InternalServerError();
             }
 
-            var user = new User() { UserName = model.Email, Email = model.Email };
+            var user = new User() { UserName = model.UserName, Email = model.UserName };
 
             var result = await UserManager.CreateAsync(user);
             if (!result.Succeeded)

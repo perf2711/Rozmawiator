@@ -4,6 +4,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
+using Rozmawiator.Database;
 using Rozmawiator.Database.Entities;
 using Rozmawiator.Database.Identity;
 using Rozmawiator.Rest.Models;
@@ -21,7 +22,7 @@ namespace Rozmawiator.Rest
 
         public static ApplicationUserManager Create(IdentityFactoryOptions<ApplicationUserManager> options, IOwinContext context)
         {
-            var manager = new ApplicationUserManager(new UserStore<User, GuidRole, Guid, GuidUserLogin, GuidUserRole, GuidUserClaim>(context.Get<ApplicationDbContext>()));
+            var manager = new ApplicationUserManager(new UserStore<User, GuidRole, Guid, GuidUserLogin, GuidUserRole, GuidUserClaim>(context.Get<RozmawiatorDb>()));
             // Configure validation logic for usernames
             manager.UserValidator = new UserValidator<User, Guid>(manager)
             {
@@ -31,11 +32,11 @@ namespace Rozmawiator.Rest
             // Configure validation logic for passwords
             manager.PasswordValidator = new PasswordValidator
             {
-                RequiredLength = 6,
-                RequireNonLetterOrDigit = true,
+                RequiredLength = 8,
+                RequireNonLetterOrDigit = false,
                 RequireDigit = true,
                 RequireLowercase = true,
-                RequireUppercase = true,
+                RequireUppercase = false,
             };
             var dataProtectionProvider = options.DataProtectionProvider;
             if (dataProtectionProvider != null)
