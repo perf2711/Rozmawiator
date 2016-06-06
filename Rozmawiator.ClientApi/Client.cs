@@ -127,7 +127,7 @@ namespace Rozmawiator.ClientApi
 
         public void DisconnectFromConversation(string reason)
         {
-            Conversation.SendToAll(new Message().ByeConversation(reason));
+            Conversation.SendToAll(Message.CreateNew.ByeConversation(reason));
             Conversation = null;
         }
 

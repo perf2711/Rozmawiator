@@ -43,6 +43,12 @@ namespace Rozmawiator.RestClient
             return await HttpHelper.Post(BaseUrl + url, content);
         }
 
+        public async Task<HttpResponse> Search(TokenModel token, string query)
+        {
+            var url = $"/api/Users/Search/{query}";
+            return await HttpHelper.Get(BaseUrl + url, token);
+        }
+
         public async Task<HttpResponse> GetAvatar(TokenModel token, string username)
         {
             var url = $"/api/Users/Avatar/{username}";

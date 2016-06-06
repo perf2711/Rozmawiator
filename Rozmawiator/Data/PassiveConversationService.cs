@@ -27,8 +27,9 @@ namespace Rozmawiator.Data
                 throw new RestErrorException(response.Error);
             }
 
-            var conversations = response.GetModel<ConversationViewModel[]>();
+            var conversations = response.GetModel<ConversationViewModel[]>().Where(c => c.Type == ConversationType.Passive).ToArray();
 
+            //TODO: Check why the filter is not working
             await UserService.AddUsers(conversations.SelectMany(c => c.Participants).ToArray());
             Conversations = conversations.Select(c => new Conversation
             {

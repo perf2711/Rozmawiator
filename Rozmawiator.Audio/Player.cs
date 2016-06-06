@@ -38,12 +38,18 @@ namespace Rozmawiator.Audio
 
         public void Start()
         {
-            _waveOut.Play();
+            if (State == PlayerState.Stopped)
+            {
+                _waveOut.Play();
+            }
         }
 
         public void Stop()
         {
-            _waveOut.Stop();
+            if (State != PlayerState.Stopped)
+            {
+                _waveOut.Stop();
+            }
         }
     }
 }

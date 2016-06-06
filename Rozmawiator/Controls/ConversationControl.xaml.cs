@@ -23,15 +23,29 @@ namespace Rozmawiator.Controls
     /// </summary>
     public partial class ConversationControl : UserControl
     {
-        private Conversation _conversation;
+        private Conversation _passiveConversation;
+        private Conversation _activeConversation;
 
-        public Conversation Conversation
+        public Conversation PassiveConversation
         {
-            get { return _conversation; }
+            get { return _passiveConversation; }
             set
             {
-                _conversation = value;
+                _passiveConversation = value;
                 SetLayout();
+            }
+        }
+
+        public Conversation ActiveConversation
+        {
+            get { return _activeConversation; }
+            set
+            {
+                _activeConversation = value;
+                if (Background == null)
+                {
+                    Background = new SolidColorBrush(Colors.DodgerBlue);
+                }
             }
         }
 
@@ -52,13 +66,13 @@ namespace Rozmawiator.Controls
         {
             Dispatcher.Invoke(() =>
             {
-                Background = _conversation.Type == ConversationType.Active ? new SolidColorBrush(Colors.DodgerBlue) : null;
+                Background = ActiveConversation != null ? new SolidColorBrush(Colors.DodgerBlue) : null;
             });
         }
 
         private void SetLayout()
         {
-            var users = _conversation.Participants.Where(u => u.Nickname != UserService.LoggedUser.Nickname).ToArray();
+            var users = _passiveConversation.Participants.Where(u => u.Nickname != UserService.LoggedUser.Nickname).ToArray();
             if (!users.Any())
             {
                 return;

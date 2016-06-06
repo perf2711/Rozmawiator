@@ -47,6 +47,28 @@ namespace Rozmawiator.Data
             Users.Add(LoggedUser);
         }
 
+        public static async Task<User[]> Search(string query)
+        {
+            var response = await RestService.UserApi.Search(RestService.CurrentToken, query);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new InvalidOperationException();
+            }
+
+            var usersViewModels = response.GetModel<UserViewModel[]>();
+            var result = new List<User>();
+
+            foreach (var model in usersViewModels)
+            {
+                result.Add(new User
+                {
+                    Nickname = model.UserName,
+                    Avatar = await GetAvatar(model.UserName)
+                });
+            }
+            return result.ToArray();
+        }
+
         public static async Task<ImageSource> GetAvatar(string username)
         {
             var response = await RestService.UserApi.GetAvatar(RestService.CurrentToken, username);

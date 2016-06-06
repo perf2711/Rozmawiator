@@ -42,7 +42,7 @@
             <Border BorderThickness="0,0,0,2" BorderBrush="Coral" Background="LightCoral">
                 <partialViews:LoggedUserInfoControl x:Name="LoggedUserInfoControl"/>
             </Border>
-            <ListBox x:Name="ConversationList" Grid.Row="1" SelectionChanged="PassiveConversationSelectionChanged" SelectionMode="Single" Grid.RowSpan="1"/>
+            <ListBox x:Name="ConversationList" Grid.Row="1" SelectionChanged="ConversationSelectionChanged" SelectionMode="Single" Grid.RowSpan="1"/>
         </Grid>
 
         <Grid Grid.Row="1" Grid.Column="1">

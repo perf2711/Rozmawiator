@@ -63,6 +63,21 @@ namespace Rozmawiator.Rest.Controllers.Database
         }
 
         [HttpGet]
+        [Route("Search/{query}")]
+        public IEnumerable<UserViewModel> SearchUsers(string query)
+        {
+            return
+                _database.Users.Where(u => u.UserName.ToLower().Contains(query.ToLower()))
+                    .ToArray()
+                    .Select(user => new UserViewModel
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        RegistrationDateTime = user.RegistrationDateTime
+                    });
+        }
+
+        [HttpGet]
         [Route("Avatar/{username}")]
         public HttpResponseMessage GetAvatar(string username)
         {
