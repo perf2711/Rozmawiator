@@ -23,5 +23,12 @@ namespace Rozmawiator.Communication.Conversation
         {
             return (ConversationMessage) CreateRequest(senderId, requestId).AddContent(conversationId.ToByteArray());
         }
+
+        public override byte[] Content => base.Content.Skip(16).ToArray();
+
+        public Guid GetConversationId()
+        {
+            return new Guid(base.Content.Take(16).ToArray());
+        }
     }
 }

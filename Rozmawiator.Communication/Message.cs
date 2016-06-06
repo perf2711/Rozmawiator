@@ -50,9 +50,21 @@ namespace Rozmawiator.Communication
             }
         }
 
+        private byte[] _content;
+
+        public virtual byte[] Content
+        {
+            get
+            {
+                return IsRequestType ? _content.Skip(16).ToArray() : _content;
+            }
+            set { _content = value; }
+        }
+
         public Guid SenderId { get; set; }
-        public byte[] Content { get; set; }
         public bool IsRequestType { get; }
+
+        public Guid RequestId => IsRequestType ? Guid.Empty : new Guid(_content.Take(16).ToArray());
 
         public byte[] GetBytes()
         {
