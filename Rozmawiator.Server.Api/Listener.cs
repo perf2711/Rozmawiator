@@ -78,7 +78,7 @@ namespace Rozmawiator.Server.Api
                     };
                     database.Servers.Add(server);
                 }
-                server.IpAddress = "192.168.56.1";
+                server.IpAddress = "192.168.88.19";
                 server.Port = Configuration.Host.ListenPort;
                 server.State = ServerState.Online;
                 database.SaveChanges();
@@ -468,9 +468,16 @@ namespace Rozmawiator.Server.Api
 
             using (var database = new RozmawiatorDb())
             {
+                var content = message.GetTextContent();
+                var lastTimestamp =
+                    database.CallRequests.Where(
+                        c => c.Callee.UserName == sender.Nickname).Max(c => c.Timestamp);
+                /*
                 var callRequest =
                     database.CallRequests.LastOrDefault(
-                        c => c.Callee.UserName == sender.Nickname && c.Caller.UserName == message.GetTextContent());
+                        c => c.Callee.UserName == sender.Nickname && c.Caller.UserName == content);
+                        */
+                var callRequest = database.CallRequests.FirstOrDefault(c => c.Timestamp == lastTimestamp);
                 if (callRequest != null)
                 {
                     callRequest.State = response == Message.CallResponseType.RequestAccepted
@@ -514,6 +521,7 @@ namespace Rozmawiator.Server.Api
             conversation.ParticipantsUpdate += OnConversationParticipantsUpdate;
             _conversations.Add(conversation);
             ConversationCreated?.Invoke(conversation);
+            _nextConversationId++;
             return conversation;
         }
 

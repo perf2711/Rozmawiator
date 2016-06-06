@@ -210,8 +210,12 @@ namespace Rozmawiator.Server.Api
                     SaveMessage(message);
                     break;
                 case Message.MessageType.Audio:
+                    Resend(message, true);
+                    return;
                 case Message.MessageType.HelloConversation:
+                    break;
                 case Message.MessageType.ByeConversation:
+                    Disconnect(Server.GetClient(message.Sender));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -220,9 +224,9 @@ namespace Rozmawiator.Server.Api
             Resend(message);
         }
 
-        public void Resend(Message message)
+        public void Resend(Message message, bool skipSender = false)
         {
-            Broadcast(message);
+            Broadcast(message, skipSender);
             return;
             /*
             if (message.Receiver == 0)
@@ -236,9 +240,10 @@ namespace Rozmawiator.Server.Api
             */
         }
 
-        public void Broadcast(Message message)
+        public void Broadcast(Message message, bool skipSender = false)
         {
-            foreach (var client in _participants)
+            var sender = Server.GetClient(message.Sender);
+            foreach (var client in _participants.Where(p => !skipSender || p != sender))
             {
                 client.Send(message);
             }

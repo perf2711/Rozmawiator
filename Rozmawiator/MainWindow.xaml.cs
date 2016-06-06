@@ -36,6 +36,8 @@ namespace Rozmawiator
         public MainWindow()
         {
             InitializeComponent();
+
+            Title = $"Rozmawiator - {UserService.LoggedUser.Nickname}";
         }
 
         #region Initializing
@@ -57,7 +59,7 @@ namespace Rozmawiator
             {
                 var control = new ConversationControl
                 {
-                    Conversation = conversation
+                    PassiveConversation = conversation
                 };
 
                 ConversationList.Items.Add(control);
@@ -107,12 +109,12 @@ namespace Rozmawiator
                 PassiveConversationService.Conversations.FirstOrDefault(c => c.Participants.Select(p => p.Nickname).Contains(sender)) ??
                 await ConversationService.AddConversation(ConversationType.Passive, UserService.LoggedUser.Nickname, sender);
 
-            var conversationControl = ConversationControls.FirstOrDefault(p => p.Conversation == conversation);
+            var conversationControl = ConversationControls.FirstOrDefault(p => p.PassiveConversation == conversation);
             if (conversationControl == null)
             {
                 conversationControl = new ConversationControl
                 {
-                    Conversation = conversation
+                    PassiveConversation = conversation
                 };
                 Dispatcher.Invoke(() =>
                 {
@@ -120,7 +122,7 @@ namespace Rozmawiator
                 });
             }
 
-            if (SelectedConversation != conversationControl.Conversation)
+            if (SelectedConversationControl.PassiveConversation != conversationControl.PassiveConversation)
             {
                 conversationControl.Notify();
             }
@@ -162,6 +164,8 @@ namespace Rozmawiator
                 Participants = ClientService.Client.Conversation.Participants.Select(p => UserService.GetUser(p.Nickname)).ToArray()
             };
             ActiveConversationService.CurrentActiveConversation = conversation;
+            SelectedConversationControl.ActiveConversation = conversation;
+            
 
             StartConversation();
         }
@@ -254,8 +258,9 @@ namespace Rozmawiator
 
         private IEnumerable<ConversationControl> ConversationControls => ConversationList.Items.OfType<ConversationControl>();
         private List<MessageDisplayControl> MessageDisplays { get; } = new List<MessageDisplayControl>();
-        private MessageDisplayControl ActiveMessageDisplay { get; set; }
-        private UserInfoControl ActiveUserInfo { get; set; }
+        private MessageDisplayControl CurrentMessageDisplay { get; set; }
+        private ActiveConversationViewControl CurrentActiveConversationView { get; set; }
+        private UserInfoControl CurrentUserInfo { get; set; }
 
         #region Displaying messages
 
@@ -270,7 +275,7 @@ namespace Rozmawiator
 
             MessagesPanel.Children.Clear();
             MessagesPanel.Children.Add(messageDisplay);
-            ActiveMessageDisplay = messageDisplay;
+            CurrentMessageDisplay = messageDisplay;
         }
 
         #endregion
@@ -288,7 +293,7 @@ namespace Rozmawiator
             var userInfo = new UserInfoControl(user);
             userInfo.Called += OnUserCall;
 
-            ActiveUserInfo = userInfo;
+            CurrentUserInfo = userInfo;
             UserInfoGrid.Children.Clear();
             UserInfoGrid.Children.Add(userInfo);
         }
@@ -300,23 +305,85 @@ namespace Rozmawiator
 
         #endregion
 
+        #region Displaying active conversation view
+
+        private void DisplayActiveConversationView(Conversation activeConversation)
+        {
+            if (CurrentActiveConversationView == null)
+            {
+                CurrentActiveConversationView = new ActiveConversationViewControl(activeConversation);
+                CurrentActiveConversationView.MicrophoneToggled += OnMicrophoneToggle;
+                CurrentActiveConversationView.SpeakerToggled += OnSpeakerToggle;
+                CurrentActiveConversationView.HangedUp += OnHangedUp;
+            }
+            else if (CurrentActiveConversationView?.Conversation != activeConversation)
+            {
+                throw new InvalidOperationException("Cannot show new conversation when there is already one in progress.");
+            }
+
+            ActiveConversationGrid.Children.Clear();
+            ActiveConversationGrid.Children.Add(CurrentActiveConversationView);
+            ActiveConversationRow.Height = new GridLength(2, GridUnitType.Star);
+        }
+
+        #endregion
+
         #region Selecting conversation
 
-        private Conversation SelectedConversation
+        private ConversationControl SelectedConversationControl
         {
             get
             {
                 ConversationControl control = null;
                 Dispatcher.Invoke(() => control = ConversationList.SelectedItem as ConversationControl);
-                return control?.Conversation;
+                return control;
             }
         }
 
         private void ConversationSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             (ConversationList.SelectedItem as ConversationControl)?.Unnotify();
-            DisplayMessages(SelectedConversation);
-            DisplayInfo(SelectedConversation);
+            DisplayMessages(SelectedConversationControl.PassiveConversation);
+
+            if (SelectedConversationControl.ActiveConversation == null)
+            {
+                DisplayInfo(SelectedConversationControl.PassiveConversation);
+                return;
+            }
+
+            UserInfoGrid.Children.Clear();
+            CurrentUserInfo = null;
+            DisplayActiveConversationView(SelectedConversationControl.ActiveConversation);
+        }
+
+        private void SelectConversationByPassive(Conversation conversation)
+        {
+            var controls = ConversationList.Items.OfType<ConversationControl>();
+
+            var control =
+                controls.FirstOrDefault(c => c.PassiveConversation.Participants.SequenceEqual(conversation.Participants));
+
+            if (control == null)
+            {
+                return;
+            }
+
+            ConversationList.SelectedItem = control;
+        }
+
+        private void SelectConversationByActive(Conversation conversation)
+        {
+            var controls = ConversationList.Items.OfType<ConversationControl>();
+
+            var control =
+                controls.FirstOrDefault(c => c.ActiveConversation.Participants.SequenceEqual(conversation.Participants));
+
+            if (control == null)
+            {
+                return;
+            }
+
+            ConversationList.SelectedItem = control;
         }
 
         #endregion
@@ -325,22 +392,12 @@ namespace Rozmawiator
 
         private void MessageInputBox_Sent(ChatInputControl sender, TextMessage message)
         {
-            if (ActiveMessageDisplay == null || SelectedConversation == null)
+            if (CurrentMessageDisplay == null || SelectedConversationControl == null)
             {
                 return;
             }
 
-            switch (SelectedConversation.Type)
-            {
-                case ConversationType.Passive:
-                    SendPassiveMessage(SelectedConversation, message);
-                    break;
-                case ConversationType.Active:
-                    SendActiveMessage(SelectedConversation, message);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            SendPassiveMessage(SelectedConversationControl.PassiveConversation, message);
         }
 
         #endregion
@@ -348,7 +405,7 @@ namespace Rozmawiator
         #region Passive
         private void SendPassiveMessage(Conversation conversation, TextMessage message)
         {
-            if (ActiveMessageDisplay == null)
+            if (CurrentMessageDisplay == null)
             {
                 return;
             }
@@ -359,7 +416,7 @@ namespace Rozmawiator
             }
 
             conversation.Messages.Add(message);
-            ActiveMessageDisplay.AddMessageControl(message);
+            CurrentMessageDisplay.AddMessageControl(message);
         }
 
         #endregion
@@ -368,30 +425,53 @@ namespace Rozmawiator
 
         private void StartConversation()
         {
-            var activeConversationView = new ActiveConversationViewControl(ActiveConversationService.CurrentActiveConversation);
+            //DisplayMessages();
+            SelectConversationByPassive(ActiveConversationService.CurrentActiveConversation);
+            SelectedConversationControl.ActiveConversation = ActiveConversationService.CurrentActiveConversation;
+            UserInfoGrid.Children.Clear();
+            CurrentUserInfo = null;
+            DisplayActiveConversationView(SelectedConversationControl.ActiveConversation);
 
-            ActiveConversationGrid.Children.Clear();
-            ActiveConversationGrid.Children.Add(activeConversationView);
-            ActiveConversationRow.Height = new GridLength(2, GridUnitType.Star);
+            ClientService.Client.Conversation.ConversationClosed += OnConversationClose;
+            ClientService.Client.Conversation.NewAudioMessage += OnNewAudioSamples;
 
-            activeConversationView.MicrophoneToggled += OnMicrophoneToggle;
-            activeConversationView.SpeakerToggled += OnSpeakerToggle;
-            activeConversationView.HangedUp += OnHangedUp;
+            Recorder.Start();
+            Player.Start();
+        }
 
-            DisplayMessages(ActiveConversationService.CurrentActiveConversation);
+        private void OnNewAudioSamples(ClientApi.Conversation conversation, RemoteClient remoteClient, Message message)
+        {
+            Player.AddSamples(message.Content, 0, message.Content.Length);
+        }
+
+        private void OnConversationClose(ClientApi.Conversation conversation, Message message)
+        {
+            Dispatcher.Invoke(EndConversation);
         }
 
         private void EndConversation()
         {
+            Player.Stop();
+            Recorder.Stop();
+
             ClientService.Client.Conversation?.Disconnect();
             ActiveConversationGrid.Children.Clear();
 
+            ActiveConversationService.CurrentActiveConversation = null;
+            if (SelectedConversationControl.ActiveConversation != null)
+            {
+                SelectedConversationControl.ActiveConversation = null;
+                ConversationSelectionChanged(ConversationList, null);
+            }
+
             ActiveConversationRow.Height = GridLength.Auto;
+            CurrentActiveConversationView = null;
         }
 
         private void SendActiveMessage(Conversation conversation, TextMessage message)
         {
-            ClientService.Client.Conversation.SendToAll(Message.CreateNew.Text(message.Content));
+            //ClientService.Client.Conversation.SendToAll(Message.CreateNew.Text(message.Content));
+            throw new InvalidOperationException("Deprecated");
         }
 
         private void OnMicrophoneToggle(ActiveConversationViewControl activeConversationViewControl, bool b)
@@ -413,13 +493,48 @@ namespace Rozmawiator
 
         #endregion
 
+        #region Audio
+
+        private void InitializeSoundDevices()
+        {
+            Recorder = new Recorder();
+            Player = new Player();
+
+            Recorder.DataAvailable += OnRecorderDataAvailable;
+        }
+
+        #region Recording
+
+        private Recorder Recorder { get; set; }
+
+        private void OnRecorderDataAvailable(Recorder recorder, byte[] bytes)
+        {
+            if (ActiveConversationService.CurrentActiveConversation == null)
+            {
+                //return;
+                Recorder.Stop();
+            }
+
+            ClientService.Client.Conversation?.SendToAll(Message.CreateNew.Audio(bytes));
+        }
+
+        #endregion
+
+        #region Playing
+
+        private Player Player { get; set; }
+
+        #endregion
+
+        #endregion
+
         #region Events
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             new Task(async () => await UpdateData()).Start();
             SetEvents();
-            LoggedUserInfoControl.User = UserService.LoggedUser;
+            InitializeSoundDevices();
         }
 
         #endregion

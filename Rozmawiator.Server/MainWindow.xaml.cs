@@ -89,7 +89,10 @@ namespace Rozmawiator.Server
 
         private void OnConversationUpdate(Conversation conversation)
         {
-            ConversationListView.UpdateLayout();
+            Dispatcher.Invoke(() =>
+            {
+                ConversationListView.UpdateLayout();
+            });
         }
 
         private void OnDebugMessage(DateTime dateTime, string s)
@@ -111,16 +114,19 @@ namespace Rozmawiator.Server
                 case Message.MessageType.DirectText:
                     LogDirectText(ipEndPoint, message);
                     break;
-                case Message.MessageType.KeepAlive:
-                case Message.MessageType.Audio:
                 case Message.MessageType.CallResponse:
                 case Message.MessageType.HelloConversation:
                 case Message.MessageType.ByeConversation:
                 case Message.MessageType.CloseConversation:
                     break;
+                case Message.MessageType.KeepAlive:
+                case Message.MessageType.Audio:
+                    return;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            LogMessage(ipEndPoint, message, false);
         }
 
         private void LogMessage(IPEndPoint endpoint, Message message, bool appendContent = true)

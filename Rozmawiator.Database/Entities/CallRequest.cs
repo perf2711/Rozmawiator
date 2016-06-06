@@ -17,6 +17,11 @@ namespace Rozmawiator.Database.Entities
 
     public class CallRequest
     {
+        public CallRequest()
+        {
+            Timestamp = DateTime.Now;
+        }
+
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
@@ -25,6 +30,7 @@ namespace Rozmawiator.Database.Entities
         public Guid CallerId { get; set; }
         [Required]
         public Guid CalleeId { get; set; }
+        public DateTime Timestamp { get; set; }
 
         [ForeignKey("CallerId")]
         public virtual User Caller { get; set; }
