@@ -35,5 +35,11 @@ namespace Rozmawiator.ClientApi
             _client.RespondToRequest(this);
             //_client.Send(new Message().CallResponse(CallerId, Message.CallResponseType.RequestDenied));
         }
+
+        public void Ignore()
+        {
+            Response = null;
+            _client.RespondToRequest(this);
+        }
     }
 }

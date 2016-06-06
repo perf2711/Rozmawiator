@@ -26,6 +26,7 @@ namespace Rozmawiator.Server.Api
             
             _timeoutTimer = new Timer(server.TimeoutSpan);
             _timeoutTimer.Elapsed += OnTimeout;
+            _timeoutTimer.Stop();
 
             if (server.Timeouts)
             {

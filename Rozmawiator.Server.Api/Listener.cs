@@ -440,7 +440,7 @@ namespace Rozmawiator.Server.Api
             var request = conversation.GetRequest(callingClient, sender);
             if (request == null)
             {
-                Debug($"{sender.Nickname} was trying to respont to {callingClient.Nickname}'s call, but the request no longer exists.");
+                Debug($"{sender.Nickname} was trying to respond to {callingClient.Nickname}'s call, but the request no longer exists.");
                 Send(sender, Message.CallResponse(0, 0, Message.CallResponseType.ExpiredCall));
                 return;
             }

@@ -12,8 +12,9 @@
             <RowDefinition/>
             <RowDefinition Height="200"/>
         </Grid.RowDefinitions>
+        <controls:ToggleImageButton OffIcon="../Images/Icons/microphoneStroke.png" OnIcon="../Images/Icons/microphone.png"/>
         <TabControl HorizontalAlignment="Stretch" Grid.Row="1" VerticalAlignment="Stretch">
-            <TabItem Header="Zaloguj" Width="144">
+            <TabItem Header="Zaloguj" Width="140">
                 <Grid Background="White">
                     <StackPanel Margin="5">
                         <Grid>
@@ -36,7 +37,7 @@
                     <Button x:Name="LoginButton" Content="Zaloguj" VerticalAlignment="Bottom" Margin="10" Click="LoginButton_Click"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Zarejestruj się" Width="144">
+            <TabItem Header="Zarejestruj się" Width="140">
                 <Grid Background="White">
                     <StackPanel Margin="5">
                         <Grid>

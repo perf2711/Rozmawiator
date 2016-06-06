@@ -21,8 +21,10 @@ using Rozmawiator.Extensions;
 using Rozmawiator.Models;
 using Rozmawiator.PartialViews;
 using Rozmawiator.Shared;
+using CallRequest = Rozmawiator.Models.CallRequest;
 using Conversation = Rozmawiator.Models.Conversation;
 using Message = Rozmawiator.Shared.Message;
+using User = Rozmawiator.Models.User;
 
 namespace Rozmawiator
 {
@@ -42,6 +44,7 @@ namespace Rozmawiator
         {
             this.ShowLoading("Aktualizowanie danych...");
             await PassiveConversationService.UpdateConversations();
+            await ActiveConversationService.UpdateConversations();
 
             Dispatcher.Invoke(UpdateViews);
 
@@ -52,18 +55,19 @@ namespace Rozmawiator
         {
             foreach (var conversation in PassiveConversationService.Conversations)
             {
-                var control = new PassiveConversationControl
+                var control = new ConversationControl
                 {
                     Conversation = conversation
                 };
 
-                PassiveConversationList.Items.Add(control);
+                ConversationList.Items.Add(control);
             }
         }
 
         private void SetEvents()
         {
             ClientService.Client.NewMessage += OnNewMessage;
+            ClientService.Client.NewCallRequest += OnNewCallRequest;
         }
 
         #endregion
@@ -101,18 +105,18 @@ namespace Rozmawiator
 
             var conversation =
                 PassiveConversationService.Conversations.FirstOrDefault(c => c.Participants.Select(p => p.Nickname).Contains(sender)) ??
-                await PassiveConversationService.AddConversation(UserService.LoggedUser.Nickname, sender);
+                await ConversationService.AddConversation(ConversationType.Passive, UserService.LoggedUser.Nickname, sender);
 
-            var conversationControl = PassiveConversationControls.FirstOrDefault(p => p.Conversation == conversation);
+            var conversationControl = ConversationControls.FirstOrDefault(p => p.Conversation == conversation);
             if (conversationControl == null)
             {
-                conversationControl = new PassiveConversationControl
+                conversationControl = new ConversationControl
                 {
                     Conversation = conversation
                 };
                 Dispatcher.Invoke(() =>
                 {
-                    PassiveConversationList.Items.Add(conversationControl);
+                    ConversationList.Items.Add(conversationControl);
                 });
             }
 
@@ -142,35 +146,116 @@ namespace Rozmawiator
 
         #endregion
 
-        #region Conversations
+        #region Calls
 
-        #region Passive
+        #region Calling
 
-        private IEnumerable<PassiveConversationControl> PassiveConversationControls
-            => PassiveConversationList.Items.OfType<PassiveConversationControl>();
-
-        private List<MessageDisplayControl> MessageDisplays { get; } = new List<MessageDisplayControl>();
-        private MessageDisplayControl ActiveMessageDisplay { get; set; }
-
-        #region Selecting conversation
-
-        private Conversation SelectedConversation
+        private void Call(User user)
         {
-            get
+            ClientService.Client.Call(user.Nickname);
+
+            var conversation = new Conversation
             {
-                PassiveConversationControl control = null;
-                Dispatcher.Invoke(() => control = PassiveConversationList.SelectedItem as PassiveConversationControl);
-                return control?.Conversation;
-            }
-        }
+                Type = ConversationType.Active,
+                Creator = UserService.LoggedUser,
+                Owner = UserService.LoggedUser,
+                Participants = ClientService.Client.Conversation.Participants.Select(p => UserService.GetUser(p.Nickname)).ToArray()
+            };
+            ActiveConversationService.CurrentActiveConversation = conversation;
 
-        private void PassiveConversationSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            (PassiveConversationList.SelectedItem as PassiveConversationControl)?.Unnotify();
-            DisplayMessages(SelectedConversation);
+            StartConversation();
         }
 
         #endregion
+
+        #region Call requests
+
+        private void DisplayCallRequest(CallRequest callRequest)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var control = new CallControl(callRequest);
+                control.Accepted += OnCallRequestAccept;
+                control.Denied += OnCallRequestDenied;
+                control.Ignored += OnCallRequestIgnored;
+
+                Grid.SetColumnSpan(control, 99);
+                Grid.SetRowSpan(control, 99);
+
+                MainGrid.Children.Add(control);
+            });
+        }
+
+        private void HideCallRequests()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                var controls = MainGrid.Children.OfType<CallControl>().ToArray();
+
+                foreach (var control in controls)
+                {
+                    MainGrid.Children.Remove(control);
+                }
+            });
+        }
+
+        private void OnNewCallRequest(Client client, ClientApi.CallRequest callRequest, Message message)
+        {
+            var request = new CallRequest
+            {
+                Id = Guid.Empty,
+                CallerId = message.Sender,
+                Caller = callRequest.CallerNickname,
+                Callee = UserService.LoggedUser.Nickname,
+                State = CallRequestState.NoResponse
+            };
+            DisplayCallRequest(request);
+        }
+
+        private void OnCallRequestAccept(CallControl callControl)
+        {
+            var request =
+                ClientService.Client.PendingCallRequests.FirstOrDefault(
+                    r => r.CallerId == callControl.CallRequest.CallerId);
+            if (request == null)
+            {
+                return;
+            }
+            request.Accept();
+            HideCallRequests();
+
+            ActiveConversationService.CurrentActiveConversation = callControl.Conversation;
+            StartConversation();
+        }
+
+        private void OnCallRequestDenied(CallControl callControl)
+        {
+            var request =
+                ClientService.Client.PendingCallRequests.FirstOrDefault(
+                    r => r.CallerId == callControl.CallRequest.CallerId);
+            if (request == null)
+            {
+                return;
+            }
+            request.Decline();
+            HideCallRequests();
+        }
+
+        private void OnCallRequestIgnored(CallControl callControl)
+        {
+            HideCallRequests();
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Conversations
+
+        private IEnumerable<ConversationControl> ConversationControls => ConversationList.Items.OfType<ConversationControl>();
+        private List<MessageDisplayControl> MessageDisplays { get; } = new List<MessageDisplayControl>();
+        private MessageDisplayControl ActiveMessageDisplay { get; set; }
+        private UserInfoControl ActiveUserInfo { get; set; }
 
         #region Displaying messages
 
@@ -190,7 +275,53 @@ namespace Rozmawiator
 
         #endregion
 
-        #region Sending and receiving messages
+        #region Displaying info
+
+        private void DisplayInfo(Conversation conversation)
+        {
+            var user = conversation.Participants.FirstOrDefault(u => u.Nickname != UserService.LoggedUser.Nickname);
+            if (user == null)
+            {
+                return;
+            }
+
+            var userInfo = new UserInfoControl(user);
+            userInfo.Called += OnUserCall;
+
+            ActiveUserInfo = userInfo;
+            UserInfoGrid.Children.Clear();
+            UserInfoGrid.Children.Add(userInfo);
+        }
+
+        private void OnUserCall(UserInfoControl userInfoControl)
+        {
+            Call(userInfoControl.User);
+        }
+
+        #endregion
+
+        #region Selecting conversation
+
+        private Conversation SelectedConversation
+        {
+            get
+            {
+                ConversationControl control = null;
+                Dispatcher.Invoke(() => control = ConversationList.SelectedItem as ConversationControl);
+                return control?.Conversation;
+            }
+        }
+
+        private void ConversationSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            (ConversationList.SelectedItem as ConversationControl)?.Unnotify();
+            DisplayMessages(SelectedConversation);
+            DisplayInfo(SelectedConversation);
+        }
+
+        #endregion
+
+        #region Sending messages
 
         private void MessageInputBox_Sent(ChatInputControl sender, TextMessage message)
         {
@@ -199,12 +330,25 @@ namespace Rozmawiator
                 return;
             }
 
-            SendMessage(SelectedConversation, message);
+            switch (SelectedConversation.Type)
+            {
+                case ConversationType.Passive:
+                    SendPassiveMessage(SelectedConversation, message);
+                    break;
+                case ConversationType.Active:
+                    SendActiveMessage(SelectedConversation, message);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        private void SendMessage(Conversation conversation, TextMessage message)
+        #endregion
+
+        #region Passive
+        private void SendPassiveMessage(Conversation conversation, TextMessage message)
         {
-            if (ActiveMessageDisplay == null || SelectedConversation == null)
+            if (ActiveMessageDisplay == null)
             {
                 return;
             }
@@ -219,6 +363,51 @@ namespace Rozmawiator
         }
 
         #endregion
+
+        #region Active
+
+        private void StartConversation()
+        {
+            var activeConversationView = new ActiveConversationViewControl(ActiveConversationService.CurrentActiveConversation);
+
+            ActiveConversationGrid.Children.Clear();
+            ActiveConversationGrid.Children.Add(activeConversationView);
+            ActiveConversationRow.Height = new GridLength(2, GridUnitType.Star);
+
+            activeConversationView.MicrophoneToggled += OnMicrophoneToggle;
+            activeConversationView.SpeakerToggled += OnSpeakerToggle;
+            activeConversationView.HangedUp += OnHangedUp;
+
+            DisplayMessages(ActiveConversationService.CurrentActiveConversation);
+        }
+
+        private void EndConversation()
+        {
+            ClientService.Client.Conversation?.Disconnect();
+            ActiveConversationGrid.Children.Clear();
+
+            ActiveConversationRow.Height = GridLength.Auto;
+        }
+
+        private void SendActiveMessage(Conversation conversation, TextMessage message)
+        {
+            ClientService.Client.Conversation.SendToAll(Message.CreateNew.Text(message.Content));
+        }
+
+        private void OnMicrophoneToggle(ActiveConversationViewControl activeConversationViewControl, bool b)
+        {
+            //TODO: Muting microphone
+        }
+
+        private void OnSpeakerToggle(ActiveConversationViewControl activeConversationViewControl, bool b)
+        {
+            //TODO: Muting sound
+        }
+
+        private void OnHangedUp(ActiveConversationViewControl activeConversationViewControl)
+        {
+            EndConversation();
+        }
 
         #endregion
 

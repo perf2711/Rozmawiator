@@ -8,7 +8,7 @@
         xmlns:partialViews="clr-namespace:Rozmawiator.PartialViews"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="655" Loaded="Window_Loaded">
-    <Grid>
+    <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
@@ -42,21 +42,23 @@
             <Border BorderThickness="0,0,0,2" BorderBrush="Coral" Background="LightCoral">
                 <partialViews:LoggedUserInfoControl x:Name="LoggedUserInfoControl"/>
             </Border>
-            <ListBox x:Name="PassiveConversationList" Grid.Row="1" SelectionChanged="PassiveConversationSelectionChanged" SelectionMode="Single" Grid.RowSpan="1"/>
+            <ListBox x:Name="ConversationList" Grid.Row="1" SelectionChanged="PassiveConversationSelectionChanged" SelectionMode="Single" Grid.RowSpan="1"/>
         </Grid>
 
         <Grid Grid.Row="1" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="40" />
-                <RowDefinition/>
+                <RowDefinition x:Name="ActiveConversationRow" Height="Auto"/>
+                <RowDefinition Height="1*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid x:Name="UserInfoGrid"></Grid>
-            <ScrollViewer Grid.Row="1">
+            <Grid x:Name="ActiveConversationGrid" Grid.Row="1"></Grid>
+            <ScrollViewer Grid.Row="2">
                 <StackPanel x:Name="MessagesPanel" Margin="40,5">
                 </StackPanel>
             </ScrollViewer>
-            <partialViews:ChatInputControl x:Name="MessageInputBox" Grid.Row="2" Margin="40,5" VerticalAlignment="Bottom" Sent="MessageInputBox_Sent"/>
+            <partialViews:ChatInputControl x:Name="MessageInputBox" Grid.Row="3" Margin="40,5" VerticalAlignment="Bottom" Sent="MessageInputBox_Sent"/>
         </Grid>
 
         <GridSplitter Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="5"/>

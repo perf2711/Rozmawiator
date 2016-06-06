@@ -12,17 +12,16 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Rozmawiator.ClientApi;
 using Rozmawiator.Data;
-using Rozmawiator.Extensions;
+using Rozmawiator.Database.Entities;
 using Conversation = Rozmawiator.Models.Conversation;
 
 namespace Rozmawiator.Controls
 {
     /// <summary>
-    /// Interaction logic for PassiveConversationControl.xaml
+    /// Interaction logic for ConversationControl.xaml
     /// </summary>
-    public partial class PassiveConversationControl : UserControl
+    public partial class ConversationControl : UserControl
     {
         private Conversation _conversation;
 
@@ -36,7 +35,7 @@ namespace Rozmawiator.Controls
             }
         }
 
-        public PassiveConversationControl()
+        public ConversationControl()
         {
             InitializeComponent();
         }
@@ -45,7 +44,7 @@ namespace Rozmawiator.Controls
         {
             Dispatcher.Invoke(() =>
             {
-                Background = new SolidColorBrush(Colors.LightCoral);
+                Background = new SolidColorBrush(Colors.Orange);
             });
         }
 
@@ -53,7 +52,7 @@ namespace Rozmawiator.Controls
         {
             Dispatcher.Invoke(() =>
             {
-                Background = null;
+                Background = _conversation.Type == ConversationType.Active ? new SolidColorBrush(Colors.DodgerBlue) : null;
             });
         }
 
@@ -68,11 +67,7 @@ namespace Rozmawiator.Controls
             if (users.Length == 1)
             {
                 var user = users.First();
-                if (user.Avatar != null)
-                {
-                    Icon.Source = user.Avatar;
-                }
-
+                Icon.Source = user.Avatar ?? Resources["DefaultAvatar"] as ImageSource;
                 Participants.Content = user.Nickname;
                 return;
             }

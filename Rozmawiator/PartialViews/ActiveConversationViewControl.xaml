@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="Rozmawiator.PartialViews.ActiveConversationViewControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Rozmawiator.PartialViews"
+             xmlns:controls="clr-namespace:Rozmawiator.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="500">
+    <Grid Background="#FF140A0A">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+        <Border x:Name="MainBorder" Margin="20">
+            <WrapPanel x:Name="UserPanel"  HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="{Binding ActualWidth, ElementName=MainBorder}" MaxHeight="{Binding ActualWidth, ElementName=MainBorder}">
+            </WrapPanel>
+        </Border>
+        <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
+            <controls:ToggleImageButton x:Name="MicrophoneStateButton" OffIcon="../Images/Icons/microphoneStroke.png" OnIcon="../Images/Icons/microphone.png" Margin="10,0" State="true" Click="MicrophoneStateButton_Click"/>
+            <controls:ToggleImageButton x:Name="SpeakerStateButton" OffIcon="../Images/Icons/speakerMute.png" OnIcon="../Images/Icons/speaker.png" Margin="10,0" State="true" Click="SpeakerStateButton_Click"/>
+            <controls:ImageButton x:Name="DropCallButton" Icon="../Images/Icons/telephoneDown.png" Margin="10,0" Click="DropCallButton_Click"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

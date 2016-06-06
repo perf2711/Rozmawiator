@@ -12,6 +12,7 @@ namespace Rozmawiator.ClientApi
     {
         public Client Client { get; }
         public ReadOnlyObservableCollection<RemoteClient> Participants { get; }
+        public ReadOnlyObservableCollection<string> CalledClients { get; }
         public IReadOnlyList<Message> TextMessages => _textMessages.AsReadOnly();
 
         public event Action<Conversation, RemoteClient> ParticipantConnected;
@@ -21,14 +22,17 @@ namespace Rozmawiator.ClientApi
         public event Action<Conversation, RemoteClient, Message> NewAudioMessage;
 
         private readonly ObservableCollection<RemoteClient> _participants;
+        private readonly ObservableCollection<string> _calledClients;
         private readonly List<Message> _textMessages;
 
         public Conversation(Client client)
         {
             Client = client;
             _participants = new ObservableCollection<RemoteClient>();
+            _calledClients = new ObservableCollection<string>();
             _textMessages = new List<Message>();
             Participants = new ReadOnlyObservableCollection<RemoteClient>(_participants);
+            CalledClients = new ReadOnlyObservableCollection<string>(_calledClients);
         }
 
         public void HandleMessage(Message message)
@@ -84,6 +88,7 @@ namespace Rozmawiator.ClientApi
         private void HandleHelloConversation(Message message)
         {
             var remoteClient = new RemoteClient(message.Sender, message.GetTextContent());
+            _calledClients.Remove(remoteClient.Nickname);
             _participants.Add(remoteClient);
             ParticipantConnected?.Invoke(this, remoteClient);
         }
@@ -103,6 +108,12 @@ namespace Rozmawiator.ClientApi
         {
             SendToAll(new Message(Message.MessageType.ByeConversation, "Disconnect"));
             ConversationClosed?.Invoke(this, message);
+        }
+
+        public void AddUser(string nickname)
+        {
+            Client.Send(Message.CreateNew.Call(nickname));
+            _calledClients.Add(nickname);
         }
 
         public void Send(Message message)

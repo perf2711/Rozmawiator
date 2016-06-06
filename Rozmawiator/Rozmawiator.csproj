@@ -59,26 +59,60 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\CallControl.xaml.cs">
+      <DependentUpon>CallControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ConversationControl.xaml.cs">
+      <DependentUpon>ConversationControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ErrorControl.xaml.cs">
       <DependentUpon>ErrorControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\ExtendedTextBox.xaml.cs">
       <DependentUpon>ExtendedTextBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ImageButton.xaml.cs">
+      <DependentUpon>ImageButton.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\LoadingControl.xaml.cs">
       <DependentUpon>LoadingControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ToggleImageButton.cs" />
+    <Compile Include="Controls\UserInfoControl.xaml.cs">
+      <DependentUpon>UserInfoControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\UserThumbnailControl.xaml.cs">
+      <DependentUpon>UserThumbnailControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Data\ActiveConversationService.cs" />
+    <Compile Include="Data\CallRequestService.cs" />
+    <Compile Include="Data\ConversationService.cs" />
     <Compile Include="Data\TextMessageService.cs" />
     <Compile Include="Data\PassiveConversationService.cs" />
     <Compile Include="Extensions\WindowExtensions.cs" />
+    <Compile Include="Models\CallRequest.cs" />
     <Compile Include="Models\Conversation.cs" />
     <Compile Include="Models\Server.cs" />
+    <Compile Include="PartialViews\ActiveConversationViewControl.xaml.cs">
+      <DependentUpon>ActiveConversationViewControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PartialViews\LoggedUserInfoControl.xaml.cs">
       <DependentUpon>LoggedUserInfoControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PartialViews\SearchUsersControl.xaml.cs">
+      <DependentUpon>SearchUsersControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\CallControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\ConversationControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\ErrorControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -86,6 +120,10 @@
     <Page Include="Controls\ExtendedTextBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\ImageButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\LoadingControl.xaml">
       <SubType>Designer</SubType>
@@ -99,7 +137,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\PassiveConversationControl.xaml">
+    <Page Include="Controls\UserInfoControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\UserThumbnailControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PartialViews\ActiveConversationViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -129,9 +175,6 @@
     <Compile Include="Controls\MessageControl.xaml.cs">
       <DependentUpon>MessageControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controls\PassiveConversationControl.xaml.cs">
-      <DependentUpon>PassiveConversationControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Data\ClientService.cs" />
     <Compile Include="Data\RestService.cs" />
     <Compile Include="Data\UserService.cs" />
@@ -148,6 +191,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="PartialViews\SearchUsersControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\LoginWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -207,9 +254,19 @@
       <Name>Rozmawiator.Shared</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\Icons\microphone.png" />
+    <Resource Include="Images\Icons\microphoneStroke.png" />
+    <Resource Include="Images\Icons\speaker.png" />
+    <Resource Include="Images\Icons\speakerMute.png" />
+    <Resource Include="Images\Icons\telephone.png" />
+    <Resource Include="Images\Icons\telephoneDown.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\DefaultAvatar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Icons\blackIcon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

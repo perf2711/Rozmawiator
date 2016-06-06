@@ -121,13 +121,8 @@ namespace Rozmawiator.ClientApi
 
         public void Call(string nickname)
         {
-            if (Conversation != null)
-            {
-                throw new InvalidOperationException("User is already in conversation. Disconnect first.");
-            }
-
-            Conversation = new Conversation(this);
-            Send(new Message().Call(nickname));
+            JoinNewConversation();
+            Conversation.AddUser(nickname);
         }
 
         public void DisconnectFromConversation(string reason)
@@ -140,6 +135,8 @@ namespace Rozmawiator.ClientApi
         {
             if (request.Response == null)
             {
+                //Ignored
+                _pendingCallRequests.Remove(request);
                 return;
             }
 
@@ -147,14 +144,20 @@ namespace Rozmawiator.ClientApi
             {
                 case Message.CallResponseType.RequestDenied:
                 case Message.CallResponseType.RequestAccepted:
+                    JoinNewConversation();
                     Send(new Message().CallResponse(request.CallerId, request.Response.Value));
                     break;
-                case Message.CallResponseType.TargetIsOffline:
-                case Message.CallResponseType.ExpiredCall:
+                default:
                     throw new InvalidOperationException("Invalid response. Client can only send Accepted and Denied.");
             }
 
             _pendingCallRequests.Remove(request);
+        }
+
+        public void JoinNewConversation()
+        {
+            Conversation?.Disconnect();
+            Conversation = new Conversation(this);
         }
 
         private void ReceiveLoop()

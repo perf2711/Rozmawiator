@@ -6,6 +6,8 @@ namespace Rozmawiator.Shared
 {
     public class Message
     {
+        public static Message CreateNew => new Message();
+
         public enum MessageType
         {
             Hello,

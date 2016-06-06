@@ -44,7 +44,6 @@ namespace Rozmawiator.Server.Api
 
                 var conversation = new Database.Entities.Conversation
                 {
-                    Id = Guid.Empty,
                     Type = ConversationType.Active,
                     Owner = ownerUser,
                     Creator = ownerUser,
