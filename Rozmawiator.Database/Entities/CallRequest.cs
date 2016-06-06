@@ -25,16 +25,11 @@ namespace Rozmawiator.Database.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
-        public CallRequestState State { get; set; }
-        [Required]
-        public Guid CallerId { get; set; }
-        [Required]
-        public Guid CalleeId { get; set; }
         public DateTime Timestamp { get; set; }
+        [Required]
+        public Guid ConversationId { get; set; }
 
-        [ForeignKey("CallerId")]
-        public virtual User Caller { get; set; }
-        [ForeignKey("CalleeId")]
-        public virtual User Callee { get; set; }
+        [ForeignKey("ConversationId")]
+        public virtual Conversation Conversation { get; set; }
     }
 }

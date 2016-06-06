@@ -21,16 +21,10 @@ namespace Rozmawiator.Database.Entities
         public string AvatarPath { get; set; }
         [Required]
         public DateTime RegistrationDateTime { get; set; }
-        
-        //public virtual ICollection<User> Friends { get; set; }
-        public virtual ICollection<ConversationParticipant> ConversationParticipants { get; set; }
-        public virtual ICollection<Conversation> OwnerConversations { get; set; }
-        public virtual ICollection<Conversation> CreatedConversations { get; set; }
-        public virtual ICollection<CallRequest> CallerCallRequests { get; set; }
-        public virtual ICollection<CallRequest> CalleeCallRequests { get; set; }
+
         public virtual ICollection<Message> Messages { get; set; }
-        //public virtual ICollection<FriendRequest> RequestedFriendRequests { get; set; }
-        //public virtual ICollection<FriendRequest> FriendRequests { get; set; }
+        public virtual ICollection<Conversation> Conversations { get; set; }
+        public virtual ICollection<Call> Calls { get; set; }
 
         /* Methods */
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<User, Guid> manager, string authenticationType)

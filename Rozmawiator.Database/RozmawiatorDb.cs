@@ -24,41 +24,29 @@ namespace Rozmawiator.Database
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            /* Friends mapping */
-            /*
+            /* Conversation - User mapping */
             modelBuilder
                 .Entity<User>()
-                .HasMany(u => u.Friends)
-                .WithMany(u => u.Friends)
+                .HasMany(u => u.Conversations)
+                .WithMany(c => c.Participants)
                 .Map(m =>
                 {
-                    m.ToTable("FriendBinds");
-                    m.MapLeftKey("User1Id");
-                    m.MapRightKey("User2Id");
+                    m.MapLeftKey("UserId");
+                    m.MapRightKey("ConversationId");
+                    m.ToTable("ConversationParticipants");
                 });
-                */
 
-            /* Caller and callee mapping */
+            /* Call - User mapping */
             modelBuilder
                 .Entity<User>()
-                .HasMany(u => u.CallerCallRequests)
-                .WithRequired(u => u.Caller);
-            modelBuilder
-                .Entity<User>()
-                .HasMany(u => u.CalleeCallRequests)
-                .WithRequired(u => u.Callee);
-
-            /* Friend request mapping */
-            /*
-            modelBuilder
-                .Entity<User>()
-                .HasMany(u => u.FriendRequests)
-                .WithRequired(r => r.TargetUser);
-            modelBuilder
-                .Entity<User>()
-                .HasMany(u => u.RequestedFriendRequests)
-                .WithRequired(r => r.RequestingUser);
-                */
+                .HasMany(u => u.Calls)
+                .WithMany(u => u.Participants)
+                .Map(m =>
+                {
+                    m.MapLeftKey("UserId");
+                    m.MapRightKey("ConversationId");
+                    m.ToTable("CallParticipants");
+                });
 
             base.OnModelCreating(modelBuilder);
 
@@ -73,7 +61,6 @@ namespace Rozmawiator.Database
         public DbSet<CallRequest> CallRequests { get; set; }
         //public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<Conversation> Conversations { get; set; }
-        public DbSet<ConversationParticipant> ConversationParticipants { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Server> Servers { get; set; }
     }

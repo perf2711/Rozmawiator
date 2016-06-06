@@ -8,13 +8,18 @@ using System.Threading.Tasks;
 
 namespace Rozmawiator.Database.Entities
 {
-    public class Conversation
+    public class Call
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
+        [Required]
+        public DateTime Timestamp { get; set; }
+        [Required]
+        public Guid ConversationId { get; set; }
 
+        [ForeignKey("ConversationId")]
+        public Conversation Conversation { get; set; }
         public virtual ICollection<User> Participants { get; set; }
-        public virtual ICollection<Call> Calls { get; set; }
-        
+
     }
 }
