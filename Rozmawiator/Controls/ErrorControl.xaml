@@ -20,7 +20,7 @@
                 <Grid x:Name="HeaderGrid" Background="IndianRed">
                     <Label x:Name="HeaderLabel" Content="Uwaga" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>    
                 </Grid>
-                <Label x:Name="ContentLabel" Grid.Row="1" Content="Treść błędu" HorizontalAlignment="Center"/>
+                <TextBlock x:Name="ContentLabel" Grid.Row="1" Text="Treść błędu" Margin="5" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
                 <Button x:Name="CloseButton" Grid.Row="2" Content="OK" Margin="5" HorizontalAlignment="Center" MinWidth="50" Click="CloseButton_Click"/>
             </Grid>
         </Border>

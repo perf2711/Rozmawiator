@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using Rozmawiator.Data;
 using Rozmawiator.Models;
 
 namespace Rozmawiator
@@ -17,6 +18,11 @@ namespace Rozmawiator
         public App()
         {
             
+        }
+
+        private void App_OnExit(object sender, ExitEventArgs e)
+        {
+            ClientService.Client.Disconnect();
         }
     }
 }

@@ -23,6 +23,19 @@ namespace Rozmawiator.Controls
     {
         private TextMessage _message;
         private bool _senderInfoVisibility = true;
+        private bool _isSent = false;
+
+        public bool IsSent
+        {
+            get { return _isSent; }
+            set
+            {
+                _isSent = value;
+                SenderInfoVisibility = !value;
+
+                Bubble.HorizontalAlignment = _isSent ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+            }
+        }
 
         public TextMessage Message
         {
@@ -66,9 +79,10 @@ namespace Rozmawiator.Controls
             }
         }
 
-        public MessageControl()
+        public MessageControl(TextMessage message)
         {
             InitializeComponent();
+            Message = message;
         }
 
         private void SetSenderInfoVisibility()

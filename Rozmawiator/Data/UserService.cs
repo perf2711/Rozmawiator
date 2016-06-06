@@ -17,6 +17,11 @@ namespace Rozmawiator.Data
 
         public static List<User> Users { get; } = new List<User>();
 
+        public static User GetUser(string nickname)
+        {
+            return Users.FirstOrDefault(u => u.Nickname == nickname);
+        }
+
         public static async Task UpdateLoggedUser()
         {
             var response = await RestService.UserApi.GetLogged(RestService.CurrentToken);

@@ -4,8 +4,27 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="300">
+             MinHeight="30"
+             d:DesignWidth="300" Background="White">
+    <UserControl.Resources>
+        <Brush x:Key="Unfocused">Gray</Brush>
+        <Brush x:Key="Focused">DodgerBlue</Brush>
+    </UserControl.Resources>
+    
     <Grid>
-            
+        <Border x:Name="TextBorder" BorderBrush="{DynamicResource Unfocused}" BorderThickness="4" CornerRadius="15">
+            <TextBox x:Name="InputBox" Margin="10,0" BorderBrush="{x:Null}" Background="{x:Null}" AcceptsReturn="false" TextWrapping="Wrap" GotFocus="InputBox_GotFocus" LostFocus="InputBox_LostFocus" KeyDown="InputBox_KeyDown">
+                <!--<TextBox.Style>
+                    <Style TargetType="TextBox">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="true">
+                                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                                <Setter Property="BorderBrush" Value="{x:Null}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>-->
+            </TextBox>
+        </Border>
     </Grid>
 </UserControl>

@@ -72,6 +72,7 @@
     <Compile Include="Data\PassiveConversationService.cs" />
     <Compile Include="Extensions\WindowExtensions.cs" />
     <Compile Include="Models\Conversation.cs" />
+    <Compile Include="Models\Server.cs" />
     <Compile Include="Windows\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>

@@ -11,10 +11,12 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Rozmawiator.ClientApi;
 using Rozmawiator.Data;
 using Rozmawiator.Database.ViewModels;
 using Rozmawiator.Extensions;
 using Rozmawiator.RestClient.Models;
+using Rozmawiator.Shared;
 
 namespace Rozmawiator.Windows
 {
@@ -58,12 +60,8 @@ namespace Rozmawiator.Windows
 
                 var token = response.GetModel<TokenModel>();
                 RestService.CurrentToken = token;
-
-                Dispatcher.Invoke(() =>
-                {
-                    new MainWindow().Show();
-                    Close();
-                });
+                await UserService.UpdateLoggedUser();
+                ConnectToServer();
 
             }).Start();
         }
@@ -144,9 +142,61 @@ namespace Rozmawiator.Windows
 
         #endregion
 
+        #region Connect
+
+        private void ConnectToServer()
+        {
+            this.ShowLoading("Łączenie z serwerem...");
+
+            new Task(async () =>
+            {
+                var server = await ClientService.GetOnlineServer();
+                if (server == null)
+                {
+                    this.HideLoading();
+                    this.ShowError("Uwaga", "W tym momencie żaden serwer nie jest dostępny. Spróbuj ponownie później.");
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        LoginUsernameBox.IsEnabled = true;
+                        LoginPasswordBox.IsEnabled = true;
+                        LoginButton.IsEnabled = true;
+                        RegisterUsernameBox.IsEnabled = true;
+                        RegisterEmailBox.IsEnabled = true;
+                        RegisterPasswordBox.IsEnabled = true;
+                        RegisterConfirmPasswordBox.IsEnabled = true;
+                        RegisterButton.IsEnabled = true;
+                    });
+
+                    return;
+                }
+
+                ClientService.Client.Connected += OnConnected;
+                ClientService.Client.Nickname = UserService.LoggedUser.Nickname;
+                ClientService.Client.Connect(server.EndPoint);
+
+            }).Start();
+        }
+
+        private void OnConnected(Client client, Message message)
+        {
+            this.HideLoading();
+
+            Dispatcher.Invoke(() =>
+            {
+                new MainWindow().Show();
+                Close();
+            });
+        }
+
+        #endregion
+
         public LoginWindow()
         {
             InitializeComponent();
+            /* Debug autofill */
+            LoginUsernameBox.Text = "tomek";
+            LoginPasswordBox.Password = "fajnehaslo38";
         }
 
         

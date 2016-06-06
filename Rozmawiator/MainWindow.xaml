@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Rozmawiator"
         xmlns:controls="clr-namespace:Rozmawiator.Controls"
+        xmlns:partialViews="clr-namespace:Rozmawiator.PartialViews"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="655" Loaded="Window_Loaded">
     <Grid>
@@ -35,18 +36,21 @@
         <GridSplitter Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="5"/>
         
         <Grid Grid.Row="1" Grid.Column="0">
-            <ListBox x:Name="PassiveConversationList"/>
+            <ListBox x:Name="PassiveConversationList" SelectionChanged="PassiveConversationSelectionChanged" SelectionMode="Single"/>
         </Grid>
 
         <Grid Grid.Row="1" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="40" />
                 <RowDefinition/>
-                <RowDefinition Height="40"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid x:Name="UserInfoGrid"></Grid>
-            <StackPanel x:Name="MessagesPanel" Grid.Row="1">
-            </StackPanel>
+            <ScrollViewer Grid.Row="1">
+                <StackPanel x:Name="MessagesPanel" Margin="40,5">
+                </StackPanel>
+            </ScrollViewer>
+            <partialViews:ChatInputControl x:Name="MessageInputBox" Grid.Row="2" Margin="40,5" VerticalAlignment="Bottom" Sent="MessageInputBox_Sent"/>
         </Grid>
     </Grid>
 </Window>

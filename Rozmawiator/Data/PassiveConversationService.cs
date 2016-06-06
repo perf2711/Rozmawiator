@@ -40,6 +40,22 @@ namespace Rozmawiator.Data
             }).ToList();
         }
 
+        public static async Task<Conversation> AddConversation(params string[] participants)
+        {
+            await UserService.AddUsers(participants);
+            var conversation = new Conversation
+            {
+                Id = Guid.Empty,
+                Type = ConversationType.Passive,
+                Creator = null,
+                Owner = null,
+                Participants = UserService.Users.Where(u => participants.Contains(u.Nickname)).ToArray()
+            };
+
+            Conversations.Add(conversation);
+            return conversation;
+        }
+
         public static async Task GetMoreMessages(this Conversation conversation, int page = 0, int count = 100)
         {
             var filter = Filter.CreateNew.Set("ConversationId", conversation.Id);

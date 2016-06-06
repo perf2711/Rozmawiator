@@ -74,12 +74,11 @@ namespace Rozmawiator.Server.Api
                     server = new Database.Entities.Server
                     {
                         Id = _serverGuid,
-                        IpAddress = "192.168.100.135",
-                        Port = Configuration.Host.ListenPort,
-                        State = ServerState.Online
                     };
                     database.Servers.Add(server);
                 }
+                server.IpAddress = "192.168.56.1";
+                server.Port = Configuration.Host.ListenPort;
                 server.State = ServerState.Online;
                 database.SaveChanges();
             }
@@ -104,6 +103,7 @@ namespace Rozmawiator.Server.Api
                 if (server != null)
                 {
                     server.State = ServerState.Offline;
+                    database.SaveChanges();
                 }
             }
 

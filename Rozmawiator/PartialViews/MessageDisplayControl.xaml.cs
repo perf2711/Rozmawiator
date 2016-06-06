@@ -5,7 +5,10 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using MoreLinq;
 using Rozmawiator.Controls;
+using Rozmawiator.Data;
 using Rozmawiator.Models;
 
 namespace Rozmawiator.PartialViews
@@ -15,27 +18,57 @@ namespace Rozmawiator.PartialViews
     /// </summary>
     public partial class MessageDisplayControl : UserControl
     {
-        public ObservableCollection<TextMessage> Messages { get; }
+        public Conversation Conversation { get; }
 
-        public MessageDisplayControl()
+        public MessageDisplayControl(Conversation conversation, Guid? priorTo = null)
         {
             InitializeComponent();
-            Messages = new ObservableCollection<TextMessage>();
-            Messages.CollectionChanged += OnMessagesChanged;
+            Conversation = conversation;
+            DisplayMessages(priorTo);
         }
 
-        private void AddMessageControl(TextMessage message)
+        private async void DisplayMessages(Guid? priorTo = null)
         {
-            var bubble = new MessageControl
+            await Conversation.GetMoreMessages();
+
+            var priorToMessage = Conversation.Messages.FirstOrDefault(m => m.Id == priorTo);
+            var messages = priorToMessage != null
+                ? Conversation.Messages.Where(m => m.Timestamp < priorToMessage.Timestamp).OrderBy(m => m.Timestamp)
+                : Conversation.Messages.OrderBy(m => m.Timestamp);
+            
+            foreach (var message in messages)
             {
-                Message = message,
-                Margin = new Thickness(5)
+                AddMessageControl(message);
+            }
+
+            SetSenderInfoVisibility();
+        }
+
+        public void AddMessageControl(TextMessage message)
+        {
+            var lastBubble = MessagesPanel.Children.OfType<MessageControl>().Any()
+                ? MessagesPanel.Children.OfType<MessageControl>().MaxBy(m => m.Message.Timestamp)
+                : null;
+            
+            var bubble = new MessageControl(message)
+            {
+                Margin = new Thickness(5),
             };
+
+            if (bubble.Message.Sender == UserService.LoggedUser)
+            {
+                bubble.IsSent = true;
+                bubble.Bubble.Background = new SolidColorBrush(Colors.LightGray);
+            }
+            else if (bubble.Message.Sender == lastBubble?.Message.Sender)
+            {
+                bubble.SenderInfoVisibility = false;
+            }
 
             MessagesPanel.Children.Add(bubble);
         }
 
-        private void RemoveMessageControl(TextMessage message)
+        public void RemoveMessageControl(TextMessage message)
         {
             var bubble = MessagesPanel.Children.OfType<MessageControl>().FirstOrDefault(b => b.Message == message);
             if (bubble != null)
@@ -50,6 +83,12 @@ namespace Rozmawiator.PartialViews
 
             foreach (var bubble in MessagesPanel.Children.OfType<MessageControl>())
             {
+                if (bubble.Message.Sender == UserService.LoggedUser)
+                {
+                    bubble.SenderInfoVisibility = false;
+                    previousMessage = bubble;
+                    continue;
+                }
                 if (previousMessage == null)
                 {
                     previousMessage = bubble;

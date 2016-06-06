@@ -41,6 +41,22 @@ namespace Rozmawiator.Controls
             InitializeComponent();
         }
 
+        public void Notify()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                Background = new SolidColorBrush(Colors.LightCoral);
+            });
+        }
+
+        public void Unnotify()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                Background = null;
+            });
+        }
+
         private void SetLayout()
         {
             var users = _conversation.Participants.Where(u => u.Nickname != UserService.LoggedUser.Nickname).ToArray();

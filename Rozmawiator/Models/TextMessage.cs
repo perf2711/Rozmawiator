@@ -10,10 +10,10 @@ namespace Rozmawiator.Models
 {
     public class TextMessage
     {
-        public Guid Id { get; protected set; }
-        public User Sender { get; protected set; }
-        public DateTime Timestamp { get; protected set; }
-        public string Content { get; protected set; }
+        public Guid Id { get; set; }
+        public User Sender { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string Content { get; set; }
 
         public TextMessage(Guid id, string content, DateTime timestamp, User sender) : this(id, content, timestamp)
         {
@@ -25,6 +25,16 @@ namespace Rozmawiator.Models
             Id = id;
             Content = content;
             Timestamp = timestamp;
+        }
+
+        public TextMessage(string content, DateTime timestamp) : this(Guid.Empty, content, timestamp)
+        {
+            
+        }
+
+        public TextMessage(string content, DateTime timestamp, User sender) : this(Guid.Empty, content, timestamp, sender)
+        {
+
         }
     }
 }

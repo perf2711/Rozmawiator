@@ -24,8 +24,8 @@ namespace Rozmawiator.Controls
 
         public string ErrorMessage
         {
-            get { return (string) ContentLabel.GetValue(ContentProperty); }
-            set { ContentLabel.SetValue(ContentProperty, value); }
+            get { return (string) ContentLabel.GetValue(TextBlock.TextProperty); }
+            set { ContentLabel.SetValue(TextBlock.TextProperty, value); }
         }
 
         public string ErrorHeader
