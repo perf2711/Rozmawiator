@@ -10,8 +10,7 @@ namespace Rozmawiator.Database.ViewModels
     public class CallRequestViewModel
     {
         public Guid Id { get; set; }
-        public CallRequestState State { get; set; }
-        public string Caller { get; set; }
-        public string Callee { get; set; }
+        public DateTime Timestamp { get; set; }
+        public Guid ConversationId { get; set; }
     }
 }

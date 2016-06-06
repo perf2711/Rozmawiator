@@ -11,22 +11,39 @@ namespace Rozmawiator.Database.Migrations
                 "dbo.CallRequests",
                 c => new
                     {
-                        Id = c.Guid(nullable: false, identity: true, defaultValueSql: "newsequentialid()"),
-                        State = c.Int(nullable: false),
-                        CallerId = c.Guid(nullable: false),
-                        CalleeId = c.Guid(nullable: false),
+                        Id = c.Guid(nullable: false),
+                        Timestamp = c.DateTime(nullable: false),
+                        ConversationId = c.Guid(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
-                .ForeignKey("dbo.Users", t => t.CalleeId, cascadeDelete: false)
-                .ForeignKey("dbo.Users", t => t.CallerId, cascadeDelete: false)
-                .Index(t => t.CallerId)
-                .Index(t => t.CalleeId);
+                .ForeignKey("dbo.Conversations", t => t.ConversationId, cascadeDelete: true)
+                .Index(t => t.ConversationId);
+            
+            CreateTable(
+                "dbo.Conversations",
+                c => new
+                    {
+                        Id = c.Guid(nullable: false),
+                    })
+                .PrimaryKey(t => t.Id);
+            
+            CreateTable(
+                "dbo.Calls",
+                c => new
+                    {
+                        Id = c.Guid(nullable: false),
+                        Timestamp = c.DateTime(nullable: false),
+                        ConversationId = c.Guid(nullable: false),
+                    })
+                .PrimaryKey(t => t.Id)
+                .ForeignKey("dbo.Conversations", t => t.ConversationId, cascadeDelete: true)
+                .Index(t => t.ConversationId);
             
             CreateTable(
                 "dbo.Users",
                 c => new
                     {
-                        Id = c.Guid(nullable: false, identity: true, defaultValueSql: "newsequentialid()"),
+                        Id = c.Guid(nullable: false),
                         AvatarPath = c.String(),
                         RegistrationDateTime = c.DateTime(nullable: false),
                         Email = c.String(maxLength: 256),
@@ -58,41 +75,6 @@ namespace Rozmawiator.Database.Migrations
                 .Index(t => t.UserId);
             
             CreateTable(
-                "dbo.ConversationParticipants",
-                c => new
-                    {
-                        UserId = c.Guid(nullable: false),
-                        ConversationId = c.Guid(nullable: false),
-                        IsActive = c.Boolean(nullable: false),
-                    })
-                .PrimaryKey(t => new { t.UserId, t.ConversationId })
-                .ForeignKey("dbo.Conversations", t => t.ConversationId, cascadeDelete: true)
-                .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
-                .Index(t => t.UserId)
-                .Index(t => t.ConversationId);
-            
-            CreateTable(
-                "dbo.Conversations",
-                c => new
-                    {
-                        Id = c.Guid(nullable: false, identity: true, defaultValueSql: "newsequentialid()"),
-                        Type = c.Int(nullable: false),
-                        OwnerId = c.Guid(),
-                        CreatorId = c.Guid(),
-                        User_Id = c.Guid(),
-                        User_Id1 = c.Guid(),
-                    })
-                .PrimaryKey(t => t.Id)
-                .ForeignKey("dbo.Users", t => t.CreatorId)
-                .ForeignKey("dbo.Users", t => t.OwnerId)
-                .ForeignKey("dbo.Users", t => t.User_Id)
-                .ForeignKey("dbo.Users", t => t.User_Id1)
-                .Index(t => t.OwnerId)
-                .Index(t => t.CreatorId)
-                .Index(t => t.User_Id)
-                .Index(t => t.User_Id1);
-            
-            CreateTable(
                 "dbo.UserLogins",
                 c => new
                     {
@@ -108,7 +90,7 @@ namespace Rozmawiator.Database.Migrations
                 "dbo.Messages",
                 c => new
                     {
-                        Id = c.Guid(nullable: false, identity: true, defaultValueSql: "newsequentialid()"),
+                        Id = c.Guid(nullable: false),
                         Content = c.String(nullable: false),
                         Timestamp = c.DateTime(nullable: false),
                         SenderId = c.Guid(nullable: false),
@@ -137,7 +119,7 @@ namespace Rozmawiator.Database.Migrations
                 "dbo.Roles",
                 c => new
                     {
-                        Id = c.Guid(nullable: false, identity: true, defaultValueSql: "newsequentialid()"),
+                        Id = c.Guid(nullable: false),
                         Name = c.String(nullable: false, maxLength: 256),
                     })
                 .PrimaryKey(t => t.Id)
@@ -147,56 +129,80 @@ namespace Rozmawiator.Database.Migrations
                 "dbo.Servers",
                 c => new
                     {
-                        Id = c.Guid(nullable: false, identity: true, defaultValueSql: "newsequentialid()"),
+                        Id = c.Guid(nullable: false),
                         IpAddress = c.String(nullable: false),
                         Port = c.Int(nullable: false),
                         State = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.Id);
             
+            CreateTable(
+                "dbo.CallParticipants",
+                c => new
+                    {
+                        UserId = c.Guid(nullable: false),
+                        ConversationId = c.Guid(nullable: false),
+                    })
+                .PrimaryKey(t => new { t.UserId, t.ConversationId })
+                .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
+                .ForeignKey("dbo.Calls", t => t.ConversationId, cascadeDelete: true)
+                .Index(t => t.UserId)
+                .Index(t => t.ConversationId);
+            
+            CreateTable(
+                "dbo.ConversationParticipants",
+                c => new
+                    {
+                        UserId = c.Guid(nullable: false),
+                        ConversationId = c.Guid(nullable: false),
+                    })
+                .PrimaryKey(t => new { t.UserId, t.ConversationId })
+                .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
+                .ForeignKey("dbo.Conversations", t => t.ConversationId, cascadeDelete: true)
+                .Index(t => t.UserId)
+                .Index(t => t.ConversationId);
+            
         }
         
         public override void Down()
         {
             DropForeignKey("dbo.UserRoles", "RoleId", "dbo.Roles");
+            DropForeignKey("dbo.CallRequests", "ConversationId", "dbo.Conversations");
             DropForeignKey("dbo.UserRoles", "UserId", "dbo.Users");
-            DropForeignKey("dbo.Conversations", "User_Id1", "dbo.Users");
             DropForeignKey("dbo.Messages", "SenderId", "dbo.Users");
             DropForeignKey("dbo.Messages", "ConversationId", "dbo.Conversations");
             DropForeignKey("dbo.UserLogins", "UserId", "dbo.Users");
-            DropForeignKey("dbo.Conversations", "User_Id", "dbo.Users");
-            DropForeignKey("dbo.ConversationParticipants", "UserId", "dbo.Users");
-            DropForeignKey("dbo.Conversations", "OwnerId", "dbo.Users");
-            DropForeignKey("dbo.Conversations", "CreatorId", "dbo.Users");
             DropForeignKey("dbo.ConversationParticipants", "ConversationId", "dbo.Conversations");
+            DropForeignKey("dbo.ConversationParticipants", "UserId", "dbo.Users");
             DropForeignKey("dbo.UserClaims", "UserId", "dbo.Users");
-            DropForeignKey("dbo.CallRequests", "CallerId", "dbo.Users");
-            DropForeignKey("dbo.CallRequests", "CalleeId", "dbo.Users");
+            DropForeignKey("dbo.CallParticipants", "ConversationId", "dbo.Calls");
+            DropForeignKey("dbo.CallParticipants", "UserId", "dbo.Users");
+            DropForeignKey("dbo.Calls", "ConversationId", "dbo.Conversations");
+            DropIndex("dbo.ConversationParticipants", new[] { "ConversationId" });
+            DropIndex("dbo.ConversationParticipants", new[] { "UserId" });
+            DropIndex("dbo.CallParticipants", new[] { "ConversationId" });
+            DropIndex("dbo.CallParticipants", new[] { "UserId" });
             DropIndex("dbo.Roles", "RoleNameIndex");
             DropIndex("dbo.UserRoles", new[] { "RoleId" });
             DropIndex("dbo.UserRoles", new[] { "UserId" });
             DropIndex("dbo.Messages", new[] { "ConversationId" });
             DropIndex("dbo.Messages", new[] { "SenderId" });
             DropIndex("dbo.UserLogins", new[] { "UserId" });
-            DropIndex("dbo.Conversations", new[] { "User_Id1" });
-            DropIndex("dbo.Conversations", new[] { "User_Id" });
-            DropIndex("dbo.Conversations", new[] { "CreatorId" });
-            DropIndex("dbo.Conversations", new[] { "OwnerId" });
-            DropIndex("dbo.ConversationParticipants", new[] { "ConversationId" });
-            DropIndex("dbo.ConversationParticipants", new[] { "UserId" });
             DropIndex("dbo.UserClaims", new[] { "UserId" });
             DropIndex("dbo.Users", "UserNameIndex");
-            DropIndex("dbo.CallRequests", new[] { "CalleeId" });
-            DropIndex("dbo.CallRequests", new[] { "CallerId" });
+            DropIndex("dbo.Calls", new[] { "ConversationId" });
+            DropIndex("dbo.CallRequests", new[] { "ConversationId" });
+            DropTable("dbo.ConversationParticipants");
+            DropTable("dbo.CallParticipants");
             DropTable("dbo.Servers");
             DropTable("dbo.Roles");
             DropTable("dbo.UserRoles");
             DropTable("dbo.Messages");
             DropTable("dbo.UserLogins");
-            DropTable("dbo.Conversations");
-            DropTable("dbo.ConversationParticipants");
             DropTable("dbo.UserClaims");
             DropTable("dbo.Users");
+            DropTable("dbo.Calls");
+            DropTable("dbo.Conversations");
             DropTable("dbo.CallRequests");
         }
     }

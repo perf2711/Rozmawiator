@@ -10,9 +10,6 @@ namespace Rozmawiator.Database.ViewModels
     public class ConversationViewModel
     {
         public Guid Id { get; set; }
-        public ConversationType Type { get; set; }
-        public string Owner { get; set; }
-        public string Creator { get; set; }
-        public string[] Participants { get; set; }
+        public Guid[] Participants { get; set; }
     }
 }

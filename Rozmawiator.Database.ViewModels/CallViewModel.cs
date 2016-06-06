@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Rozmawiator.Database.ViewModels
 {
-    public class FriendRequestViewModel
+    public class CallViewModel
     {
         public Guid Id { get; set; }
-        public string RequestingUser { get; set; }
-        public string TargetUser { get; set; }
+        public DateTime Timestamp { get; set; }
+        public Guid ConversationId { get; set; }
+        public Guid[] Participants { get; set; }
     }
 }

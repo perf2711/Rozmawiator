@@ -13,7 +13,7 @@ namespace Rozmawiator.Database.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201606042149002_Initial"; }
+            get { return "201606062203557_Initial"; }
         }
         
         string IMigrationMetadata.Source

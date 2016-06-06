@@ -57,10 +57,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Call.cs" />
     <Compile Include="Entities\CallRequest.cs" />
     <Compile Include="Entities\Conversation.cs" />
-    <Compile Include="Entities\ConversationParticipant.cs" />
-    <Compile Include="Entities\FriendRequest.cs" />
     <Compile Include="Entities\Message.cs" />
     <Compile Include="Entities\Server.cs" />
     <Compile Include="Entities\User.cs" />
@@ -69,13 +68,9 @@
     <Compile Include="Identity\GuidUserLogin.cs" />
     <Compile Include="Identity\GuidUserRole.cs" />
     <Compile Include="Identity\IdentityExtensions.cs" />
-    <Compile Include="Migrations\201606042149002_Initial.cs" />
-    <Compile Include="Migrations\201606042149002_Initial.Designer.cs">
-      <DependentUpon>201606042149002_Initial.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201606061521288_CallRequestTimestamp.cs" />
-    <Compile Include="Migrations\201606061521288_CallRequestTimestamp.Designer.cs">
-      <DependentUpon>201606061521288_CallRequestTimestamp.cs</DependentUpon>
+    <Compile Include="Migrations\201606062203557_Initial.cs" />
+    <Compile Include="Migrations\201606062203557_Initial.Designer.cs">
+      <DependentUpon>201606062203557_Initial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="RozmawiatorDb.cs" />
@@ -86,11 +81,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201606042149002_Initial.resx">
-      <DependentUpon>201606042149002_Initial.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201606061521288_CallRequestTimestamp.resx">
-      <DependentUpon>201606061521288_CallRequestTimestamp.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201606062203557_Initial.resx">
+      <DependentUpon>201606062203557_Initial.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
