@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Rozmawiator.Database;
 using Rozmawiator.Database.Entities;
+using Rozmawiator.Shared;
 using Message = Rozmawiator.Shared.Message;
 
 namespace Rozmawiator.Server.Api
@@ -315,7 +316,9 @@ namespace Rozmawiator.Server.Api
                 database.SaveChanges();
             }
 
-            SendAsClient(sender, targetClient, message);
+            var forwardMessage = new Message().DirectText(sender.Nickname, message.GetDirectTextContent());
+            //SendAsClient(sender, targetClient, message);
+            SendAsClient(sender, targetClient, forwardMessage);
         }
 
         private void HandleHello(IPEndPoint endpoint, Message message)

@@ -73,6 +73,9 @@
     <Compile Include="Extensions\WindowExtensions.cs" />
     <Compile Include="Models\Conversation.cs" />
     <Compile Include="Models\Server.cs" />
+    <Compile Include="PartialViews\LoggedUserInfoControl.xaml.cs">
+      <DependentUpon>LoggedUserInfoControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
@@ -101,6 +104,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PartialViews\ChatInputControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PartialViews\LoggedUserInfoControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

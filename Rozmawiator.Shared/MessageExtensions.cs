@@ -196,7 +196,7 @@ namespace Rozmawiator.Shared
         /// Conversation-less message.
         /// </summary>
         /// <param name="message">Message to modify</param>
-        /// <param name="nickname">Receiver's nickname</param>
+        /// <param name="nickname">When sending, this should be Receiver's nickname. On the receiving side, this should be Sender's nickname.</param>
         /// <param name="content">Message content</param>
         /// <returns></returns>
         public static Message DirectText(this Message message, string nickname, string content)

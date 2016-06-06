@@ -209,13 +209,13 @@ namespace Rozmawiator
                 return;
             }
 
-            foreach (var participant in conversation.Participants)
+            foreach (var participant in conversation.Participants.Where(p => p.Nickname != UserService.LoggedUser.Nickname))
             {
                 ClientService.Client.Send(new Message().DirectText(participant.Nickname, message.Content));
             }
 
-            //conversation.Messages.Add(message);
-            //ActiveMessageDisplay.AddMessageControl(message);
+            conversation.Messages.Add(message);
+            ActiveMessageDisplay.AddMessageControl(message);
         }
 
         #endregion
@@ -230,6 +230,7 @@ namespace Rozmawiator
         {
             new Task(async () => await UpdateData()).Start();
             SetEvents();
+            LoggedUserInfoControl.User = UserService.LoggedUser;
         }
 
         #endregion

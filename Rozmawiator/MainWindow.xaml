@@ -17,7 +17,7 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
-        
+
         <Menu Grid.Row="0" Grid.ColumnSpan="2">
             <MenuItem Header="Rozmawiator">
                 <MenuItem Header="Wyloguj"/>
@@ -32,11 +32,17 @@
                 <MenuItem Header="O Rozmawiatorze"/>
             </MenuItem>
         </Menu>
-        
-        <GridSplitter Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="5"/>
-        
+
+
         <Grid Grid.Row="1" Grid.Column="0">
-            <ListBox x:Name="PassiveConversationList" SelectionChanged="PassiveConversationSelectionChanged" SelectionMode="Single"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border BorderThickness="0,0,0,2" BorderBrush="Coral" Background="LightCoral">
+                <partialViews:LoggedUserInfoControl x:Name="LoggedUserInfoControl"/>
+            </Border>
+            <ListBox x:Name="PassiveConversationList" Grid.Row="1" SelectionChanged="PassiveConversationSelectionChanged" SelectionMode="Single" Grid.RowSpan="1"/>
         </Grid>
 
         <Grid Grid.Row="1" Grid.Column="1">
@@ -52,5 +58,7 @@
             </ScrollViewer>
             <partialViews:ChatInputControl x:Name="MessageInputBox" Grid.Row="2" Margin="40,5" VerticalAlignment="Bottom" Sent="MessageInputBox_Sent"/>
         </Grid>
+
+        <GridSplitter Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="5"/>
     </Grid>
 </Window>
