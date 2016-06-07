@@ -18,7 +18,7 @@ namespace Rozmawiator.ClientApi
         public Client Client { get; }
         public Call Call { get; private set; }
         public ReadOnlyObservableCollection<Guid> Participants { get; }
-        public IReadOnlyList<Message> TextMessages => _textMessages.AsReadOnly();
+        public IReadOnlyList<ConversationMessage> TextMessages => _textMessages.AsReadOnly();
 
         public event Action<Conversation, Guid> ParticipantConnected;
         public event Action<Conversation, Guid> ParticipantDisconnected;
@@ -26,17 +26,19 @@ namespace Rozmawiator.ClientApi
         public event Action<Conversation, CallRequest> NewCallRequest;
         public event Action<Conversation, ConversationMessage> NewTextMessage;
 
-        private readonly ObservableCollection<Guid> _participants;
-        private readonly List<Message> _textMessages;
+        public event Action<Conversation, Call> NewCall;
 
-        public Conversation(Guid id, Client client)
+        private readonly ObservableCollection<Guid> _participants;
+        private readonly List<ConversationMessage> _textMessages;
+
+        public Conversation(Guid id, Client client, params Guid[] participants)
         {
             Id = id;
             Client = client;
 
-            _textMessages = new List<Message>();
+            _textMessages = new List<ConversationMessage>();
 
-            _participants = new ObservableCollection<Guid>();
+            _participants = new ObservableCollection<Guid>(participants);
             Participants = new ReadOnlyObservableCollection<Guid>(_participants);
         }
 
@@ -54,6 +56,7 @@ namespace Rozmawiator.ClientApi
                     HandleTextMessage(message);
                     break;
                 case ConversationMessageType.CallRequest:
+                    HandleCallRequest(message);
                     break;
                 case ConversationMessageType.AddUser:
                 case ConversationMessageType.Bye:
@@ -83,6 +86,12 @@ namespace Rozmawiator.ClientApi
             NewTextMessage?.Invoke(this, message);
         }
 
+        private void HandleCallRequest(ConversationMessage message)
+        {
+            var callRequest = new CallRequest(this, message.GetGuidContent());
+            NewCallRequest?.Invoke(this, callRequest);
+        }
+
         public void AddUser(Guid id)
         {
             Client.Send(ConversationMessage.Create(Client.Id, Id).AddUser(id));
@@ -94,9 +103,9 @@ namespace Rozmawiator.ClientApi
             Client.Send(ConversationMessage.Create(Client.Id, Id).CreateCall());
         }
 
-        private void OnCallCreated(ExpectedMessage expectedMessage, Message message)
+        private void OnCallCreated(ExpectedMessage expectedMessage, IMessage message)
         {
-            var callId = message.GetGuidContent();
+            var callId = ((CallMessage)message).GetGuidContent();
             Call = new Call(callId, this);
         }
 
@@ -105,6 +114,18 @@ namespace Rozmawiator.ClientApi
             if (request.Response == null)
             {
                 return;
+            }
+
+            switch (request.Response.Value)
+            {
+                case CallResponseType.Accepted:
+                    Call = new Call(request.CallId, this);
+                    NewCall?.Invoke(this, Call);
+                    break;
+                case CallResponseType.Denied:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             Client.Send(ConversationMessage.Create(Client.Id, Id).CallResponse(request.Response.Value));

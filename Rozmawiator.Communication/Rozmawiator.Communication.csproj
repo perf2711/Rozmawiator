@@ -47,6 +47,7 @@
     <Compile Include="Conversation\ConversationMessage.cs" />
     <Compile Include="Conversation\ConversationMessageExtensions.cs" />
     <Compile Include="Conversation\ConversationMessageType.cs" />
+    <Compile Include="IMessage.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="MessageCategory.cs" />
     <Compile Include="MessageExtensions.cs" />

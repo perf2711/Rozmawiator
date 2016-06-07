@@ -127,7 +127,7 @@ namespace Rozmawiator.Server.Api
             
             Call.Join(Server.GetClient(message.SenderId));
             Server.Send(Server.GetClient(message.SenderId), ServerMessage.Create(Id).Ok(Call.Id.ToByteArray()));
-            Broadcast(ConversationMessage.Create(Server.ServerId, Id).CallRequest());
+            Broadcast(ConversationMessage.Create(Server.ServerId, Id).CallRequest(Call.Id));
         }
 
         private void HandleCallResponse(ConversationMessage message)

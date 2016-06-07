@@ -104,7 +104,7 @@ namespace Rozmawiator.Server
             Log(s);
         }
 
-        private void OnNewMessage(IPEndPoint ipEndPoint, Message message)
+        private void OnNewMessage(IPEndPoint ipEndPoint, IMessage message)
         {
             switch (message.Category)
             {

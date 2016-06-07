@@ -11,32 +11,32 @@ namespace Rozmawiator.ClientApi
 {
     public class CallRequest
     {
-        private readonly Conversation _conversation;
-        public Guid ConversationId { get; }
+        public Conversation Conversation { get; }
+        public Guid CallId { get; }
         public CallResponseType? Response { get; private set; }
 
-        public CallRequest(Guid conversationId, Conversation conversation)
+        public CallRequest(Conversation conversation, Guid callId)
         {
-            ConversationId = conversationId;
-            _conversation = conversation;
+            Conversation = conversation;
+            CallId = callId;
         }
 
         public void Accept()
         {
             Response = CallResponseType.Accepted;
-            _conversation.RespondToRequest(this);
+            Conversation.RespondToRequest(this);
         }
 
         public void Decline()
         {
             Response = CallResponseType.Denied;
-            _conversation.RespondToRequest(this);
+            Conversation.RespondToRequest(this);
         }
 
         public void Ignore()
         {
             Response = null;
-            _conversation.RespondToRequest(this);
+            Conversation.RespondToRequest(this);
         }
     }
 }

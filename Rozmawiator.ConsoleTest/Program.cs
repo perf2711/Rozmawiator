@@ -5,7 +5,6 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Rozmawiator.ClientApi;
-using Rozmawiator.Shared;
 
 namespace Rozmawiator.ConsoleTest
 {

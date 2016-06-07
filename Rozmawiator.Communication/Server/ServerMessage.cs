@@ -8,6 +8,11 @@ namespace Rozmawiator.Communication.Server
 {
     public class ServerMessage : Message
     {
+        protected ServerMessage(Guid senderId)
+        {
+            SenderId = senderId;
+        }
+
         public ServerMessageType Type 
         {
             get { return (ServerMessageType) MessageType; }
@@ -16,12 +21,7 @@ namespace Rozmawiator.Communication.Server
 
         public new static ServerMessage Create(Guid senderId)
         {
-            return (ServerMessage) Message.Create(senderId);
-        }
-
-        public new static ServerMessage CreateRequest(Guid senderId, Guid requestId)
-        {
-            return (ServerMessage)Message.CreateRequest(senderId, requestId);
+            return new ServerMessage(senderId);
         }
     }
 }

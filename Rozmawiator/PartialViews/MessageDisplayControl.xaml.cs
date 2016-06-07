@@ -29,7 +29,7 @@ namespace Rozmawiator.PartialViews
 
         private async void DisplayMessages(Guid? priorTo = null)
         {
-            await Conversation.GetMoreMessages();
+            await ConversationService.GetMoreMessages(Conversation);
 
             var priorToMessage = Conversation.Messages.FirstOrDefault(m => m.Id == priorTo);
             var messages = priorToMessage != null

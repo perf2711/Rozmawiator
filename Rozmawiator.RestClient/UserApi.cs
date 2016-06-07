@@ -49,9 +49,9 @@ namespace Rozmawiator.RestClient
             return await HttpHelper.Get(BaseUrl + url, token);
         }
 
-        public async Task<HttpResponse> GetAvatar(TokenModel token, string username)
+        public async Task<HttpResponse> GetAvatar(TokenModel token, Guid id)
         {
-            var url = $"/api/Users/Avatar/{username}";
+            var url = $"/api/Users/Avatar/{id}";
             return await HttpHelper.Get(BaseUrl + url, token);
         }
 

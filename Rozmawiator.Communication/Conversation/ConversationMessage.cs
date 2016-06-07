@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 
 namespace Rozmawiator.Communication.Conversation
 {
-    public class ConversationMessage : Message
+    public class ConversationMessage : Message, IMessage
     {
+        protected ConversationMessage(Guid senderId)
+        {
+            SenderId = senderId;
+        }
+
         public ConversationMessageType Type
         {
             get { return (ConversationMessageType)MessageType; }
@@ -16,12 +21,7 @@ namespace Rozmawiator.Communication.Conversation
 
         public static ConversationMessage Create(Guid senderId, Guid conversationId)
         {
-            return (ConversationMessage) Create(senderId).AddContent(conversationId.ToByteArray());
-        }
-
-        public static ConversationMessage CreateRequest(Guid senderId, Guid requestId, Guid conversationId)
-        {
-            return (ConversationMessage) CreateRequest(senderId, requestId).AddContent(conversationId.ToByteArray());
+            return (ConversationMessage) new ConversationMessage(senderId).AddContent(conversationId.ToByteArray());
         }
 
         public override byte[] Content => base.Content.Skip(16).ToArray();

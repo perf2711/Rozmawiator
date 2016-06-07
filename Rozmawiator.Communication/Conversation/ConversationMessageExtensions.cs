@@ -52,10 +52,10 @@ namespace Rozmawiator.Communication.Conversation
         }
         */
 
-        public static ConversationMessage CallRequest(this ConversationMessage message)
+        public static ConversationMessage CallRequest(this ConversationMessage message, Guid callId)
         {
             message.Type = ConversationMessageType.CallRequest;
-            return message;
+            return (ConversationMessage) message.AddContent(callId.ToByteArray());
         }
 
         public static ConversationMessage CallResponse(this ConversationMessage message, CallResponseType callResponse)

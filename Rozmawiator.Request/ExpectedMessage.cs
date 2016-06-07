@@ -15,27 +15,27 @@ namespace Rozmawiator.Request
     { 
         public byte MessageType { get; set; }
 
-        public event Action<ExpectedMessage, Message> Arrived;
+        public event Action<ExpectedMessage, IMessage> Arrived;
 
-        public ExpectedMessage(byte type, Action<ExpectedMessage, Message> callback = null)
+        public ExpectedMessage(byte type, Action<ExpectedMessage, IMessage> callback = null)
         {
             MessageType = type;
             Arrived = callback;
         }
 
-        public ExpectedMessage(ServerMessageType type, Action<ExpectedMessage, Message> callback = null) : this((byte)type, callback)
+        public ExpectedMessage(ServerMessageType type, Action<ExpectedMessage, IMessage> callback = null) : this((byte)type, callback)
         {
         }
 
-        public ExpectedMessage(ConversationMessageType type, Action<ExpectedMessage, Message> callback = null) : this((byte)type, callback)
+        public ExpectedMessage(ConversationMessageType type, Action<ExpectedMessage, IMessage> callback = null) : this((byte)type, callback)
         {
         }
 
-        public ExpectedMessage(CallMessageType type, Action<ExpectedMessage, Message> callback = null) : this((byte)type, callback)
+        public ExpectedMessage(CallMessageType type, Action<ExpectedMessage, IMessage> callback = null) : this((byte)type, callback)
         {
         }
 
-        public bool Test(Message message)
+        public bool Test(IMessage message)
         {
             if (MessageType != message.MessageType)
             {

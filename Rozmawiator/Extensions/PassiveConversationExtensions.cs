@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 using Rozmawiator.ClientApi;
 using Rozmawiator.Data;
 using Rozmawiator.Models;
+using Conversation = Rozmawiator.Models.Conversation;
 
 namespace Rozmawiator.Extensions
 {
     public static class PassiveConversationExtensions
     {
-        public static IEnumerable<User> GetUsers(this PassiveConversation conversation)
+        public static IEnumerable<User> GetUsers(this Conversation conversation)
         {
-            return UserService.Users.Where(u => conversation.ParticipantsNicknames.Contains(u.Nickname));
+            return UserService.Users.Where(u => conversation.Participants.Contains(u));
         }
     }
 }

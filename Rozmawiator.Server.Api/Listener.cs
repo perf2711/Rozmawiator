@@ -38,7 +38,7 @@ namespace Rozmawiator.Server.Api
         public int TimeoutSpan { get; private set; }
         public int Port { get; private set; }
 
-        public event Action<IPEndPoint, Message> NewMessage;
+        public event Action<IPEndPoint, IMessage> NewMessage;
         public event Action<DateTime, string> DebugMessage;
 
         public event NotifyCollectionChangedEventHandler ClientListChanged;
@@ -176,7 +176,7 @@ namespace Rozmawiator.Server.Api
             return _conversations.FirstOrDefault(c => c.Id == conversationId);
         }
 
-        private void HandleMessage(IPEndPoint endpoint, Message message)
+        private void HandleMessage(IPEndPoint endpoint, IMessage message)
         {
             switch (message.Category)
             {

@@ -20,14 +20,13 @@ namespace Rozmawiator.Controls
     /// <summary>
     /// Interaction logic for CallControl.xaml
     /// </summary>
-    public partial class CallControl : UserControl
+    public partial class CallRequestControl : UserControl
     {
         private CallRequest _callRequest;
-        public Conversation Conversation { get; private set; }
 
-        public event Action<CallControl> Accepted;
-        public event Action<CallControl> Denied;
-        public event Action<CallControl> Ignored;
+        public event Action<CallRequestControl> Accepted;
+        public event Action<CallRequestControl> Denied;
+        public event Action<CallRequestControl> Ignored;
 
         public CallRequest CallRequest
         {
@@ -39,17 +38,15 @@ namespace Rozmawiator.Controls
             }
         }
 
-        public CallControl(CallRequest callRequest)
+        public CallRequestControl(CallRequest callRequest)
         {
             InitializeComponent();
             CallRequest = callRequest;
         }
 
-        public async void Update()
+        public void Update()
         {
-            Conversation = await CallRequestService.GetConversation(_callRequest.Caller);
-
-            CallerLabel.Text = Conversation.Participants.Select(p => p.Nickname).Aggregate((a, b) => a + ", " + b);
+            CallerLabel.Text = _callRequest.Conversation.Participants.Select(p => p.Nickname).Aggregate((a, b) => a + ", " + b);
         }
 
         private void AcceptClick(object sender, RoutedEventArgs e)

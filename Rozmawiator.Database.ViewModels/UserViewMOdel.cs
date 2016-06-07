@@ -10,6 +10,7 @@ namespace Rozmawiator.Database.ViewModels
     {
         public Guid Id { get; set; }
         public string UserName { get; set; }
+        public byte[] Avatar { get; set; }
         public DateTime RegistrationDateTime { get; set; }
     }
 }

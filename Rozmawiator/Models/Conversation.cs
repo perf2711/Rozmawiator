@@ -10,10 +10,7 @@ namespace Rozmawiator.Models
     public class Conversation
     {
         public Guid Id { get; set; }
-        public ConversationType Type { get; set; }
-        public User Owner { get; set; }
-        public User Creator { get; set; }
-        public User[] Participants { get; set; }
+        public List<User> Participants { get; set; }
         public List<TextMessage> Messages { get; } = new List<TextMessage>();
     }
 }

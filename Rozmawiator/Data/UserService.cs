@@ -39,12 +39,34 @@ namespace Rozmawiator.Data
 
             var user = new User
             {
+                Id = userViewModel.Id,
                 Nickname = userViewModel.UserName,
-                Avatar = await GetAvatar(userViewModel.UserName)
+                Avatar = GetImage(userViewModel.Avatar),
+                RegistrationDateTime = userViewModel.RegistrationDateTime
             };
 
             LoggedUser = user;
             Users.Add(LoggedUser);
+        }
+
+        public static async Task<User> GetUser(Guid id)
+        {
+            var response = await RestService.UserApi.Get(RestService.CurrentToken, id);
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            var userViewModel = response.GetModel<UserViewModel>();
+            var user = new User
+            {
+                Id = userViewModel.Id,
+                Nickname = userViewModel.UserName,
+                Avatar = GetImage(userViewModel.Avatar),
+                RegistrationDateTime = userViewModel.RegistrationDateTime
+            };
+
+            return user;
         }
 
         public static async Task<User[]> Search(string query)
@@ -62,22 +84,48 @@ namespace Rozmawiator.Data
             {
                 result.Add(new User
                 {
+                    Id = model.Id,
                     Nickname = model.UserName,
-                    Avatar = await GetAvatar(model.UserName)
+                    Avatar = GetImage(model.Avatar),
+                    RegistrationDateTime = model.RegistrationDateTime
                 });
             }
             return result.ToArray();
         }
 
-        public static async Task<ImageSource> GetAvatar(string username)
+        public static async Task<ImageSource> GetAvatar(Guid id)
         {
-            var response = await RestService.UserApi.GetAvatar(RestService.CurrentToken, username);
+            var response = await RestService.UserApi.GetAvatar(RestService.CurrentToken, id);
             if (!response.IsSuccessStatusCode)
             {
                 return null;
             }
             var imageBytes = response.ResponseObject as byte[];
             if (imageBytes == null)
+            {
+                return null;
+            }
+
+            return GetImage(imageBytes);
+        }
+
+        public static async Task AddUsers(params Guid[] ids)
+        {
+            foreach (var id in ids)
+            {
+                if (LoggedUser.Id == id || Users.Any(u => u.Id == id))
+                {
+                    continue;
+                }
+
+                var user = await GetUser(id);
+                Users.Add(user);
+            }
+        }
+
+        public static ImageSource GetImage(byte[] imageBytes)
+        {
+            if (imageBytes == null || imageBytes.Length == 0)
             {
                 return null;
             }
@@ -95,25 +143,6 @@ namespace Rozmawiator.Data
             }
             image.Freeze();
             return image;
-        }
-
-        public static async Task AddUsers(params string[] usernames)
-        {
-            foreach (var username in usernames)
-            {
-                if (LoggedUser.Nickname == username || Users.Any(u => u.Nickname == username))
-                {
-                    continue;
-                }
-
-                var user = new User
-                {
-                    Nickname = username,
-                    Avatar = await GetAvatar(username)
-                };
-
-                Users.Add(user);
-            }
         }
     }
 }

@@ -59,8 +59,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Controls\CallControl.xaml.cs">
-      <DependentUpon>CallControl.xaml</DependentUpon>
+    <Compile Include="Controls\CallRequestControl.xaml.cs">
+      <DependentUpon>CallRequestControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\ConversationControl.xaml.cs">
       <DependentUpon>ConversationControl.xaml</DependentUpon>
@@ -84,17 +84,16 @@
     <Compile Include="Controls\UserThumbnailControl.xaml.cs">
       <DependentUpon>UserThumbnailControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Data\ActiveConversationService.cs" />
-    <Compile Include="Data\CallRequestService.cs" />
+    <Compile Include="Data\CallService.cs" />
     <Compile Include="Data\ConversationService.cs" />
     <Compile Include="Data\TextMessageService.cs" />
-    <Compile Include="Data\PassiveConversationService.cs" />
     <Compile Include="Extensions\WindowExtensions.cs" />
+    <Compile Include="Models\Call.cs" />
     <Compile Include="Models\CallRequest.cs" />
     <Compile Include="Models\Conversation.cs" />
     <Compile Include="Models\Server.cs" />
-    <Compile Include="PartialViews\ActiveConversationViewControl.xaml.cs">
-      <DependentUpon>ActiveConversationViewControl.xaml</DependentUpon>
+    <Compile Include="PartialViews\CallViewControl.xaml.cs">
+      <DependentUpon>CallViewControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="PartialViews\LoggedUserInfoControl.xaml.cs">
       <DependentUpon>LoggedUserInfoControl.xaml</DependentUpon>
@@ -105,7 +104,7 @@
     <Compile Include="Windows\LoginWindow.xaml.cs">
       <DependentUpon>LoginWindow.xaml</DependentUpon>
     </Compile>
-    <Page Include="Controls\CallControl.xaml">
+    <Page Include="Controls\CallRequestControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -145,7 +144,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PartialViews\ActiveConversationViewControl.xaml">
+    <Page Include="PartialViews\CallViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -236,6 +235,10 @@
     <ProjectReference Include="..\Rozmawiator.ClientApi\Rozmawiator.ClientApi.csproj">
       <Project>{8f2e073a-c63f-4a9e-9909-876c17e47276}</Project>
       <Name>Rozmawiator.ClientApi</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rozmawiator.Communication\Rozmawiator.Communication.csproj">
+      <Project>{A71CDB11-FBFF-4CFE-B3A2-1F32B9F19914}</Project>
+      <Name>Rozmawiator.Communication</Name>
     </ProjectReference>
     <ProjectReference Include="..\Rozmawiator.Database.ViewModels\Rozmawiator.Database.ViewModels.csproj">
       <Project>{216B81AA-F4A4-46AE-8AAE-7B07B84B476D}</Project>

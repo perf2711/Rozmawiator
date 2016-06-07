@@ -34,9 +34,14 @@ namespace Rozmawiator.RestClient
             return await HttpHelper.Get(BaseUrl + Get(id), token);
         }
 
+        public async Task<HttpResponse> Get(TokenModel token)
+        {
+            return await HttpHelper.Post(BaseUrl + GetList(), new Filter(), token);
+        }
+
         public async Task<HttpResponse> Get(TokenModel token, Filter filter)
         {
-            return await HttpHelper.Post(BaseUrl + GetList(), filter.Filters, token);
+            return await HttpHelper.Post(BaseUrl + GetList(), filter?.Filters ?? new Dictionary<string, object>(), token);
         }
     }
 }

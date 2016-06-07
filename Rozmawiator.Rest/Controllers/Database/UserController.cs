@@ -25,7 +25,37 @@ namespace Rozmawiator.Rest.Controllers.Database
         private readonly RozmawiatorDb _database = new RozmawiatorDb();
 
         [HttpGet]
-        [Route("{username?}")]
+        [Route("{id?}")]
+        public UserViewModel GetUser(Guid? id = null)
+        {
+            var userId = User.GetUserId();
+
+            var user = id == null
+                ? _database.Users.Find(userId)
+                : _database.Users.Find(id.Value);
+            if (user == null)
+            {
+                return null;
+            }
+
+            var path = HostingEnvironment.MapPath("~/App_Data/Avatars/" + user.Id + ".png");
+            byte[] avatar = null;
+            if (File.Exists(path))
+            {
+                avatar = File.ReadAllBytes(path);
+            }
+
+            return new UserViewModel
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Avatar = avatar,
+                RegistrationDateTime = user.RegistrationDateTime
+            };
+        }
+
+        [HttpGet]
+        [Route("Info/{username?}")]
         public UserViewModel GetUser(string username = null)
         {
             var userId = User.GetUserId();
@@ -38,9 +68,17 @@ namespace Rozmawiator.Rest.Controllers.Database
                 return null;
             }
 
+            var path = HostingEnvironment.MapPath("~/App_Data/Avatars/" + user.Id + ".png");
+            byte[] avatar = null;
+            if (File.Exists(path))
+            {
+                avatar = File.ReadAllBytes(path);
+            }
+
             return new UserViewModel
             {
                 Id = user.Id,
+                Avatar = avatar,
                 UserName = user.UserName,
                 RegistrationDateTime = user.RegistrationDateTime
             };

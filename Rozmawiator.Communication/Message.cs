@@ -10,84 +10,42 @@ using Rozmawiator.Communication.Server;
 
 namespace Rozmawiator.Communication
 {
-    public class Message
+    public class Message : IMessage
     {
-        public static Message Create(Guid senderId)
-        {
-            return new Message { SenderId = senderId };
-        }
-
-        public static Message CreateRequest(Guid senderId, Guid requestId)
-        {
-            var message = new Message(true) {SenderId = senderId};
-            return message.AddContent(requestId.ToByteArray());
-        }
-
         public const int MaxLength = 65535;
         public static int HeaderLength { get; } = 17;
 
-        protected Message(bool isRequestType = false)
+        protected Message()
         {
-            IsRequestType = isRequestType;
         }
 
-        private byte _messageType;
-
-        public byte MessageType
+        public static IMessage Create(Guid senderId)
         {
-            get
-            {
-                if (IsRequestType)
-                {
-                    return (byte)(_messageType - 128);
-                }
-                return _messageType;
-            }
-            set
-            {
-                _messageType = value;
-                if (IsRequestType)
-                {
-                    _messageType += 128;
-                }
-            }
-        }
-
-        public MessageCategory Category
-        {
-            get
-            {
-                if (Enum.IsDefined(typeof(ServerMessageType), MessageType))
-                {
-                    return MessageCategory.Server;   
-                }
-                if (Enum.IsDefined(typeof(ConversationMessageType), MessageType))
-                {
-                    return MessageCategory.Conversation;
-                }
-                if (Enum.IsDefined(typeof(CallMessageType), MessageType))
-                {
-                    return MessageCategory.Call;
-                }
-                throw new IndexOutOfRangeException();
-            }
-        }
-
-        private byte[] _content;
-
-        public virtual byte[] Content
-        {
-            get
-            {
-                return IsRequestType ? _content.Skip(16).ToArray() : _content;
-            }
-            set { _content = value; }
+            return new Message {SenderId = senderId};
         }
 
         public Guid SenderId { get; set; }
-        public bool IsRequestType { get; }
+        public byte MessageType { get; set; }
+        public virtual byte[] Content { get; set; }
 
-        public Guid RequestId => IsRequestType ? Guid.Empty : new Guid(_content.Take(16).ToArray());
+        public MessageCategory Category => GetCategory(MessageType);
+
+        public static MessageCategory GetCategory(byte messageType)
+        {
+            if (Enum.IsDefined(typeof(ServerMessageType), (int)messageType))
+            {
+                return MessageCategory.Server;
+            }
+            if (Enum.IsDefined(typeof(ConversationMessageType), (int)messageType))
+            {
+                return MessageCategory.Conversation;
+            }
+            if (Enum.IsDefined(typeof(CallMessageType), (int)messageType))
+            {
+                return MessageCategory.Call;
+            }
+            throw new IndexOutOfRangeException();
+        }
 
         public byte[] GetBytes()
         {
@@ -104,8 +62,8 @@ namespace Rozmawiator.Communication
             // If content.Length + HeaderLength is more than MTU, return MTU - HeaderLength, and cap message length to MTU
             var contentToCopyLength = (contentLength + HeaderLength > MaxLength) ? MaxLength - HeaderLength : contentLength;
 
-            Buffer.BlockCopy(sender, 0, result, 0, sender.Length);
-            result[sender.Length] = MessageType;
+            result[0] = MessageType;
+            Buffer.BlockCopy(sender, 0, result, 1, sender.Length);
             if (Content != null)
             {
                 Buffer.BlockCopy(Content, 0, result, HeaderLength, contentToCopyLength);
@@ -114,14 +72,9 @@ namespace Rozmawiator.Communication
             return result;
         }
 
-        public static Message FromBytes(byte[] msgBytes)
+        public static IMessage FromBytes(byte[] msgBytes)
         {
             var type = msgBytes[0];
-            var isRequest = (type & 128) == 128;
-            if (isRequest)
-            {
-                return FromBytesRequest(msgBytes);
-            }
 
             var sender = new byte[16];
             var content = new byte[msgBytes.Length - HeaderLength];
@@ -129,36 +82,36 @@ namespace Rozmawiator.Communication
             Buffer.BlockCopy(msgBytes, 1, sender, 0, sender.Length);
             Buffer.BlockCopy(msgBytes, HeaderLength, content, 0, msgBytes.Length - HeaderLength);
 
-            return ConstructMessage(type, sender, null, content);
+            return ConstructMessage(type, sender, content);
         }
 
-        private static Message FromBytesRequest(byte[] msgBytes)
+        private static IMessage ConstructMessage(byte type, byte[] sender, byte[] content)
         {
-            var type = msgBytes[0];
-            type -= 128;
-
-            var sender = new byte[16];
-            var request = new byte[16];
-            var content = new byte[msgBytes.Length - sender.Length - request.Length];
-
-            Buffer.BlockCopy(msgBytes, 1, sender, 0, sender.Length);
-            Buffer.BlockCopy(msgBytes, 1 + request.Length, request, 0, request.Length);
-            Buffer.BlockCopy(msgBytes, 1 + sender.Length + request.Length, content, 0, msgBytes.Length - 1 - sender.Length - request.Length);
-
-            return ConstructMessage(type, sender, request, content);
-        }
-
-        private static Message ConstructMessage(byte type, byte[] sender, byte[] request, byte[] content)
-        {
-            var message = new Message(request != null)
+            IMessage message;
+            switch (GetCategory(type))
             {
-                MessageType = type,
-                SenderId = new Guid(sender)
-            };
-
-            if (request != null)
-            {
-                message.AddContent(request);
+                case MessageCategory.Server:
+                    message = ServerMessage.Create(new Guid(sender));
+                    message.MessageType = type;
+                    break;
+                case MessageCategory.Conversation:
+                    if (content.Length < 16)
+                    {
+                        throw new InvalidOperationException("Content must contain conversation ID.");
+                    }
+                    message = ConversationMessage.Create(new Guid(sender), new Guid(content.Take(16).ToArray()));
+                    message.MessageType = type;
+                    break;
+                case MessageCategory.Call:
+                    if (content.Length < 16)
+                    {
+                        throw new InvalidOperationException("Content must contain conversation ID.");
+                    }
+                    message = CallMessage.Create(new Guid(sender), new Guid(content.Take(16).ToArray()));
+                    message.MessageType = type;
+                    break;
+                default:
+                    return null;
             }
             return message.AddContent(content);
         }

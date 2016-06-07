@@ -31,19 +31,10 @@ namespace Rozmawiator.ClientApi
         public ReadOnlyObservableCollection<Conversation> Conversations { get; }
         private readonly ObservableCollection<Conversation> _conversations;
 
-        public ReadOnlyObservableCollection<CallRequest> PendingCallRequests { get; }
-        private readonly ObservableCollection<CallRequest> _pendingCallRequests;
-
         public List<ExpectedMessage> ExpectedMessages { get; }
 
-        public event Action<Client, Message> Connected;
-        public event Action<Client, Message> NewMessage;
-
+        public event Action<Client, ServerMessage> Connected;
         public event Action<Client, Conversation> NewConversation;
-
-        public event Action<Client, CallRequest, Message> NewCallRequest;
-        public event Action<Client, Message> NewCallResponse;
-        
 
         private readonly UdpClient _client;
         private const int KeepAliveSpan = 1000;
@@ -52,9 +43,6 @@ namespace Rozmawiator.ClientApi
         public Client()
         {
             _client = new UdpClient();
-
-            _pendingCallRequests = new ObservableCollection<CallRequest>();
-            PendingCallRequests = new ReadOnlyObservableCollection<CallRequest>(_pendingCallRequests);
 
             _conversations = new ObservableCollection<Conversation>();
             Conversations = new ReadOnlyObservableCollection<Conversation>(_conversations);
@@ -85,10 +73,10 @@ namespace Rozmawiator.ClientApi
             ForceSend(ServerMessage.Create(Id).Hello());
         }
 
-        private void OnConnected(ExpectedMessage expectedMessage, Message message)
+        private void OnConnected(ExpectedMessage expectedMessage, IMessage message)
         {
             State = ClientState.Connected;
-            Connected?.Invoke(this, message);
+            Connected?.Invoke(this, (ServerMessage) message);
         }
 
         public void Disconnect()
@@ -138,9 +126,16 @@ namespace Rozmawiator.ClientApi
             Send(ServerMessage.Create(Id).CreateConversation());
         }
 
-        private void OnConversationCreated(ExpectedMessage expectedMessage, Message message)
+        public void LoadConversation(Guid conversationId, params Guid[] participants)
         {
-            var conversationId = message.GetGuidContent();
+            var conversation = new Conversation(conversationId, this, participants);
+            _conversations.Add(conversation);
+            NewConversation?.Invoke(this, conversation);
+        }
+
+        private void OnConversationCreated(ExpectedMessage expectedMessage, IMessage message)
+        {
+            var conversationId = ((ConversationMessage) message).GetGuidContent();
             var conversation = new Conversation(conversationId, this);
             _conversations.Add(conversation);
             NewConversation?.Invoke(this, conversation);
@@ -167,7 +162,7 @@ namespace Rozmawiator.ClientApi
             }
         }
 
-        private void CheckExpectedMessages(Message message)
+        private void CheckExpectedMessages(IMessage message)
         {
             foreach (var expectedMessage in ExpectedMessages.ToArray())
             {
@@ -178,7 +173,7 @@ namespace Rozmawiator.ClientApi
             }
         }
 
-        private void HandleMessage(Message message)
+        private void HandleMessage(IMessage message)
         {
             CheckExpectedMessages(message);
 
@@ -196,8 +191,6 @@ namespace Rozmawiator.ClientApi
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            NewMessage?.Invoke(this, message);
         }
 
         private void HandleServerMessage(ServerMessage message)
@@ -220,10 +213,26 @@ namespace Rozmawiator.ClientApi
 
         private void HandleConversationMessage(ConversationMessage message)
         {
+            var conversationId = message.GetConversationId();
+            var conversation = _conversations.FirstOrDefault(c => c.Id == conversationId);
+
+            if (conversation == null)
+            {
+                conversation = new Conversation(conversationId, this);
+                _conversations.Add(conversation);
+                NewConversation?.Invoke(this, conversation);
+            }
+
+            conversation.HandleConversationMessage(message);
+
         }
 
         private void HandleCallMessage(CallMessage message)
         {
+            var callId = message.GetCallId();
+            var call = _conversations.Select(c => c.Call).FirstOrDefault(c => c?.Id == callId);
+
+            call?.HandleCallMessage(message);
         }
 
         private void HandleBye(ServerMessage message)

@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 
 namespace Rozmawiator.Communication.Call
 {
-    public class CallMessage : Message
+    public class CallMessage : Message, IMessage
     {
+        protected CallMessage(Guid senderId)
+        {
+            SenderId = senderId;
+        }
+
         public CallMessageType Type
         {
             get { return (CallMessageType)MessageType; }
@@ -16,12 +21,7 @@ namespace Rozmawiator.Communication.Call
 
         public static CallMessage Create(Guid senderId, Guid callId)
         {
-            return (CallMessage) Create(senderId).AddContent(callId.ToByteArray());
-        }
-
-        public static CallMessage CreateRequest(Guid senderId, Guid requestId, Guid callId)
-        {
-            return (CallMessage) CreateRequest(senderId, requestId).AddContent(callId.ToByteArray());
+            return (CallMessage) new CallMessage(senderId).AddContent(callId.ToByteArray());
         }
 
         public override byte[] Content => base.Content.Skip(16).ToArray();

@@ -208,7 +208,6 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\Database\CallRequestController.cs" />
     <Compile Include="Controllers\Database\ConversationController.cs" />
-    <Compile Include="Controllers\Database\FriendController.cs" />
     <Compile Include="Controllers\Database\MessageController.cs" />
     <Compile Include="Controllers\Database\ServerController.cs" />
     <Compile Include="Controllers\Database\UserController.cs" />

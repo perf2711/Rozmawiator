@@ -16,7 +16,7 @@ using Rozmawiator.Data;
 using Rozmawiator.Database.ViewModels;
 using Rozmawiator.Extensions;
 using Rozmawiator.RestClient.Models;
-using Rozmawiator.Shared;
+using Rozmawiator.Communication;
 
 namespace Rozmawiator.Windows
 {
@@ -172,7 +172,7 @@ namespace Rozmawiator.Windows
                 }
 
                 ClientService.Client.Connected += OnConnected;
-                ClientService.Client.Nickname = UserService.LoggedUser.Nickname;
+                ClientService.Client.Id = UserService.LoggedUser.Id;
                 ClientService.Client.Connect(server.EndPoint);
 
             }).Start();

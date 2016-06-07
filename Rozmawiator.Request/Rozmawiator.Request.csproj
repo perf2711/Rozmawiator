@@ -40,10 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ComplexRequest.cs" />
     <Compile Include="ExpectedMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RequestStep.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rozmawiator.Communication\Rozmawiator.Communication.csproj">

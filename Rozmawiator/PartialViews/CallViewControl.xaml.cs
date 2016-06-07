@@ -21,35 +21,35 @@ namespace Rozmawiator.PartialViews
     /// <summary>
     /// Interaction logic for ActiveConversationViewControl.xaml
     /// </summary>
-    public partial class ActiveConversationViewControl : UserControl
+    public partial class CallViewControl : UserControl
     {
-        private Conversation _conversation;
+        private Call _call;
 
-        public event Action<ActiveConversationViewControl, bool> MicrophoneToggled;
-        public event Action<ActiveConversationViewControl, bool> SpeakerToggled;
-        public event Action<ActiveConversationViewControl> HangedUp;
+        public event Action<CallViewControl, bool> MicrophoneToggled;
+        public event Action<CallViewControl, bool> SpeakerToggled;
+        public event Action<CallViewControl> HangedUp;
 
-        public Conversation Conversation
+        public Call Call
         {
-            get { return _conversation; }
+            get { return _call; }
             set
             {
-                _conversation = value;
+                _call = value;
                 Update();
             }
         }
 
-        public ActiveConversationViewControl(Conversation conversation)
+        public CallViewControl(Call call)
         {
             InitializeComponent();
-            Conversation = conversation;
+            Call = call;
         }
 
         public void Update()
         {
             UserPanel.Children.Clear();
 
-            foreach (var participant in _conversation.Participants)
+            foreach (var participant in _call.Participants)
             {
                 if (participant.Nickname == UserService.LoggedUser.Nickname)
                 {
@@ -60,9 +60,8 @@ namespace Rozmawiator.PartialViews
                 UserPanel.Children.Add(userControl);
             }
 
-            foreach (var calledClient in ClientService.Client.Conversation.CalledClients)
+            foreach (var user in Call.Participants)
             {
-                var user = UserService.GetUser(calledClient);
                 var userControl = new UserThumbnailControl(user);
                 UserPanel.Children.Add(userControl);
             }
