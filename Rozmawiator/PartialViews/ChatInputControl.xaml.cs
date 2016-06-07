@@ -33,6 +33,11 @@ namespace Rozmawiator.PartialViews
 
         public void Send()
         {
+            if (string.IsNullOrEmpty(InputBox.Text))
+            {
+                return;
+            }
+
             var message = new TextMessage(InputBox.Text, DateTime.Now, UserService.LoggedUser);
             Sent?.Invoke(this, message);
             InputBox.Text = "";

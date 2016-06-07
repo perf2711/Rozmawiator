@@ -12,5 +12,6 @@ namespace Rozmawiator.Communication
         Guid SenderId { get; set; }
         byte MessageType { get; set; }
         byte[] Content { get; set; }
+        byte[] RawContent { get; set; }
     }
 }

@@ -26,7 +26,12 @@ namespace Rozmawiator.Communication
 
         public Guid SenderId { get; set; }
         public byte MessageType { get; set; }
-        public virtual byte[] Content { get; set; }
+        public byte[] RawContent { get; set; }
+        public virtual byte[] Content
+        {
+            get { return RawContent; }
+            set { RawContent = value; }
+        }
 
         public MessageCategory Category => GetCategory(MessageType);
 
@@ -49,7 +54,7 @@ namespace Rozmawiator.Communication
 
         public byte[] GetBytes()
         {
-            var contentLength = Content?.Length ?? 0;
+            var contentLength = RawContent?.Length ?? 0;
             var length = HeaderLength + contentLength;
             if (length > MaxLength)
             {
@@ -64,9 +69,9 @@ namespace Rozmawiator.Communication
 
             result[0] = MessageType;
             Buffer.BlockCopy(sender, 0, result, 1, sender.Length);
-            if (Content != null)
+            if (RawContent != null)
             {
-                Buffer.BlockCopy(Content, 0, result, HeaderLength, contentToCopyLength);
+                Buffer.BlockCopy(RawContent, 0, result, HeaderLength, contentToCopyLength);
             }
 
             return result;
@@ -91,7 +96,7 @@ namespace Rozmawiator.Communication
             switch (GetCategory(type))
             {
                 case MessageCategory.Server:
-                    message = ServerMessage.Create(new Guid(sender));
+                    message = ServerMessage.Create(new Guid(sender), content);
                     message.MessageType = type;
                     break;
                 case MessageCategory.Conversation:
@@ -99,7 +104,7 @@ namespace Rozmawiator.Communication
                     {
                         throw new InvalidOperationException("Content must contain conversation ID.");
                     }
-                    message = ConversationMessage.Create(new Guid(sender), new Guid(content.Take(16).ToArray()));
+                    message = ConversationMessage.Create(new Guid(sender), content);
                     message.MessageType = type;
                     break;
                 case MessageCategory.Call:
@@ -107,13 +112,14 @@ namespace Rozmawiator.Communication
                     {
                         throw new InvalidOperationException("Content must contain conversation ID.");
                     }
-                    message = CallMessage.Create(new Guid(sender), new Guid(content.Take(16).ToArray()));
+                    message = CallMessage.Create(new Guid(sender), content);
                     message.MessageType = type;
                     break;
                 default:
                     return null;
             }
-            return message.AddContent(content);
+            return message;
+            //return message.AddContent(content);
         }
     }
 }

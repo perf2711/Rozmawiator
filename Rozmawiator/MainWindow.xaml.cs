@@ -79,7 +79,6 @@ namespace Rozmawiator
         #region Conversations
 
         private List<MessageDisplayControl> MessageDisplays { get; } = new List<MessageDisplayControl>();
-        private MessageDisplayControl CurrentMessageDisplay { get; set; }
 
         private ConversationControl SelectedConversation
         {
@@ -99,13 +98,20 @@ namespace Rozmawiator
         private void ConversationSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var conversation = SelectedConversation.Conversation;
-            var display = MessageDisplays.FirstOrDefault(m => m.Conversation == conversation);
-            if (display == null)
+
+            if (MessageDisplays.All(m => m.Conversation != conversation))
             {
-                display = new MessageDisplayControl(conversation);
+                var display = new MessageDisplayControl(conversation);
                 MessageDisplays.Add(display);
             }
-            CurrentMessageDisplay = display;
+
+            MessagesPanel.Children.Clear();
+
+            var displays = MessageDisplays.Where(m => m.Conversation == conversation);
+            foreach (var display in displays)
+            {
+                MessagesPanel.Children.Add(display);
+            }
         }
 
         private async void OnNewConversation(Client client, ClientApi.Conversation conversation)
@@ -113,9 +119,12 @@ namespace Rozmawiator
             var conversationModel = ConversationService.Conversations.FirstOrDefault(c => c.Id == conversation.Id) ??
                                     await ConversationService.AddConversation(conversation.Participants.ToArray());
 
-            var control = new ConversationControl { Conversation = conversationModel };
-            ConversationList.Items.Add(control);
-            SetConversationEvents(conversation);
+            Dispatcher.Invoke(() =>
+            {
+                var control = new ConversationControl { Conversation = conversationModel };
+                ConversationList.Items.Add(control);
+                SetConversationEvents(conversation);
+            });
         }
 
         private void SetConversationEvents(ClientApi.Conversation conversation)
@@ -129,21 +138,24 @@ namespace Rozmawiator
 
         private void ConversationOnNewTextMessage(ClientApi.Conversation conversation, ConversationMessage conversationMessage)
         {
-            var conversationModel = ConversationService.Conversations.First(c => c.Id == conversation.Id);
-            var conversationControl = GetConversationControl(conversationModel);
-
-            if (SelectedConversation.Conversation.Id != conversationControl.Conversation.Id)
+            Dispatcher.Invoke(() =>
             {
-                conversationControl.Notify();
-            }
+                var conversationModel = ConversationService.Conversations.First(c => c.Id == conversation.Id);
+                var conversationControl = GetConversationControl(conversationModel);
 
-            var textMessage = new TextMessage(conversationMessage.GetStringContent(), DateTime.Now,
-                UserService.Users.FirstOrDefault(u => u.Id == conversationMessage.SenderId));
+                if (SelectedConversation.Conversation.Id != conversationControl.Conversation.Id)
+                {
+                    conversationControl.Notify();
+                }
 
-            conversationModel.Messages.Add(textMessage);
+                var textMessage = new TextMessage(conversationMessage.GetStringContent(), DateTime.Now,
+                    UserService.Users.FirstOrDefault(u => u.Id == conversationMessage.SenderId));
 
-            var messageDisplay = MessageDisplays.FirstOrDefault(m => m.Conversation == conversationModel);
-            messageDisplay?.AddMessageControl(textMessage);
+                conversationModel.Messages.Add(textMessage);
+
+                var messageDisplay = MessageDisplays.FirstOrDefault(m => m.Conversation == conversationModel);
+                messageDisplay?.AddMessageControl(textMessage);
+            });
         }
 
         private void ConversationOnNewCallRequest(ClientApi.Conversation conversation, ClientApi.CallRequest callRequest)
@@ -166,9 +178,16 @@ namespace Rozmawiator
             throw new NotImplementedException();
         }
 
-        private void MessageInputBox_Sent(ChatInputControl arg1, TextMessage arg2)
+        private void MessageInputBox_Sent(ChatInputControl inputControl, TextMessage message)
         {
+            var conversation = ClientService.Client.Conversations.FirstOrDefault(c => c.Id == SelectedConversation.Conversation.Id);
+            if (conversation == null)
+            {
+                return;
+            }
 
+            var msg = ConversationMessage.Create(ClientService.Client.Id, conversation.Id).Text(message.Content);
+            conversation?.Send(msg);
         }
 
         #endregion

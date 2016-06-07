@@ -10,31 +10,31 @@ namespace Rozmawiator.Communication
     {
         public static IMessage AddContent(this IMessage message, byte[] content)
         {
-            if (message.Content == null)
+            if (message.RawContent == null)
             {
-                message.Content = content;
+                message.RawContent = content;
                 return message;
             }
 
-            var buffer = new byte[message.Content.Length + content.Length];
-            Buffer.BlockCopy(message.Content, 0, buffer, 0, message.Content.Length);
-            Buffer.BlockCopy(content, 0, buffer, message.Content.Length, buffer.Length);
-            message.Content = buffer;
+            var buffer = new byte[message.RawContent.Length + content.Length];
+            Buffer.BlockCopy(message.RawContent, 0, buffer, 0, message.RawContent.Length);
+            Buffer.BlockCopy(content, 0, buffer, message.RawContent.Length, content.Length);
+            message.RawContent = buffer;
             return message;
         }
 
         public static IMessage AddContent(this IMessage message, byte content)
         {
-            if (message.Content == null)
+            if (message.RawContent == null)
             {
-                message.Content = new [] {content};
+                message.RawContent = new [] {content};
                 return message;
             }
 
-            var buffer = new byte[message.Content.Length + 1];
-            Buffer.BlockCopy(message.Content, 0, buffer, 0, message.Content.Length);
-            Buffer.BlockCopy(new [] {content}, 0, buffer, message.Content.Length, 1);
-            message.Content = buffer;
+            var buffer = new byte[message.RawContent.Length + 1];
+            Buffer.BlockCopy(message.RawContent, 0, buffer, 0, message.RawContent.Length);
+            Buffer.BlockCopy(new [] {content}, 0, buffer, message.RawContent.Length, 1);
+            message.RawContent = buffer;
             return message;
         }
 

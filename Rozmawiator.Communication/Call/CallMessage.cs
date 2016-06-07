@@ -24,11 +24,20 @@ namespace Rozmawiator.Communication.Call
             return (CallMessage) new CallMessage(senderId).AddContent(callId.ToByteArray());
         }
 
-        public override byte[] Content => base.Content.Skip(16).ToArray();
+        public static CallMessage Create(Guid senderId, byte[] content)
+        {
+            return (CallMessage)new CallMessage(senderId).AddContent(content);
+        }
+
+        public override byte[] Content
+        {
+            get { return RawContent?.Skip(16).ToArray(); }
+            set { RawContent = value; }
+        }
 
         public Guid GetCallId()
         {
-            return new Guid(base.Content.Take(16).ToArray());
+            return new Guid(RawContent.Take(16).ToArray());
         }
     }
 }

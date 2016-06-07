@@ -17,9 +17,9 @@
             </WrapPanel>
         </Border>
         <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
-            <controls:ToggleImageButton x:Name="MicrophoneStateButton" OffIcon="../Images/Icons/microphoneStroke.png" OnIcon="../Images/Icons/microphone.png" Margin="10,0" State="true" Click="MicrophoneStateButton_Click"/>
-            <controls:ToggleImageButton x:Name="SpeakerStateButton" OffIcon="../Images/Icons/speakerMute.png" OnIcon="../Images/Icons/speaker.png" Margin="10,0" State="true" Click="SpeakerStateButton_Click"/>
-            <controls:ImageButton x:Name="DropCallButton" Icon="../Images/Icons/telephoneDown.png" Margin="10,0" Click="DropCallButton_Click"/>
+            <controls:ToggleImageButton x:Name="MicrophoneStateButton" OffIcon="../Images/Icons/microphoneStroke.png" Width="35" Height="35" OnIcon="../Images/Icons/microphone.png" Margin="10,0" State="true" Click="MicrophoneStateButton_Click"/>
+            <controls:ToggleImageButton x:Name="SpeakerStateButton" OffIcon="../Images/Icons/speakerMute.png" Width="35" Height="35" OnIcon="../Images/Icons/speaker.png" Margin="10,0" State="true" Click="SpeakerStateButton_Click"/>
+            <controls:ImageButton x:Name="DropCallButton" Width="35" Height="35" Icon="../Images/Icons/telephoneDown.png" Margin="10,0" Click="DropCallButton_Click"/>
         </StackPanel>
     </Grid>
 </UserControl>

@@ -23,5 +23,10 @@ namespace Rozmawiator.Communication.Server
         {
             return new ServerMessage(senderId);
         }
+
+        public static ServerMessage Create(Guid senderId, byte[] content)
+        {
+            return (ServerMessage) new ServerMessage(senderId).AddContent(content);
+        }
     }
 }

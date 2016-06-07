@@ -35,7 +35,9 @@ namespace Rozmawiator.Server.Api
                 var conversation = database.Conversations.FirstOrDefault(c => c.Id == Id);
                 if (conversation != null)
                 {
-                    _participants.AddRange(conversation.Participants.ToArray().Select(p => Server.GetClient(p.Id)));
+                    var participants =
+                        conversation.Participants.ToArray().Select(p => Server.GetClient(p.Id)).Where(c => c != null);
+                    _participants.AddRange(participants);
                     return;
                 }
 

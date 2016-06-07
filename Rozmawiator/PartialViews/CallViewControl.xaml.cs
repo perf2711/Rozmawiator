@@ -39,6 +39,11 @@ namespace Rozmawiator.PartialViews
             }
         }
 
+        public CallViewControl()
+        {
+            InitializeComponent();
+        }
+
         public CallViewControl(Call call)
         {
             InitializeComponent();
@@ -49,6 +54,11 @@ namespace Rozmawiator.PartialViews
         {
             UserPanel.Children.Clear();
 
+            if (Call == null)
+            {
+                return;
+            }
+
             foreach (var participant in _call.Participants)
             {
                 if (participant.Nickname == UserService.LoggedUser.Nickname)
@@ -57,12 +67,6 @@ namespace Rozmawiator.PartialViews
                 }
 
                 var userControl = new UserThumbnailControl(participant);
-                UserPanel.Children.Add(userControl);
-            }
-
-            foreach (var user in Call.Participants)
-            {
-                var userControl = new UserThumbnailControl(user);
                 UserPanel.Children.Add(userControl);
             }
         }

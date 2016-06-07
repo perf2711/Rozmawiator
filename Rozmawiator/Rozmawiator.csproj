@@ -78,8 +78,8 @@
       <DependentUpon>LoadingControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\ToggleImageButton.cs" />
-    <Compile Include="Controls\UserInfoControl.xaml.cs">
-      <DependentUpon>UserInfoControl.xaml</DependentUpon>
+    <Compile Include="Controls\ParticipantsInfoControl.xaml.cs">
+      <DependentUpon>ParticipantsInfoControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\UserThumbnailControl.xaml.cs">
       <DependentUpon>UserThumbnailControl.xaml</DependentUpon>
@@ -94,6 +94,9 @@
     <Compile Include="Models\Server.cs" />
     <Compile Include="PartialViews\CallViewControl.xaml.cs">
       <DependentUpon>CallViewControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PartialViews\ConversationViewControl.xaml.cs">
+      <DependentUpon>ConversationViewControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="PartialViews\LoggedUserInfoControl.xaml.cs">
       <DependentUpon>LoggedUserInfoControl.xaml</DependentUpon>
@@ -136,7 +139,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controls\UserInfoControl.xaml">
+    <Page Include="Controls\ParticipantsInfoControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -149,6 +152,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PartialViews\ChatInputControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PartialViews\ConversationViewControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
