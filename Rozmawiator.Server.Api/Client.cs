@@ -10,18 +10,20 @@ namespace Rozmawiator.Server.Api
 {
     public class Client
     {
+        public Guid Id => User.Id;
         public User User { get; }
         public IPEndPoint EndPoint { get; }
         public Listener Server { get; }
 
         public event Action<Client> Timeout;
 
-        private Timer _timeoutTimer;
+        private readonly Timer _timeoutTimer;
 
         public Client(Listener server, User user, IPEndPoint endPoint)
         {
             EndPoint = endPoint;
             Server = server;
+            User = user;
 
             _timeoutTimer = new Timer(server.TimeoutSpan);
             _timeoutTimer.Elapsed += OnTimeout;

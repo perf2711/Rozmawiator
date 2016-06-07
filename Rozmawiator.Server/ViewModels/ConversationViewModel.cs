@@ -11,8 +11,7 @@ namespace Rozmawiator.Server.ViewModels
     {
         public Conversation Conversation { get; set; }
 
-        public int Id => Conversation.Id;
-        public string OwnerNickname => Conversation.Owner.Nickname;
+        public Guid Id => Conversation.Id;
         public IEnumerable<ClientViewModel> Participants => Conversation.Participants.Select(c => new ClientViewModel {Client = c});
     }
 }

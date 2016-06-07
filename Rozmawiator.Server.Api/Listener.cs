@@ -132,6 +132,14 @@ namespace Rozmawiator.Server.Api
             Send(receiver, message.GetBytes());
         }
 
+        public void Broadcast(Message message)
+        {
+            foreach (var client in _clients)
+            {
+                Send(client, message);
+            }
+        }
+
         public void Debug(string message)
         {
             DebugMessage?.Invoke(DateTime.Now, message);
@@ -188,10 +196,9 @@ namespace Rozmawiator.Server.Api
 
         private void HandleServerMessage(IPEndPoint endpoint, ServerMessage message)
         {
-            var type = (ServerMessageType) message.MessageType;
             var sender = GetClient(message.SenderId);
 
-            switch (type)
+            switch (message.Type)
             {
                 case ServerMessageType.Hello:
                     HandleHello(endpoint, message);

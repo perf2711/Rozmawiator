@@ -15,10 +15,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Rozmawiator.Communication;
+using Rozmawiator.Communication.Call;
+using Rozmawiator.Communication.Conversation;
+using Rozmawiator.Communication.Server;
 using Rozmawiator.Server.Api;
 using Rozmawiator.Server.ViewModels;
 using Rozmawiator.Server.Windows;
-using Rozmawiator.Shared;
+
 
 namespace Rozmawiator.Server
 {
@@ -102,54 +106,107 @@ namespace Rozmawiator.Server
 
         private void OnNewMessage(IPEndPoint ipEndPoint, Message message)
         {
+            switch (message.Category)
+            {
+                case MessageCategory.Server:
+                    HandleServerMessage(ipEndPoint, (ServerMessage)message);
+                    break;
+                case MessageCategory.Conversation:
+                    HandleConversationMessage(ipEndPoint, (ConversationMessage)message);
+                    break;
+                case MessageCategory.Call:
+                    HandleCallMessage(ipEndPoint, (CallMessage)message);
+                    break;
+            }
+        }
+
+        private void HandleServerMessage(IPEndPoint ipEndPoint, ServerMessage message)
+        {
             switch (message.Type)
             {
-                case Message.MessageType.Hello:
-                case Message.MessageType.Bye:
-                case Message.MessageType.Call:
-                case Message.MessageType.CallRequest:
-                case Message.MessageType.Text:
+                case ServerMessageType.Hello:
+                    LogMessage(ipEndPoint, message, false);
+                    break;
+                case ServerMessageType.Ok:
+                    LogMessage(ipEndPoint, message, true, true);
+                    break;
+                case ServerMessageType.Bye:
+                case ServerMessageType.CreateConversation:
+                case ServerMessageType.Error:
                     LogMessage(ipEndPoint, message);
                     break;
-                case Message.MessageType.DirectText:
-                    LogDirectText(ipEndPoint, message);
+                case ServerMessageType.KeepAlive:
                     break;
-                case Message.MessageType.CallResponse:
-                case Message.MessageType.HelloConversation:
-                case Message.MessageType.ByeConversation:
-                case Message.MessageType.CloseConversation:
-                    break;
-                case Message.MessageType.KeepAlive:
-                case Message.MessageType.Audio:
-                    return;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            LogMessage(ipEndPoint, message, false);
         }
 
-        private void LogMessage(IPEndPoint endpoint, Message message, bool appendContent = true)
+        private void HandleConversationMessage(IPEndPoint ipEndPoint, ConversationMessage message)
         {
-            Log($"{App.Server.GetClient(message.Sender)?.Nickname ?? "?"} [{endpoint}] <{message.Type}> " + (appendContent ? message.GetTextContent() : ""));
+            switch (message.Type)
+            {
+                case ConversationMessageType.AddUser:
+                case ConversationMessageType.NewUser:
+                case ConversationMessageType.UserLeft:
+                    LogMessage(ipEndPoint, message, true, true);
+                    break;
+                case ConversationMessageType.Bye:
+                case ConversationMessageType.Text:
+                case ConversationMessageType.CallResponse:
+                    LogMessage(ipEndPoint, message);
+                    break;
+                case ConversationMessageType.CreateCall:
+                case ConversationMessageType.CallRequest:
+                    LogMessage(ipEndPoint, message, false);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        private void LogDirectText(IPEndPoint endpoint, Message message, bool appendContent = true)
+        private void HandleCallMessage(IPEndPoint ipEndPoint, CallMessage message)
         {
-            Log($"{App.Server.GetClient(message.Sender)?.Nickname ?? "?"} [{endpoint}] => {message.GetDirectTextNickname()} <{message.Type}> " + (appendContent ? message.GetDirectTextContent() : ""));
+            switch (message.Type)
+            {
+                case CallMessageType.NewUser:
+                case CallMessageType.UserDeclined:
+                case CallMessageType.UserLeft:
+                    LogMessage(ipEndPoint, message, true, true);
+                    break;
+                case CallMessageType.Bye:
+                    LogMessage(ipEndPoint, message);
+                    break;
+                case CallMessageType.Audio:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void LogMessage(IPEndPoint endpoint, ServerMessage message, bool appendContent = true, bool guidContent = false)
+        {
+            Log($"{message.SenderId} [{endpoint}] <{message.Type}> " + (appendContent ? (guidContent ? message.GetGuidContent().ToString() : message.GetStringContent()) : ""));
+        }
+
+        private void LogMessage(IPEndPoint endpoint, ConversationMessage message, bool appendContent = true, bool guidContent = false)
+        {
+            Log($"{message.SenderId} [{endpoint}] <{message.Type}> ConvID:{message.GetConversationId()} : " + (appendContent ? (guidContent ? message.GetGuidContent().ToString() : message.GetStringContent()) : ""));
+        }
+
+        private void LogMessage(IPEndPoint endpoint, CallMessage message, bool appendContent = true, bool guidContent = false)
+        {
+            Log($"{message.SenderId} [{endpoint}] <{message.Type}> CallID:{message.GetCallId()} : " + (appendContent ? (guidContent ? message.GetGuidContent().ToString() : message.GetStringContent()) : ""));
         }
 
         private void LogSelfMessage(Message message, bool appendContent = true)
         {
-            Log($"Server <{message.Type}> " + (appendContent ? message.GetTextContent() : ""));
+            Log($"Server <{message.MessageType}> " + (appendContent ? message.GetStringContent() : ""));
         }
 
         private void Log(string text, bool appendDate = true)
         {
-            Dispatcher.Invoke(() =>
-            {
-                ConsoleBox.Text += (appendDate ? $"[{DateTime.Now.ToString("T")}]" : "") + $" {text}\n";
-            });
+            Dispatcher.Invoke(() => { ConsoleBox.Text += (appendDate ? $"[{DateTime.Now.ToString("T")}]" : "") + $" {text}\n"; });
         }
 
         private void SendMessage(Message message)
@@ -224,14 +281,17 @@ namespace Rozmawiator.Server
 
         private void SendButton_Click(object sender, RoutedEventArgs e)
         {
-            var message = new Message(Message.MessageType.Text, ConsoleSendBox.Text);
+            /*
+            var message = 
             ConsoleSendBox.Text = "";
             SendMessage(message);
             LogSelfMessage(message);
+            */
         }
 
         private void ConsoleSendBox_KeyDown(object sender, KeyEventArgs e)
         {
+            /*
             if (e.Key == Key.Return)
             {
                 var message = new Message(Message.MessageType.Text, ConsoleSendBox.Text);
@@ -239,6 +299,7 @@ namespace Rozmawiator.Server
                 SendMessage(message);
                 LogSelfMessage(message);
             }
+            */
         }
     }
 }

@@ -11,8 +11,7 @@ namespace Rozmawiator.Server.ViewModels
     {
         public Client Client { get; set; }
 
-        public int Id => Client.Id;
-        public string Nickname => Client.Nickname;
+        public Guid Id => Client.Id;
         public string Endpoint => Client.EndPoint.ToString();
     }
 }
