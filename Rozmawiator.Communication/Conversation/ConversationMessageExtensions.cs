@@ -14,10 +14,10 @@ namespace Rozmawiator.Communication.Conversation
             return (ConversationMessage) message.AddContent(userId.ToByteArray());
         }
 
-        public static ConversationMessage Bye(this ConversationMessage message)
+        public static ConversationMessage Bye(this ConversationMessage message, string reason)
         {
             message.Type = ConversationMessageType.Bye;
-            return message;
+            return (ConversationMessage) message.AddContent(reason);
         }
 
         public static ConversationMessage NewUser(this ConversationMessage message, Guid userId)

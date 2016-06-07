@@ -7,7 +7,11 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Rozmawiator.Shared;
+using Rozmawiator.Communication;
+using Rozmawiator.Communication.Call;
+using Rozmawiator.Communication.Conversation;
+using Rozmawiator.Communication.Server;
+using Rozmawiator.Request;
 
 namespace Rozmawiator.ClientApi
 {
@@ -20,24 +24,26 @@ namespace Rozmawiator.ClientApi
             Connected
         }
 
-        public string Nickname { get; set; }
+        public Guid Id { get; set; }
         public ClientState State { get; private set; } = ClientState.Disconnected;
         public IPEndPoint ServerEndPoint { get; private set; }
 
-        public Conversation Conversation { get; private set; }
+        public ReadOnlyObservableCollection<Conversation> Conversations { get; }
+        private readonly ObservableCollection<Conversation> _conversations;
 
         public ReadOnlyObservableCollection<CallRequest> PendingCallRequests { get; }
         private readonly ObservableCollection<CallRequest> _pendingCallRequests;
 
-        public List<PassiveConversation> PassiveConversations { get; }
+        public List<ExpectedMessage> ExpectedMessages { get; }
 
         public event Action<Client, Message> Connected;
         public event Action<Client, Message> NewMessage;
 
+        public event Action<Client, Conversation> NewConversation;
+
         public event Action<Client, CallRequest, Message> NewCallRequest;
         public event Action<Client, Message> NewCallResponse;
-
-        public event Action<Client, PassiveConversation> NewPassiveConversation;
+        
 
         private readonly UdpClient _client;
         private const int KeepAliveSpan = 1000;
@@ -50,14 +56,17 @@ namespace Rozmawiator.ClientApi
             _pendingCallRequests = new ObservableCollection<CallRequest>();
             PendingCallRequests = new ReadOnlyObservableCollection<CallRequest>(_pendingCallRequests);
 
-            PassiveConversations = new List<PassiveConversation>();
+            _conversations = new ObservableCollection<Conversation>();
+            Conversations = new ReadOnlyObservableCollection<Conversation>(_conversations);
+
+            ExpectedMessages = new List<ExpectedMessage>();
         }
 
         public void Connect(IPEndPoint ipEndPoint)
         {
-            if (string.IsNullOrEmpty(Nickname))
+            if (Id == Guid.Empty)
             {
-                throw new InvalidOperationException("Nickname cannot be empty.");
+                throw new InvalidOperationException("GUID cannot be zeroes.");
             }
 
             if (State != ClientState.Disconnected)
@@ -72,7 +81,14 @@ namespace Rozmawiator.ClientApi
             _keepAliveTimer = new Timer(SendHeartbeat, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(KeepAliveSpan));
             Task.Factory.StartNew(ReceiveLoop);
 
-            ForceSend(Message.Hello(Nickname));
+            ExpectedMessages.Add(new ExpectedMessage(ServerMessageType.Hello, OnConnected));
+            ForceSend(ServerMessage.Create(Id).Hello());
+        }
+
+        private void OnConnected(ExpectedMessage expectedMessage, Message message)
+        {
+            State = ClientState.Connected;
+            Connected?.Invoke(this, message);
         }
 
         public void Disconnect()
@@ -82,7 +98,7 @@ namespace Rozmawiator.ClientApi
                 return;
             }
 
-            Send(Message.Bye());
+            Send(ServerMessage.Create(Id).Bye("Disconnect"));
             State = ClientState.Disconnected;
             _client.Close();
             ServerEndPoint = null;
@@ -91,7 +107,6 @@ namespace Rozmawiator.ClientApi
         private void ForceSend(Message message)
         {
             var bytes = message.GetBytes();
-            message.Origin = Message.MessageOrigin.Sent;
             _client.Send(bytes, bytes.Length);
         }
 
@@ -103,7 +118,6 @@ namespace Rozmawiator.ClientApi
             }
 
             var bytes = message.GetBytes();
-            message.Origin = Message.MessageOrigin.Sent;
             _client.Send(bytes, bytes.Length);
         }
 
@@ -115,49 +129,21 @@ namespace Rozmawiator.ClientApi
             }
 
             var bytes = message.GetBytes();
-            message.Origin = Message.MessageOrigin.Sent;
             await _client.SendAsync(bytes, bytes.Length);
         }
 
-        public void Call(string nickname)
+        public void CreateConversation()
         {
-            JoinNewConversation();
-            Conversation.AddUser(nickname);
+            ExpectedMessages.Add(new ExpectedMessage(ServerMessageType.Ok, OnConversationCreated));
+            Send(ServerMessage.Create(Id).CreateConversation());
         }
 
-        public void DisconnectFromConversation(string reason)
+        private void OnConversationCreated(ExpectedMessage expectedMessage, Message message)
         {
-            Conversation.SendToAll(Message.CreateNew.ByeConversation(reason));
-            Conversation = null;
-        }
-
-        public void RespondToRequest(CallRequest request)
-        {
-            if (request.Response == null)
-            {
-                //Ignored
-                _pendingCallRequests.Remove(request);
-                return;
-            }
-
-            switch (request.Response.Value)
-            {
-                case Message.CallResponseType.RequestDenied:
-                case Message.CallResponseType.RequestAccepted:
-                    JoinNewConversation();
-                    Send(new Message().CallResponse(request.CallerId, request.Response.Value));
-                    break;
-                default:
-                    throw new InvalidOperationException("Invalid response. Client can only send Accepted and Denied.");
-            }
-
-            _pendingCallRequests.Remove(request);
-        }
-
-        public void JoinNewConversation()
-        {
-            Conversation?.Disconnect();
-            Conversation = new Conversation(this);
+            var conversationId = message.GetGuidContent();
+            var conversation = new Conversation(conversationId, this);
+            _conversations.Add(conversation);
+            NewConversation?.Invoke(this, conversation);
         }
 
         private void ReceiveLoop()
@@ -168,12 +154,7 @@ namespace Rozmawiator.ClientApi
                 var msg = _client.Receive(ref from);
 
                 var message = Message.FromBytes(msg);
-                if (message.Type == Message.MessageType.Hello && message.Sender == -1)
-                {
-                    State = ClientState.Connected;
-                    Connected?.Invoke(this, message);
-                    break;
-                }
+                CheckExpectedMessages(message);
             }
 
             while (State == ClientState.Connected)
@@ -182,63 +163,72 @@ namespace Rozmawiator.ClientApi
                 var msg = _client.Receive(ref from);
 
                 var message = Message.FromBytes(msg);
-                message.Origin = Message.MessageOrigin.Received;
                 Task.Factory.StartNew(() => HandleMessage(message));
+            }
+        }
+
+        private void CheckExpectedMessages(Message message)
+        {
+            foreach (var expectedMessage in ExpectedMessages.ToArray())
+            {
+                if (expectedMessage.Test(message))
+                {
+                    ExpectedMessages.Remove(expectedMessage);
+                }
             }
         }
 
         private void HandleMessage(Message message)
         {
-            switch (message.Type)
+            CheckExpectedMessages(message);
+
+            switch (message.Category)
             {
-                case Message.MessageType.Hello:
-                case Message.MessageType.Bye:
-                case Message.MessageType.KeepAlive:
-                case Message.MessageType.Call:
+                case MessageCategory.Server:
+                    HandleServerMessage((ServerMessage)message);
                     break;
-                case Message.MessageType.DirectText:
-                    HandleDirectText(message);
+                case MessageCategory.Conversation:
+                    HandleConversationMessage((ConversationMessage)message);
                     break;
-                case Message.MessageType.HelloConversation:
-                case Message.MessageType.ByeConversation:
-                case Message.MessageType.CloseConversation:
-                case Message.MessageType.Text:
-                case Message.MessageType.Audio:
-                    Conversation?.HandleMessage(message);
+                case MessageCategory.Call:
+                    HandleCallMessage((CallMessage)message);
                     break;
-                case Message.MessageType.CallRequest:
-                    HandleCallRequest(message);
-                    break;
-                case Message.MessageType.CallResponse:
-                    NewCallResponse?.Invoke(this, message);
-                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             NewMessage?.Invoke(this, message);
         }
 
-
-        private void HandleDirectText(Message message)
-        {
-            var senderNickname = message.GetDirectTextNickname();
-            var passiveConversation = PassiveConversations.FirstOrDefault(p => p.ParticipantsNicknames.Any(n => n == senderNickname));
-
-            if (passiveConversation == null)
+        private void HandleServerMessage(ServerMessage message)
+        { 
+            switch (message.Type)
             {
-                passiveConversation = new PassiveConversation(this);
-                PassiveConversations.Add(passiveConversation);
-                passiveConversation.ParticipantsNicknames.Add(senderNickname);
-                NewPassiveConversation?.Invoke(this, passiveConversation);
+                case ServerMessageType.Hello:
+                case ServerMessageType.KeepAlive:
+                case ServerMessageType.CreateConversation:
+                case ServerMessageType.Ok:
+                case ServerMessageType.Error:
+                    break;
+                case ServerMessageType.Bye:
+                    HandleBye(message);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            passiveConversation.HandleMessage(message);
         }
 
-        private void HandleCallRequest(Message message)
+        private void HandleConversationMessage(ConversationMessage message)
         {
-            var request = new CallRequest(message.Sender, message.GetTextContent(), this);
-            _pendingCallRequests.Add(request);
-            NewCallRequest?.Invoke(this, request, message);
+        }
+
+        private void HandleCallMessage(CallMessage message)
+        {
+        }
+
+        private void HandleBye(ServerMessage message)
+        {
+            Disconnect();
         }
 
         private void SendHeartbeat(object state)
@@ -248,7 +238,7 @@ namespace Rozmawiator.ClientApi
                 return;
             }
 
-            Send(Message.KeepAlive());
+            Send(ServerMessage.Create(Id).KeepAlive());
         }
     }
 }

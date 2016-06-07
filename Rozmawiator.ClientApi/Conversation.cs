@@ -4,154 +4,130 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Rozmawiator.Shared;
+using Rozmawiator.Communication;
+using Rozmawiator.Communication.Call;
+using Rozmawiator.Communication.Conversation;
+using Rozmawiator.Communication.Server;
+using Rozmawiator.Request;
 
 namespace Rozmawiator.ClientApi
 {
     public class Conversation
     {
+        public Guid Id { get; }
         public Client Client { get; }
-        public ReadOnlyObservableCollection<RemoteClient> Participants { get; }
-        public ReadOnlyObservableCollection<string> CalledClients { get; }
+        public Call Call { get; private set; }
+        public ReadOnlyObservableCollection<Guid> Participants { get; }
         public IReadOnlyList<Message> TextMessages => _textMessages.AsReadOnly();
 
-        public event Action<Conversation, RemoteClient> ParticipantConnected;
-        public event Action<Conversation, RemoteClient> ParticipantDisconnected;
-        public event Action<Conversation, Message> ConversationClosed;
-        public event Action<Conversation, RemoteClient, Message> NewTextMessage;
-        public event Action<Conversation, RemoteClient, Message> NewAudioMessage;
+        public event Action<Conversation, Guid> ParticipantConnected;
+        public event Action<Conversation, Guid> ParticipantDisconnected;
 
-        private readonly ObservableCollection<RemoteClient> _participants;
-        private readonly ObservableCollection<string> _calledClients;
+        public event Action<Conversation, CallRequest> NewCallRequest;
+        public event Action<Conversation, ConversationMessage> NewTextMessage;
+
+        private readonly ObservableCollection<Guid> _participants;
         private readonly List<Message> _textMessages;
 
-        public Conversation(Client client)
+        public Conversation(Guid id, Client client)
         {
+            Id = id;
             Client = client;
-            _participants = new ObservableCollection<RemoteClient>();
-            _calledClients = new ObservableCollection<string>();
+
             _textMessages = new List<Message>();
-            Participants = new ReadOnlyObservableCollection<RemoteClient>(_participants);
-            CalledClients = new ReadOnlyObservableCollection<string>(_calledClients);
+
+            _participants = new ObservableCollection<Guid>();
+            Participants = new ReadOnlyObservableCollection<Guid>(_participants);
         }
 
-        public void HandleMessage(Message message)
+        public void HandleConversationMessage(ConversationMessage message)
         {
             switch (message.Type)
             {
-                case Message.MessageType.Hello:
-                case Message.MessageType.Bye:
-                case Message.MessageType.KeepAlive:
-                case Message.MessageType.Call:
-                case Message.MessageType.CallRequest:
-                case Message.MessageType.CallResponse:
-                    return;
-                case Message.MessageType.Text:
+                case ConversationMessageType.NewUser:
+                    HandleNewUser(message);
+                    break;
+                case ConversationMessageType.UserLeft:
+                    HandleUserLeft(message);
+                    break;
+                case ConversationMessageType.Text:
                     HandleTextMessage(message);
                     break;
-                case Message.MessageType.Audio:
-                    HandleAudioMessage(message);
+                case ConversationMessageType.CallRequest:
                     break;
-                case Message.MessageType.HelloConversation:
-                    HandleHelloConversation(message);
+                case ConversationMessageType.AddUser:
+                case ConversationMessageType.Bye:
+                case ConversationMessageType.CreateCall:
+                case ConversationMessageType.CallResponse:
                     break;
-                case Message.MessageType.ByeConversation:
-                    HandleByeConversation(message);
-                    break;
-                case Message.MessageType.CloseConversation:
-                    HandleCloseConversation(message);
-                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
-        public RemoteClient GetRemoteClient(short id)
+        private void HandleNewUser(ConversationMessage message)
         {
-            return _participants.FirstOrDefault(p => p.Id == id);
+            _participants.Add(message.SenderId);
+            ParticipantConnected?.Invoke(this, message.SenderId);
         }
 
-        public RemoteClient GetSender(Message message)
+        private void HandleUserLeft(ConversationMessage message)
         {
-            return _participants.FirstOrDefault(p => p.Id == message.Sender);
+            _participants.Remove(message.SenderId);
+            ParticipantDisconnected?.Invoke(this, message.SenderId);
         }
 
-        private void HandleTextMessage(Message message)
+        private void HandleTextMessage(ConversationMessage message)
         {
             _textMessages.Add(message);
-            NewTextMessage?.Invoke(this, GetSender(message), message);
+            NewTextMessage?.Invoke(this, message);
         }
 
-        private void HandleAudioMessage(Message message)
+        public void AddUser(Guid id)
         {
-            NewAudioMessage?.Invoke(this, GetSender(message), message);
+            Client.Send(ConversationMessage.Create(Client.Id, Id).AddUser(id));
         }
 
-        private void HandleHelloConversation(Message message)
+        public void CreateCall()
         {
-            var remoteClient = new RemoteClient(message.Sender, message.GetTextContent());
-            _calledClients.Remove(remoteClient.Nickname);
-            _participants.Add(remoteClient);
-            ParticipantConnected?.Invoke(this, remoteClient);
+            Client.ExpectedMessages.Add(new ExpectedMessage(ServerMessageType.Ok, OnCallCreated));
+            Client.Send(ConversationMessage.Create(Client.Id, Id).CreateCall());
         }
 
-        private void HandleByeConversation(Message message)
+        private void OnCallCreated(ExpectedMessage expectedMessage, Message message)
         {
-            var remoteClient = Participants.FirstOrDefault(p => p.Id == message.Sender);
-            if (remoteClient == null)
+            var callId = message.GetGuidContent();
+            Call = new Call(callId, this);
+        }
+
+        public void RespondToRequest(CallRequest request)
+        {
+            if (request.Response == null)
             {
                 return;
             }
-            _participants.Remove(remoteClient);
-            ParticipantDisconnected?.Invoke(this, remoteClient);
+
+            Client.Send(ConversationMessage.Create(Client.Id, Id).CallResponse(request.Response.Value));
         }
 
-        private void HandleCloseConversation(Message message)
+        public void DisconnectCall()
         {
-            SendToAll(new Message(Message.MessageType.ByeConversation, "Disconnect"));
-            ConversationClosed?.Invoke(this, message);
+            Call?.Disconnect();
+            Call = null;
         }
 
-        public void AddUser(string nickname)
+        public void Send(ConversationMessage message)
         {
-            Client.Send(Message.CreateNew.Call(nickname));
-            _calledClients.Add(nickname);
-        }
-
-        public void Send(Message message)
-        {
-            if (message.Type == Message.MessageType.Text)
+            if (message.Type == ConversationMessageType.Text)
             {
                 _textMessages.Add(message);
             }
             Client.Send(message);
         }
 
-        public void SendToAll(Message message)
-        {
-            message.Receiver = 0;
-            Send(message);
-        }
-
-        public void SendTo(string nickname, Message message)
-        {
-            var id = _participants.FirstOrDefault(p => p.Nickname == nickname)?.Id;
-            if (id == null)
-            {
-                return;
-            }
-            message.Receiver = id.Value;
-
-            Send(message);
-        }
-
-        public void SendTo(short id, Message message)
-        {
-            message.Receiver = id;
-            Send(message);
-        }
-
         public void Disconnect()
         {
-            Client.DisconnectFromConversation("Disconnect");
+            Client.Send(ConversationMessage.Create(Client.Id, Id).Bye("Disconnect"));
         }
     }
 }

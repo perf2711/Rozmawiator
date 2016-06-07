@@ -40,12 +40,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Call.cs" />
     <Compile Include="CallRequest.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="Conversation.cs" />
-    <Compile Include="PassiveConversation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RemoteClient.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Rozmawiator.Communication\Rozmawiator.Communication.csproj">
+      <Project>{a71cdb11-fbff-4cfe-b3a2-1f32b9f19914}</Project>
+      <Name>Rozmawiator.Communication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Rozmawiator.Request\Rozmawiator.Request.csproj">
+      <Project>{6b556b17-d5b2-45ca-888d-1155e7e0860b}</Project>
+      <Name>Rozmawiator.Request</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

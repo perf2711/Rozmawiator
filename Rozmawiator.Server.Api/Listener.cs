@@ -189,6 +189,8 @@ namespace Rozmawiator.Server.Api
                 case MessageCategory.Call:
                     HandleCallMessage(endpoint, (CallMessage) message);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             NewMessage?.Invoke(endpoint, message);
@@ -225,6 +227,16 @@ namespace Rozmawiator.Server.Api
         {
             var conversationId = message.GetConversationId();
             var conversation = _conversations.FirstOrDefault(c => c.Id == conversationId);
+            if (conversation == null)
+            {
+                using (var database = new RozmawiatorDb())
+                {
+                    if (database.Conversations.Find(conversationId) != null)
+                    {
+                        conversation = new Conversation(conversationId, this);
+                    }
+                }
+            }
 
             conversation?.HandleMessage(message);
         }
@@ -278,6 +290,7 @@ namespace Rozmawiator.Server.Api
         {
             var conversation = new Conversation(Guid.NewGuid(), this);
             conversation.Join(sender);
+            _conversations.Add(conversation);
 
             Send(sender, ServerMessage.Create(ServerId).Ok(conversation.Id.ToByteArray()));
         }
@@ -287,6 +300,7 @@ namespace Rozmawiator.Server.Api
             //Debug($"{sender.Nickname} is alive ({sender.EndPoint.Address}:{sender.EndPoint.Port})");
             sender?.KeepAlive();
         }
+
         private Client AddClient(IPEndPoint endpoint, User user)
         {
             var client = new Client(this, user, endpoint);

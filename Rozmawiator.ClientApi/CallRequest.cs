@@ -4,42 +4,39 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using Rozmawiator.Shared;
+using Rozmawiator.Communication;
+using Rozmawiator.Communication.Conversation;
 
 namespace Rozmawiator.ClientApi
 {
     public class CallRequest
     {
-        private readonly Client _client;
-        public short CallerId { get; }
-        public string CallerNickname { get; }
-        public Message.CallResponseType? Response { get; private set; }
+        private readonly Conversation _conversation;
+        public Guid ConversationId { get; }
+        public CallResponseType? Response { get; private set; }
 
-        public CallRequest(short callerId, string callerNickname, Client client)
+        public CallRequest(Guid conversationId, Conversation conversation)
         {
-            CallerId = callerId;
-            CallerNickname = callerNickname;
-            _client = client;
+            ConversationId = conversationId;
+            _conversation = conversation;
         }
 
         public void Accept()
         {
-            //_client.Send(new Message().CallResponse(CallerId, Message.CallResponseType.RequestAccepted));
-            Response = Message.CallResponseType.RequestAccepted;
-            _client.RespondToRequest(this);
+            Response = CallResponseType.Accepted;
+            _conversation.RespondToRequest(this);
         }
 
         public void Decline()
         {
-            Response = Message.CallResponseType.RequestDenied;
-            _client.RespondToRequest(this);
-            //_client.Send(new Message().CallResponse(CallerId, Message.CallResponseType.RequestDenied));
+            Response = CallResponseType.Denied;
+            _conversation.RespondToRequest(this);
         }
 
         public void Ignore()
         {
             Response = null;
-            _client.RespondToRequest(this);
+            _conversation.RespondToRequest(this);
         }
     }
 }
