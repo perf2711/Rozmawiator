@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Timers;
-using Rozmawiator.Shared;
+using Rozmawiator.Database;
+using Rozmawiator.Database.Entities;
+using Message = Rozmawiator.Communication.Message;
 
 namespace Rozmawiator.Server.Api
 {
     public class Client
     {
-
-        public short Id { get; }
-        public string Nickname { get; }
+        public User User { get; }
         public IPEndPoint EndPoint { get; }
         public Listener Server { get; }
 
@@ -17,13 +18,11 @@ namespace Rozmawiator.Server.Api
 
         private Timer _timeoutTimer;
 
-        public Client(Listener server, short id, string nickname, IPEndPoint endPoint)
+        public Client(Listener server, User user, IPEndPoint endPoint)
         {
-            Id = id;
-            Nickname = nickname;
             EndPoint = endPoint;
             Server = server;
-            
+
             _timeoutTimer = new Timer(server.TimeoutSpan);
             _timeoutTimer.Elapsed += OnTimeout;
             _timeoutTimer.Stop();

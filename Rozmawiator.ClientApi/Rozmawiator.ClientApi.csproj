@@ -47,12 +47,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemoteClient.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Rozmawiator.Shared\Rozmawiator.Shared.csproj">
-      <Project>{ed52d6a8-fe5b-48e4-a66f-e8cea78205fb}</Project>
-      <Name>Rozmawiator.Shared</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

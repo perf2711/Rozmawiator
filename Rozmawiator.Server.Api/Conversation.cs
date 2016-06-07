@@ -1,61 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Odbc;
 using System.Linq;
+using Rozmawiator.Communication;
+using Rozmawiator.Communication.Call;
+using Rozmawiator.Communication.Conversation;
+using Rozmawiator.Communication.Server;
 using Rozmawiator.Database;
 using Rozmawiator.Database.Entities;
-using Message = Rozmawiator.Shared.Message;
+using Message = Rozmawiator.Communication.Message;
 
 namespace Rozmawiator.Server.Api
 {
     public class Conversation
     {
-        public int Id { get; }
-        public Client Owner { get; private set; }
+        public Guid Id { get; }
         public Listener Server { get; }
-        private readonly List<Client> _participants;
-        private readonly List<CallRequest> _callRequests;
-        private readonly Guid _conversationId = Guid.Empty;
         public IEnumerable<Client> Participants => _participants.AsReadOnly();
-        public IEnumerable<CallRequest> CallRequests => _callRequests.AsReadOnly();
+        public Call Call { get; set; }
 
         public event Action<Conversation> ParticipantsUpdate;
 
-        public event Action<Conversation> CloseConversation;
-        
-        public Conversation(int id, Listener server, Client owner)
+        private readonly List<Client> _participants;
+
+        public Conversation(Guid id, Listener server)
         {
             Id = id;
-            Owner = owner;
             Server = server;
-            _participants = new List<Client>
-            {
-                owner
-            };
-            _callRequests = new List<CallRequest>();
+            _participants = new List<Client>();
 
             using (var database = new RozmawiatorDb())
             {
-                var ownerUser = database.Users.FirstOrDefault(u => u.UserName == owner.Nickname);
-                if (ownerUser == null)
+                var conversation = database.Conversations.FirstOrDefault(c => c.Id == Id);
+                if (conversation != null)
                 {
+                    _participants.AddRange(conversation.Participants.ToArray().Select(p => Server.GetClient(p.Id)));
                     return;
                 }
 
-                var conversation = new Database.Entities.Conversation
-                {
-                    Type = ConversationType.Active,
-                    Owner = ownerUser,
-                    Creator = ownerUser,
-                    ConversationParticipants = new[]
-                    {
-                        new ConversationParticipant
-                        {
-                            User = ownerUser
-                        }
-                    }
-                };
-                _conversationId = conversation.Id;
+                conversation = new Database.Entities.Conversation {Id = id};
                 database.Conversations.Add(conversation);
                 database.SaveChanges();
             }
@@ -63,40 +47,7 @@ namespace Rozmawiator.Server.Api
 
         public bool IsMember(Client client)
         {
-            return Owner == client || _participants.Contains(client);
-        }
-
-        public void AddRequest(Client target)
-        {
-            _callRequests.Add(new CallRequest(Server, Owner, target));
-        }
-
-        public void SendRequests()
-        {
-            foreach (var request in _callRequests)
-            {
-                if (request.State == CallRequest.RequestState.Untouched)
-                {
-                    request.SendRequest();
-                }
-            }
-        }
-
-        public void RemoveRequests()
-        {
-            var requestsToRemove = _callRequests.Where(request => request.State == CallRequest.RequestState.Resolved).ToArray();
-
-            foreach (var requestToRemove in requestsToRemove)
-            {
-                _callRequests.Remove(requestToRemove);
-            }
-
-            TryClose();
-        }
-
-        public CallRequest GetRequest(Client caller, Client target)
-        {
-            return _callRequests.FirstOrDefault(c => c.RequestingClient == caller && c.TargetClient == target);
+            return _participants.Contains(client);
         }
 
         public void Join(Client client)
@@ -105,169 +56,119 @@ namespace Rozmawiator.Server.Api
 
             using (var database = new RozmawiatorDb())
             {
-                var user =
-                    database.Users.Select(u => new {u.Id, u.UserName})
-                        .FirstOrDefault(u => u.UserName == client.Nickname);
-                if (user != null)
-                {
-                    var conversation = database.Conversations.First(c => c.Id == _conversationId);
-                    var participant = conversation.ConversationParticipants.FirstOrDefault(p => p.UserId == user.Id);
-                    if (participant != null)
-                    {
-                        participant.IsActive = true;
-                    }
-                    else
-                    {
-                        participant = new ConversationParticipant
-                        {
-                            Conversation = conversation,
-                            UserId = user.Id
-                        };
-                        conversation.ConversationParticipants.Add(participant);
-                    }
-                }
-
+                var conversation = database.Conversations.First();
+                conversation.Participants.Add(client.User);
                 database.SaveChanges();
             }
 
-            Broadcast(new Message(client.Id, 0, Message.MessageType.HelloConversation, client.Nickname));
+            Broadcast(ConversationMessage.Create(Server.ServerId, Id).NewUser(client.User.Id));
             ParticipantsUpdate?.Invoke(this);
         }
 
         public void Disconnect(Client client)
         {
-            Server.Debug($"{client.Nickname} disconnected from {Owner.Nickname}'s conversation.");
+            Server.Debug($"{client.User.Id} left from conversation {Id}.");
             _participants.Remove(client);
             using (var database = new RozmawiatorDb())
             {
-                var conversation = database.Conversations.First(c => c.Id == _conversationId);
-
-                if (Owner == client)
-                {
-                    Owner = _participants.FirstOrDefault();
-                    if (Owner != null)
-                    {
-                        var newOwnerUser = database.Users.Select(u => new { u.Id, u.UserName })
-                            .FirstOrDefault(u => u.UserName == Owner.Nickname);
-                        conversation.OwnerId = newOwnerUser?.Id ?? Guid.Empty;
-                    }
-                }
-
-                var user =
-                    database.Users.Select(u => new { u.Id, u.UserName })
-                        .FirstOrDefault(u => u.UserName == client.Nickname);
-
-                if (user != null)
-                {
-                    var conversationParticipant =
-                        conversation.ConversationParticipants.FirstOrDefault(p => p.UserId == user.Id);
-
-                    if (conversationParticipant != null)
-                    {
-                        conversationParticipant.IsActive = false;
-                    }
-                }
-
+                var conversation = database.Conversations.Find(Id);
+                var user = database.Users.Find(client.User.Id);
+                conversation.Participants.Remove(user);
                 database.SaveChanges();
             }
 
-            //Broadcast(new Message(client.Id, 0, Message.MessageType.ByeConversation, client.Nickname));
-            Server.SendAsClient(client, _participants, new Message(Message.MessageType.ByeConversation, client.Nickname));
+            Broadcast(ConversationMessage.Create(Server.ServerId, Id).UserLeft(client.User.Id));
             ParticipantsUpdate?.Invoke(this);
-            TryClose();
         }
 
-        private void TryClose()
-        {
-            // If there is only one participant (owner), and all requests were aborted, close the conversation
-            if (_participants.Count < 2 && !_callRequests.Any())
-            {
-                Broadcast(new Message(Message.MessageType.CloseConversation, "NoMembersLeft"));
-                CloseConversation?.Invoke(this);
-            }
-        }
-
-        public void Close()
-        {
-            Broadcast(new Message(Message.MessageType.CloseConversation, "ClosedByServer"));
-            CloseConversation?.Invoke(this);
-        }
-
-        public void HandleMessage(Message message)
+        public void HandleMessage(ConversationMessage message)
         {
             switch (message.Type)
             {
-                case Message.MessageType.Hello:
-                case Message.MessageType.Bye:
-                case Message.MessageType.KeepAlive:
-                case Message.MessageType.Call:
-                case Message.MessageType.CallRequest:
-                case Message.MessageType.CallResponse:
-                case Message.MessageType.CloseConversation:
-                case Message.MessageType.DirectText:
-                    return;
-                case Message.MessageType.Text:
+                case ConversationMessageType.AddUser:
+                    Join(Server.GetClient(message.GetGuidContent()));
+                    break;
+                case ConversationMessageType.Bye:
+                    Disconnect(Server.GetClient(message.SenderId));
+                    break;
+                case ConversationMessageType.NewUser:
+                    break;
+                case ConversationMessageType.UserLeft:
+                    break;
+                case ConversationMessageType.Text:
                     SaveMessage(message);
                     break;
-                case Message.MessageType.Audio:
-                    Resend(message, true);
-                    return;
-                case Message.MessageType.HelloConversation:
+                case ConversationMessageType.CreateCall:
+                    CreateCall(message);
                     break;
-                case Message.MessageType.ByeConversation:
-                    Disconnect(Server.GetClient(message.Sender));
+                case ConversationMessageType.CallRequest:
+                    return;
+                case ConversationMessageType.CallResponse:
+                    HandleCallResponse(message);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            } 
+
+            Broadcast(message);
+        }
+
+        public void HandleMessage(CallMessage message)
+        {
+            Call?.HandleMessage(message);
+        }
+
+        public void CreateCall(ConversationMessage message)
+        {
+            if (Call == null)
+            {
+                Call = new Call(Server);
+            }
+            
+            Call.Join(Server.GetClient(message.SenderId));
+            Server.Send(Server.GetClient(message.SenderId), ServerMessage.Create(Id).Ok(Call.Id.ToByteArray()));
+            Broadcast(ConversationMessage.Create(Server.ServerId, Id).CallRequest());
+        }
+
+        private void HandleCallResponse(ConversationMessage message)
+        {
+            if (Call == null)
+            {
+                return;
+            }
+
+            var response = (CallResponseType) message.GetByteContent();
+            switch (response)
+            {
+                case CallResponseType.Accepted:
+                    Call.Join(Server.GetClient(message.SenderId));
+                    break;
+                case CallResponseType.Denied:
+                    Call.Broadcast(CallMessage.Create(Server.ServerId, Id).UserDeclined(message.SenderId));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            Resend(message);
-        }
-
-        public void Resend(Message message, bool skipSender = false)
-        {
-            Broadcast(message, skipSender);
-            return;
-            /*
-            if (message.Receiver == 0)
-            {
-                Broadcast(message);
-            }
-            else
-            {
-                Server.Send(Server.GetClient(message.Receiver), message);
-            }
-            */
         }
 
         public void Broadcast(Message message, bool skipSender = false)
         {
-            var sender = Server.GetClient(message.Sender);
+            var sender = Server.GetClient(message.SenderId);
             foreach (var client in _participants.Where(p => !skipSender || p != sender))
             {
                 client.Send(message);
             }
         }
 
-        private void SaveMessage(Message message)
+        private void SaveMessage(ConversationMessage message)
         {
-            var sender = _participants.FirstOrDefault(p => p.Id == message.Sender);
             using (var database = new RozmawiatorDb())
             {
-                var senderUser = database.Users.FirstOrDefault(u => u.UserName == sender.Nickname);
-                if (senderUser == null)
-                {
-                    return;
-                }
-
-                var conversation = database.Conversations.First(c => c.Id == _conversationId);
+                var conversation = database.Conversations.First(c => c.Id == Id);
 
                 var msg = new Database.Entities.Message
                 {
-                    Content = message.GetTextContent(),
-                    Conversation = conversation,
-                    Sender = senderUser,
-                    Timestamp = DateTime.Now
+                    Content = message.GetStringContent(), Conversation = conversation, SenderId = message.SenderId, Timestamp = DateTime.Now
                 };
                 database.Messages.Add(msg);
                 database.SaveChanges();

@@ -44,10 +44,18 @@ namespace Rozmawiator.Communication.Conversation
             return message;
         }
 
+        /*
         public static ConversationMessage CallRequest(this ConversationMessage message, Guid userId)
         {
             message.Type = ConversationMessageType.CallRequest;
             return (ConversationMessage)message.AddContent(userId.ToByteArray());
+        }
+        */
+
+        public static ConversationMessage CallRequest(this ConversationMessage message)
+        {
+            message.Type = ConversationMessageType.CallRequest;
+            return message;
         }
 
         public static ConversationMessage CallResponse(this ConversationMessage message, CallResponseType callResponse)

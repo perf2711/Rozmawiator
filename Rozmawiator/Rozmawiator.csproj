@@ -249,10 +249,6 @@
       <Project>{b98dbbbb-5964-418e-b222-c1e369062314}</Project>
       <Name>Rozmawiator.RestClient</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rozmawiator.Shared\Rozmawiator.Shared.csproj">
-      <Project>{ed52d6a8-fe5b-48e4-a66f-e8cea78205fb}</Project>
-      <Name>Rozmawiator.Shared</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Icons\microphone.png" />

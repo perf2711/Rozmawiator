@@ -54,10 +54,6 @@
       <Project>{8f2e073a-c63f-4a9e-9909-876c17e47276}</Project>
       <Name>Rozmawiator.ClientApi</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rozmawiator.Shared\Rozmawiator.Shared.csproj">
-      <Project>{ed52d6a8-fe5b-48e4-a66f-e8cea78205fb}</Project>
-      <Name>Rozmawiator.Shared</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

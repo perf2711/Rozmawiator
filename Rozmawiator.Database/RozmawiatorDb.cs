@@ -61,6 +61,7 @@ namespace Rozmawiator.Database
         public DbSet<CallRequest> CallRequests { get; set; }
         //public DbSet<FriendRequest> FriendRequests { get; set; }
         public DbSet<Conversation> Conversations { get; set; }
+        public DbSet<Call> Calls { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Server> Servers { get; set; }
     }

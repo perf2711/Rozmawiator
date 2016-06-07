@@ -40,15 +40,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Call\CallMessage.cs" />
+    <Compile Include="Call\CallMessageExtensions.cs" />
+    <Compile Include="Call\CallMessageType.cs" />
+    <Compile Include="Conversation\CallResponseType.cs" />
+    <Compile Include="Conversation\ConversationMessage.cs" />
+    <Compile Include="Conversation\ConversationMessageExtensions.cs" />
+    <Compile Include="Conversation\ConversationMessageType.cs" />
     <Compile Include="Message.cs" />
-    <Compile Include="MessageType.cs" />
+    <Compile Include="MessageCategory.cs" />
+    <Compile Include="MessageExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\ServerMessage.cs" />
     <Compile Include="Server\ServerMessageExtensions.cs" />
+    <Compile Include="Server\ServerMessageType.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Call\" />
-    <Folder Include="Conversation\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

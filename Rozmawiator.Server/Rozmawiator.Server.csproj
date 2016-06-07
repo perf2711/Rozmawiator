@@ -131,10 +131,6 @@
       <Project>{42d8f708-44f2-4cc3-a764-6e7b420d2515}</Project>
       <Name>Rozmawiator.Server.Configuration</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rozmawiator.Shared\Rozmawiator.Shared.csproj">
-      <Project>{ed52d6a8-fe5b-48e4-a66f-e8cea78205fb}</Project>
-      <Name>Rozmawiator.Shared</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

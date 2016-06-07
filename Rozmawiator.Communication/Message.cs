@@ -4,6 +4,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Rozmawiator.Communication.Call;
+using Rozmawiator.Communication.Conversation;
+using Rozmawiator.Communication.Server;
 
 namespace Rozmawiator.Communication
 {
@@ -47,6 +50,26 @@ namespace Rozmawiator.Communication
                 {
                     _messageType += 128;
                 }
+            }
+        }
+
+        public MessageCategory Category
+        {
+            get
+            {
+                if (Enum.IsDefined(typeof(ServerMessageType), MessageType))
+                {
+                    return MessageCategory.Server;   
+                }
+                if (Enum.IsDefined(typeof(ConversationMessageType), MessageType))
+                {
+                    return MessageCategory.Conversation;
+                }
+                if (Enum.IsDefined(typeof(CallMessageType), MessageType))
+                {
+                    return MessageCategory.Call;
+                }
+                throw new IndexOutOfRangeException();
             }
         }
 

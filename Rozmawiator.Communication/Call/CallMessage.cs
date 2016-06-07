@@ -26,7 +26,7 @@ namespace Rozmawiator.Communication.Call
 
         public override byte[] Content => base.Content.Skip(16).ToArray();
 
-        public Guid GetConversationId()
+        public Guid GetCallId()
         {
             return new Guid(base.Content.Take(16).ToArray());
         }

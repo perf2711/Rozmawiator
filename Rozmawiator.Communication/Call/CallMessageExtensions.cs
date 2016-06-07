@@ -14,10 +14,16 @@ namespace Rozmawiator.Communication.Call
             return (CallMessage) message.AddContent(userId.ToByteArray());
         }
 
-        public static CallMessage Bye(this CallMessage message)
+        public static CallMessage UserDeclined(this CallMessage message, Guid userId)
+        {
+            message.Type = CallMessageType.UserDeclined;
+            return (CallMessage) message.AddContent(userId.ToByteArray());
+        }
+
+        public static CallMessage Bye(this CallMessage message, string reason)
         {
             message.Type = CallMessageType.Bye;
-            return message;
+            return (CallMessage) message.AddContent(reason);
         }
 
         public static CallMessage UserLeft(this CallMessage message, Guid userId)

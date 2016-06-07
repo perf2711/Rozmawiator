@@ -1,4 +1,5 @@
-﻿using Rozmawiator.Shared;
+﻿using Rozmawiator.Communication;
+using Rozmawiator.Communication.Conversation;
 
 namespace Rozmawiator.Server.Api
 {
@@ -12,28 +13,23 @@ namespace Rozmawiator.Server.Api
         }
 
         public RequestState State { get; private set; } = RequestState.Untouched;
+        public Conversation Conversation { get; }
 
-        public Listener Server { get; }
-        public Client RequestingClient { get; }
-        public Client TargetClient { get; }
-
-        public CallRequest(Listener server, Client requestingClient, Client targetClient)
-        {
-            Server = server;
-            RequestingClient = requestingClient;
-            TargetClient = targetClient;
+        public CallRequest(Conversation conversation)
+        { 
+            Conversation = conversation;
         }
 
         public void SendRequest()
         {
-            Server.SendAsClient(RequestingClient, TargetClient, new Message(Message.MessageType.CallRequest, RequestingClient.Nickname));
+            //Server.SendAsClient(RequestingClient, TargetClient, new Message(Message.MessageType.CallRequest, RequestingClient.Nickname));
             State = RequestState.Sent;
         }
 
-        public Message.CallResponseType ResolveRequest(Message message)
+        public CallResponseType ResolveRequest(Message message)
         {
             State = RequestState.Resolved;
-            return (Message.CallResponseType) message.Content[0];
+            return (CallResponseType) message.Content[0];
         }
     }
 }
