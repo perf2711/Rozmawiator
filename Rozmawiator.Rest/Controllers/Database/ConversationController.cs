@@ -29,10 +29,7 @@ namespace Rozmawiator.Rest.Controllers.Database
             return new ConversationViewModel
             {
                 Id = conversation.Id,
-                Type = conversation.Type,
-                Creator = conversation.Creator.UserName,
-                Owner = conversation.Owner.UserName,
-                Participants = conversation.ConversationParticipants.Select(cp => cp.User.UserName).ToArray()
+                Participants = conversation.Participants.Select(cp => cp.Id).ToArray()
             };
         }
 
@@ -44,15 +41,12 @@ namespace Rozmawiator.Rest.Controllers.Database
 
             return
                 new Filter(filters).FilterQuery(
-                    _database.Conversations.Where(cr => cr.ConversationParticipants.Any(cp => cp.UserId == user)))
+                    _database.Conversations.Where(cr => cr.Participants.Any(cp => cp.Id == user)))
                     .ToArray()
                     .Select(conversation => new ConversationViewModel
                     {
                         Id = conversation.Id,
-                        Type = conversation.Type,
-                        Creator = conversation.Creator?.UserName,
-                        Owner = conversation.Owner?.UserName,
-                        Participants = conversation.ConversationParticipants.Select(cp => cp.User.UserName).ToArray()
+                        Participants = conversation.Participants.Select(cp => cp.Id).ToArray()
                     });
         }
     }

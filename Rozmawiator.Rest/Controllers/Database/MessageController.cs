@@ -31,7 +31,7 @@ namespace Rozmawiator.Rest.Controllers.Database
                 Id = message.Id,
                 Content = message.Content,
                 ConversationId = message.ConversationId,
-                Sender = message.Sender.UserName,
+                SenderId = message.Sender.Id,
                 Timestamp = message.Timestamp
             };
         }
@@ -44,7 +44,7 @@ namespace Rozmawiator.Rest.Controllers.Database
 
             return
                 new Filter(filters).FilterQuery(
-                    _database.Messages.Where(cr => cr.Conversation.ConversationParticipants.Any(cp => cp.UserId == user)))
+                    _database.Messages.Where(cr => cr.Conversation.Participants.Any(cp => cp.Id == user)))
                     .OrderByDescending(m => m.Timestamp)
                     .Skip(page*count)
                     .Take(count)
@@ -54,7 +54,7 @@ namespace Rozmawiator.Rest.Controllers.Database
                         Id = message.Id,
                         Content = message.Content,
                         ConversationId = message.ConversationId,
-                        Sender = message.Sender.UserName,
+                        SenderId = message.Sender.Id,
                         Timestamp = message.Timestamp
                     });
         }
@@ -73,7 +73,7 @@ namespace Rozmawiator.Rest.Controllers.Database
 
             return
                 new Filter(filters).FilterQuery(
-                    _database.Messages.Where(cr => cr.Conversation.ConversationParticipants.Any(cp => cp.UserId == user)))
+                    _database.Messages.Where(cr => cr.Conversation.Participants.Any(cp => cp.Id == user)))
                     .Where(m => m.Timestamp < startFromMessage.Timestamp)
                     .OrderByDescending(m => m.Timestamp)
                     .Skip(page * count)
@@ -84,7 +84,7 @@ namespace Rozmawiator.Rest.Controllers.Database
                         Id = message.Id,
                         Content = message.Content,
                         ConversationId = message.ConversationId,
-                        Sender = message.Sender.UserName,
+                        SenderId = message.Sender.Id,
                         Timestamp = message.Timestamp
                     });
         }

@@ -31,9 +31,8 @@ namespace Rozmawiator.Rest.Controllers.Database
             return new CallRequestViewModel
             {
                 Id = callRequest.Id,
-                State = callRequest.State,
-                Caller = callRequest.Caller.UserName,
-                Callee = callRequest.Callee.UserName
+                Timestamp = callRequest.Timestamp,
+                ConversationId = callRequest.ConversationId
             };
         }
         
@@ -43,18 +42,22 @@ namespace Rozmawiator.Rest.Controllers.Database
         {
             var user = User.GetUserId();
 
-            return new Filter(filters).FilterQuery(_database.CallRequests.Where(cr => cr.CalleeId == user || cr.CallerId == user)).ToArray().Select(callRequest => new CallRequestViewModel
-            {
-                Id = callRequest.Id,
-                State = callRequest.State,
-                Caller = callRequest.Caller.UserName,
-                Callee = callRequest.Callee.UserName
-            });
+            return
+                new Filter(filters).FilterQuery(
+                    _database.CallRequests.Where(c => c.Conversation.Participants.Any(p => p.Id == user)))
+                        .ToArray()
+                        .Select(callRequest => new CallRequestViewModel
+                        {
+                            Id = callRequest.Id,
+                            Timestamp = callRequest.Timestamp,
+                            ConversationId = callRequest.ConversationId
+                        });
         }
 
+        /*
         [HttpGet]
         [Route("Conversation/{caller}")]
-        public ConversationViewModel GetCurrentCallRequestConversation(string caller)
+        public ConversationViewModel GetCurrentCallRequestConversation(Guid conversationId)
         {
             var userId = User.GetUserId();
             var user = _database.Users.FirstOrDefault(u => u.Id == userId);
@@ -63,7 +66,7 @@ namespace Rozmawiator.Rest.Controllers.Database
                 return null;
             }
 
-            var callRequest = _database.CallRequests.FirstOrDefault(c => c.Caller.UserName == caller && c.Callee.UserName == user.UserName);
+            var callRequest = _database.CallRequests.FirstOrDefault(c => );
             if (callRequest == null)
             {
                 return null;
@@ -89,5 +92,6 @@ namespace Rozmawiator.Rest.Controllers.Database
                 Participants = conversation.ConversationParticipants.Where(p => p.IsActive).Select(p => p.User.UserName).ToArray()
             };
         }
+        */
     }
 }
