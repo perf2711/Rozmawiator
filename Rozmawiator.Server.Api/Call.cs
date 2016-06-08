@@ -70,7 +70,7 @@ namespace Rozmawiator.Server.Api
 
         public void Disconnect(Client client, bool tryClose = true)
         {
-            Server.Debug($"{client.User.Id} left from call {Id}.");
+            Server.Debug($"{client?.User?.Id} left from call {Id}.");
             _participants.Remove(client);
             using (var database = new RozmawiatorDb())
             {

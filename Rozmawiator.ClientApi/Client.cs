@@ -34,6 +34,7 @@ namespace Rozmawiator.ClientApi
         public List<ExpectedMessage> ExpectedMessages { get; }
 
         public event Action<Client, ServerMessage> Connected;
+        public event Action<Client, ServerMessage> DisconnectedByServer;
         public event Action<Client, Conversation> NewConversation;
 
         private readonly UdpClient _client;
@@ -237,6 +238,7 @@ namespace Rozmawiator.ClientApi
 
         private void HandleBye(ServerMessage message)
         {
+            DisconnectedByServer?.Invoke(this, message);
             Disconnect();
         }
 

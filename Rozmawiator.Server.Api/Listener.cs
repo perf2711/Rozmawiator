@@ -109,6 +109,7 @@ namespace Rozmawiator.Server.Api
 
             foreach (var client in _clients.ToArray())
             {
+                Send(client, ServerMessage.Create(ServerId).Bye("Shutdown"));
                 RemoveClient(client);
             }
 
@@ -178,6 +179,12 @@ namespace Rozmawiator.Server.Api
 
         private void HandleMessage(IPEndPoint endpoint, IMessage message)
         {
+            /* If client is not on the client list, and the message is not 'hello' */
+            if (message.MessageType != 0 && _clients.All(c => !Equals(c.EndPoint, endpoint)))
+            {
+                return;
+            }
+
             switch (message.Category)
             {
                 case MessageCategory.Server:

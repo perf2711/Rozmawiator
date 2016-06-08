@@ -29,6 +29,8 @@ namespace Rozmawiator.PartialViews
         public event Action<CallViewControl, bool> SpeakerToggled;
         public event Action<CallViewControl> HangedUp;
 
+        private List<User> _temporaryUsers = new List<User>();
+
         public Call Call
         {
             get { return _call; }
@@ -52,23 +54,64 @@ namespace Rozmawiator.PartialViews
 
         public void Update()
         {
-            UserPanel.Children.Clear();
-
             if (Call == null)
             {
                 return;
             }
 
+            var existingThumbnails = UserPanel.Children.OfType<UserThumbnailControl>().ToList();
             foreach (var participant in _call.Participants)
             {
-                if (participant.Nickname == UserService.LoggedUser.Nickname)
+                if (participant.Id == UserService.LoggedUser.Id || _temporaryUsers.Contains(participant))
                 {
                     continue;
                 }
 
-                var userControl = new UserThumbnailControl(participant);
-                UserPanel.Children.Add(userControl);
+                //var userControl = new UserThumbnailControl(participant);
+                var userControl = existingThumbnails.FirstOrDefault(t => t.User.Id == participant.Id);
+                if (userControl == null)
+                {
+                    UserPanel.Children.Add(new UserThumbnailControl(participant));
+                }
+                else
+                {
+                    existingThumbnails.Remove(userControl);
+                }
             }
+
+            foreach (var thumbnail in existingThumbnails)
+            {
+                if (_temporaryUsers.Contains(thumbnail.User))
+                {
+                    continue;
+                }
+
+                UserPanel.Children.Remove(thumbnail);
+            }
+        }
+
+        public void AddTemporaryUser(User user, UserThumbnailControl.CallState state)
+        {
+            _temporaryUsers.Add(user);
+            var control = new UserThumbnailControl(user) {State = state};
+            UserPanel.Children.Add(control);
+        }
+
+        public void RemoveTemporaryUser(User user)
+        {
+            _temporaryUsers.Remove(user);
+            var control = UserPanel.Children.OfType<UserThumbnailControl>().FirstOrDefault(t => t.User.Id == user.Id);
+            UserPanel.Children.Remove(control);
+        }
+
+        public void ClearTemporaryUsers()
+        {
+            foreach (var user in _temporaryUsers)
+            {
+                var control = UserPanel.Children.OfType<UserThumbnailControl>().FirstOrDefault(t => t.User.Id == user.Id);
+                UserPanel.Children.Remove(control);
+            }
+            _temporaryUsers.Clear();
         }
 
         private void MicrophoneStateButton_Click(ImageButton button, RoutedEventArgs arg2)

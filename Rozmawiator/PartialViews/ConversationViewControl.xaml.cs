@@ -77,11 +77,22 @@ namespace Rozmawiator.PartialViews
 
         public void HideCall()
         {
+            CallView.ClearTemporaryUsers();
             CallView.Call = null;
             Call = null;
 
             CallGrid.Visibility = Visibility.Collapsed;
             CallSplitter.Visibility = Visibility.Collapsed;
+        }
+
+        public void AddTemporaryUser(User user, UserThumbnailControl.CallState state)
+        {
+            CallView.AddTemporaryUser(user, state);
+        }
+
+        public void RemoveTemporaryUser(User user)
+        {
+            CallView.RemoveTemporaryUser(user);
         }
 
         private void SetEvents()

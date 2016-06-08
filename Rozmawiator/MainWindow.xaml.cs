@@ -12,17 +12,20 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Rozmawiator.Audio;
 using Rozmawiator.ClientApi;
 using Rozmawiator.Communication;
 using Rozmawiator.Communication.Call;
 using Rozmawiator.Communication.Conversation;
+using Rozmawiator.Communication.Server;
 using Rozmawiator.Controls;
 using Rozmawiator.Data;
 using Rozmawiator.Database.Entities;
 using Rozmawiator.Extensions;
 using Rozmawiator.Models;
 using Rozmawiator.PartialViews;
+using Rozmawiator.Windows;
 using Call = Rozmawiator.Models.Call;
 using CallRequest = Rozmawiator.Models.CallRequest;
 using Conversation = Rozmawiator.Models.Conversation;
@@ -56,6 +59,22 @@ namespace Rozmawiator
         private void SetEvents()
         {
             ClientService.Client.NewConversation += OnNewConversation;
+            ClientService.Client.DisconnectedByServer += ClientOnDisconnectedByServer;
+        }
+
+        private void ClientOnDisconnectedByServer(Client client, ServerMessage serverMessage)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                this.ShowError("Uwaga", $"Odłączono od serwera. Przyczyna: {serverMessage.GetStringContent()}", (e) => Logout());
+            });
+        }
+
+        private void Logout()
+        {
+            var loginWindow = new LoginWindow();
+            loginWindow.Show();
+            Close();
         }
 
         private async Task UpdateData()
@@ -285,6 +304,10 @@ namespace Rozmawiator
                 };
 
                 view?.ShowCall(conversationModel.Call);
+                foreach (var participant in conversationModel.Participants.Where(p => p.Id != UserService.LoggedUser.Id))
+                {
+                    view?.AddTemporaryUser(participant, UserThumbnailControl.CallState.Calling);
+                }
 
                 CallService.CurrentCall = conversationModel.Call;
                 SetCallEvents(call);
@@ -324,17 +347,42 @@ namespace Rozmawiator
 
         private void CallOnNewParticipant(ClientApi.Call call, Guid guid)
         {
-            
+            Dispatcher.Invoke(() =>
+            {
+                var conversationModel = ConversationService.Conversations.First(c => c.Id == call.Conversation.Id);
+                var view = GetConversationView(conversationModel);
+                var user = UserService.Users.FirstOrDefault(u => u.Id == guid);
+
+                view?.CallView.Call?.Participants.Add(user);
+                view?.CallView?.Update();
+                view?.RemoveTemporaryUser(user);
+            });
         }
 
         private void CallOnParticipantLeft(ClientApi.Call call, Guid guid)
         {
-            
+            Dispatcher.Invoke(() =>
+            {
+                var conversationModel = ConversationService.Conversations.First(c => c.Id == call.Conversation.Id);
+                var view = GetConversationView(conversationModel);
+                var user = UserService.Users.FirstOrDefault(u => u.Id == guid);
+
+                view?.CallView.Call?.Participants.Remove(user);
+                view?.CallView?.Update();
+                view?.RemoveTemporaryUser(user);
+            });
         }
 
         private void CallOnParticipantDeclined(ClientApi.Call call, Guid guid)
         {
-            
+            Dispatcher.Invoke(() =>
+            {
+                var conversationModel = ConversationService.Conversations.First(c => c.Id == call.Conversation.Id);
+                var view = GetConversationView(conversationModel);
+                var user = UserService.Users.FirstOrDefault(u => u.Id == guid);
+
+                view?.RemoveTemporaryUser(user);
+            });
         }
 
         private void CallOnNewAudio(ClientApi.Call call, CallMessage callMessage)
@@ -399,13 +447,5 @@ namespace Rozmawiator
         #endregion
 
         #endregion
-
-        #region Events
-
-        
-
-        #endregion
-
-        
     }
 }
