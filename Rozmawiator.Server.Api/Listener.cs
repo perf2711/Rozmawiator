@@ -77,7 +77,7 @@ namespace Rozmawiator.Server.Api
                     };
                     database.Servers.Add(server);
                 }
-                server.IpAddress = "192.168.88.19";
+                server.IpAddress = "192.168.173.1";
                 server.Port = Configuration.Host.ListenPort;
                 server.State = ServerState.Online;
                 database.SaveChanges();
