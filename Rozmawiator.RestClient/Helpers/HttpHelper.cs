@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Rozmawiator.RestClient.Errors;
 using Rozmawiator.RestClient.Models;
 
 namespace Rozmawiator.RestClient.Helpers
@@ -22,8 +23,18 @@ namespace Rozmawiator.RestClient.Helpers
                     client.DefaultRequestHeaders.Authorization = token.GetHeader();
                 }
 
-                var response = await client.GetAsync(url);
-                var responseCode = response.StatusCode;
+                HttpResponseMessage response;
+                HttpStatusCode responseCode;
+                try
+                {
+                    response = await client.GetAsync(url);
+                }
+                catch (HttpRequestException e)
+                {
+                    responseCode = HttpStatusCode.Gone;
+                    return new HttpResponse(responseCode, new UnavailableError { Error = e.Message });
+                }
+                responseCode = response.StatusCode;
                 var responseContent = response.Content;
                 var mediaType = response.Content?.Headers?.ContentType?.MediaType;
 
@@ -49,8 +60,18 @@ namespace Rozmawiator.RestClient.Helpers
                     client.DefaultRequestHeaders.Authorization = token.GetHeader();
                 }
 
-                var response = await client.PostAsync(url, content);
-                var responseCode = response.StatusCode;
+                HttpResponseMessage response;
+                HttpStatusCode responseCode;
+                try
+                {
+                    response = await client.PostAsync(url, content);
+                }
+                catch (HttpRequestException e)
+                {
+                    responseCode = HttpStatusCode.Gone;
+                    return new HttpResponse(responseCode, new UnavailableError {Error = e.Message});
+                }
+                responseCode = response.StatusCode;
                 var responseContent = response.Content;
                 var mediaType = response.Content?.Headers?.ContentType?.MediaType;
 
@@ -71,8 +92,18 @@ namespace Rozmawiator.RestClient.Helpers
 
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(contentType));
 
-                var response = await client.PostAsync(url, content);
-                var responseCode = response.StatusCode;
+                HttpResponseMessage response;
+                HttpStatusCode responseCode;
+                try
+                {
+                    response = await client.PostAsync(url, content);
+                }
+                catch (HttpRequestException e)
+                {
+                    responseCode = HttpStatusCode.Gone;
+                    return new HttpResponse(responseCode, new UnavailableError { Error = e.Message });
+                }
+                responseCode = response.StatusCode;
                 var responseContent = response.Content;
                 var mediaType = response.Content?.Headers?.ContentType?.MediaType;
 

@@ -29,6 +29,16 @@ namespace Rozmawiator.RestClient.Helpers
             }
         }
 
+        public HttpResponse(HttpStatusCode responseCode, IRestError error)
+        {
+            ResponseCode = responseCode;
+            ResponseObject = null;
+            ContentType = "";
+
+            Error = error;
+        }
+
+
         public Dictionary<string, object> GetModel()
         {
             return JsonConvert.DeserializeObject<Dictionary<string, object>>(ResponseObject.ToString());
