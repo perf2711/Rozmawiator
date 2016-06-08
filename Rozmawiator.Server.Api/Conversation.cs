@@ -69,17 +69,8 @@ namespace Rozmawiator.Server.Api
 
         public void Disconnect(Client client)
         {
-            Server.Debug($"{client.User.Id} left from conversation {Id}.");
+            Call?.Disconnect(client);
             _participants.Remove(client);
-            using (var database = new RozmawiatorDb())
-            {
-                var conversation = database.Conversations.Find(Id);
-                var user = database.Users.Find(client.User.Id);
-                conversation.Participants.Remove(user);
-                database.SaveChanges();
-            }
-
-            Broadcast(ConversationMessage.Create(Server.ServerId, Id).UserLeft(client.User.Id));
             ParticipantsUpdate?.Invoke(this);
         }
 
