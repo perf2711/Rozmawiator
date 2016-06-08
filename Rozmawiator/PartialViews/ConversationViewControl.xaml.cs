@@ -25,6 +25,7 @@ namespace Rozmawiator.PartialViews
     {
         public Conversation Conversation { get; }
         public Call Call { get; set; }
+        public MessageDisplayControl MessageDisplay { get; private set; }
 
         public event Action<ConversationViewControl> Called;
 
@@ -48,8 +49,8 @@ namespace Rozmawiator.PartialViews
 
             if (MessagesPanel.Children.Count == 0)
             {
-                var messageDisplayControl = new MessageDisplayControl(Conversation);
-                MessagesPanel.Children.Add(messageDisplayControl);
+                MessageDisplay = new MessageDisplayControl(Conversation);
+                MessagesPanel.Children.Add(MessageDisplay);
             }
 
             var conversation = ClientService.Client.Conversations.FirstOrDefault(c => c.Id == Conversation.Id);
@@ -58,6 +59,11 @@ namespace Rozmawiator.PartialViews
                 CallGrid.Visibility = Visibility.Collapsed;
                 CallSplitter.Visibility = Visibility.Collapsed;
             }
+        }
+
+        public void AddMessage(TextMessage message)
+        {
+            MessageDisplay.AddMessageControl(message);
         }
 
         public void ShowCall(Call call)

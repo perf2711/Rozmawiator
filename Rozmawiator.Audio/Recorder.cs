@@ -31,12 +31,22 @@ namespace Rozmawiator.Audio
 
         public void Start()
         {
+            if (State == RecorderState.Recording)
+            {
+                return;
+            }
+
             _waveIn.StartRecording();
             State = RecorderState.Recording;
         }
 
         public void Stop()
         {
+            if (State == RecorderState.Idle)
+            {
+                return;
+            }
+
             _waveIn.StopRecording();
             State = RecorderState.Idle;
         }

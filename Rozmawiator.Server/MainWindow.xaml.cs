@@ -149,6 +149,7 @@ namespace Rozmawiator.Server
                 case ConversationMessageType.AddUser:
                 case ConversationMessageType.NewUser:
                 case ConversationMessageType.UserLeft:
+                case ConversationMessageType.RevokeRequest:
                     LogMessage(ipEndPoint, message, true, true);
                     break;
                 case ConversationMessageType.Bye:

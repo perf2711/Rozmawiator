@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Rozmawiator.Database.Entities;
 using Rozmawiator.Database.ViewModels;
+using Rozmawiator.Models;
 using Rozmawiator.RestClient.Errors;
-using CallRequest = Rozmawiator.Models.CallRequest;
-using Conversation = Rozmawiator.Models.Conversation;
 
 namespace Rozmawiator.Data
 {

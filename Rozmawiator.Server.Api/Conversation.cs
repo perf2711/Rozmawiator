@@ -108,6 +108,8 @@ namespace Rozmawiator.Server.Api
                 case ConversationMessageType.CallResponse:
                     HandleCallResponse(message);
                     break;
+                case ConversationMessageType.RevokeRequest:
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             } 
@@ -124,12 +126,12 @@ namespace Rozmawiator.Server.Api
         {
             if (Call == null)
             {
-                Call = new Call(Server);
+                Call = new Call(this, Server);
             }
             
             Call.Join(Server.GetClient(message.SenderId));
             Server.Send(Server.GetClient(message.SenderId), ServerMessage.Create(Id).Ok(Call.Id.ToByteArray()));
-            Broadcast(ConversationMessage.Create(Server.ServerId, Id).CallRequest(Call.Id));
+            Broadcast(ConversationMessage.Create(Server.ServerId, Id).CallRequest(Call.Id), message.SenderId);
         }
 
         private void HandleCallResponse(ConversationMessage message)
@@ -153,10 +155,34 @@ namespace Rozmawiator.Server.Api
             }
         }
 
+        public void Broadcast(Message message, params Client[] skipClients)
+        {
+            var participants = skipClients.Any()
+                ? _participants.Where(p => !skipClients.Contains(p))
+                : _participants;
+
+            foreach (var client in participants)
+            {
+                client.Send(message);
+            }
+        }
+
+        public void Broadcast(Message message, params Guid[] skipClients)
+        {
+            var participants = skipClients.Any()
+                ? _participants.Where(p => !skipClients.Contains(p.Id))
+                : _participants;
+
+            foreach (var client in participants)
+            {
+                client.Send(message);
+            }
+        }
+
         public void Broadcast(Message message, bool skipSender = false)
         {
             var sender = Server.GetClient(message.SenderId);
-            foreach (var client in _participants.Where(p => !skipSender || p != sender))
+            foreach (var client in _participants.Where(p => !skipSender || p.Id != sender?.Id))
             {
                 client.Send(message);
             }

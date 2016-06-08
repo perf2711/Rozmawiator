@@ -58,9 +58,15 @@ namespace Rozmawiator.Communication.Conversation
             return (ConversationMessage) message.AddContent(callId.ToByteArray());
         }
 
+        public static ConversationMessage RevokeCallRequest(this ConversationMessage message, Guid callId)
+        {
+            message.Type = ConversationMessageType.RevokeRequest;
+            return (ConversationMessage) message.AddContent(callId.ToByteArray());
+        }
+
         public static ConversationMessage CallResponse(this ConversationMessage message, CallResponseType callResponse)
         {
-            message.Type = ConversationMessageType.CallRequest;
+            message.Type = ConversationMessageType.CallResponse;
             return (ConversationMessage)message.AddContent((byte)callResponse);
         }
     }

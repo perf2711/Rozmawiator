@@ -16,6 +16,7 @@ namespace Rozmawiator.Communication.Conversation
         Text,
         CreateCall,
         CallRequest,
-        CallResponse
+        CallResponse,
+        RevokeRequest
     }
 }

@@ -9,7 +9,7 @@ namespace Rozmawiator.Communication.Call
 {
     public enum CallMessageType
     {
-        NewUser = ConversationMessageType.CallResponse + 1,
+        NewUser = ConversationMessageType.RevokeRequest + 1,
         UserDeclined,
         Bye,
         UserLeft,

@@ -234,6 +234,7 @@ namespace Rozmawiator.Server.Api
                     if (database.Conversations.Find(conversationId) != null)
                     {
                         conversation = new Conversation(conversationId, this);
+                        _conversations.Add(conversation);
                     }
                 }
             }
@@ -245,6 +246,18 @@ namespace Rozmawiator.Server.Api
         {
             var callId = message.GetCallId();
             var conversation = _conversations.FirstOrDefault(c => c.Call?.Id == callId);
+            if (conversation == null)
+            {
+                using (var database = new RozmawiatorDb())
+                {
+                    var call = database.Calls.Find(callId);
+                    if (call != null)
+                    {
+                        conversation = new Conversation(call.ConversationId, this);
+                        _conversations.Add(conversation);
+                    }
+                }
+            }
 
             conversation?.HandleMessage(message);
         }

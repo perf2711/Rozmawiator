@@ -12,5 +12,6 @@ namespace Rozmawiator.Models
         public Guid Id { get; set; }
         public List<User> Participants { get; set; }
         public List<TextMessage> Messages { get; } = new List<TextMessage>();
+        public Call Call { get; set; }
     }
 }

@@ -10,7 +10,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
-            <RowDefinition x:Name="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <controls:ParticipantsInfoControl x:Name="ParticipantsInfo" />
@@ -22,7 +22,7 @@
                 <RowDefinition/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.RowSpan="2">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="MessagesPanel" Margin="40,5">
                 </StackPanel>
             </ScrollViewer>

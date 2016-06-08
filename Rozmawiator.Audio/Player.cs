@@ -22,6 +22,17 @@ namespace Rozmawiator.Audio
         private readonly AcmCodec _codec = new Gsm610Codec();
         private readonly BufferedWaveProvider _waveProvider;
 
+        public float Volume
+        {
+            get { return _waveOut.Volume; }
+            set { _waveOut.Volume = Math.Min(Math.Max(0, value), 1); }
+        }
+
+        public void SetMute(bool mute, float volume = 1)
+        {
+            Volume = mute ? 0 : volume;
+        }
+
         public Player()
         {
             _waveProvider = new BufferedWaveProvider(_codec.RecordFormat);
@@ -40,6 +51,7 @@ namespace Rozmawiator.Audio
         {
             if (State == PlayerState.Stopped)
             {
+                SetMute(false);
                 _waveOut.Play();
             }
         }
@@ -48,6 +60,7 @@ namespace Rozmawiator.Audio
         {
             if (State != PlayerState.Stopped)
             {
+                SetMute(true);
                 _waveOut.Stop();
             }
         }

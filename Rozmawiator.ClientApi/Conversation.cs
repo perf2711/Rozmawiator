@@ -24,6 +24,7 @@ namespace Rozmawiator.ClientApi
         public event Action<Conversation, Guid> ParticipantDisconnected;
 
         public event Action<Conversation, CallRequest> NewCallRequest;
+        public event Action<Conversation, Guid> CallRequestRevoked;
         public event Action<Conversation, ConversationMessage> NewTextMessage;
 
         public event Action<Conversation, Call> NewCall;
@@ -57,6 +58,9 @@ namespace Rozmawiator.ClientApi
                     break;
                 case ConversationMessageType.CallRequest:
                     HandleCallRequest(message);
+                    break;
+                case ConversationMessageType.RevokeRequest:
+                    HandleCallRequestRevoked(message);
                     break;
                 case ConversationMessageType.AddUser:
                 case ConversationMessageType.Bye:
@@ -92,6 +96,11 @@ namespace Rozmawiator.ClientApi
             NewCallRequest?.Invoke(this, callRequest);
         }
 
+        private void HandleCallRequestRevoked(ConversationMessage message)
+        {
+            CallRequestRevoked?.Invoke(this, message.GetGuidContent());
+        }
+
         public void AddUser(Guid id)
         {
             Client.Send(ConversationMessage.Create(Client.Id, Id).AddUser(id));
@@ -105,8 +114,9 @@ namespace Rozmawiator.ClientApi
 
         private void OnCallCreated(ExpectedMessage expectedMessage, IMessage message)
         {
-            var callId = ((CallMessage)message).GetGuidContent();
+            var callId = ((ServerMessage)message).GetGuidContent();
             Call = new Call(callId, this);
+            NewCall?.Invoke(this, Call);
         }
 
         public void RespondToRequest(CallRequest request)

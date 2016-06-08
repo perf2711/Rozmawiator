@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Rozmawiator.Communication.Conversation
 {
-    public class ConversationMessage : Message, IMessage
+    public class ConversationMessage : Message
     {
         protected ConversationMessage(Guid senderId)
         {

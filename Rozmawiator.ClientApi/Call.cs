@@ -23,6 +23,8 @@ namespace Rozmawiator.ClientApi
 
         public event Action<Call, CallMessage> NewAudio;
 
+        public event Action<Call> CallEnded;
+
         public Call(Guid id, Conversation conversation)
         {
             Id = id;
@@ -91,6 +93,7 @@ namespace Rozmawiator.ClientApi
         private void HandleBye(CallMessage message)
         {
             Conversation.DisconnectCall();
+            CallEnded?.Invoke(this);
         }
 
         private void HandleUserLeft(CallMessage message)
