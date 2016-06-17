@@ -121,6 +121,18 @@ namespace Rozmawiator
                 ConversationViews.FirstOrDefault(v => v.Conversation.Id == conversation.Id);
         }
 
+        private ConversationControl GetConversationControl(Guid id)
+        {
+            return
+                ConversationList.Items.OfType<ConversationControl>().FirstOrDefault(c => c.Conversation.Id == id);
+        }
+
+        private ConversationViewControl GetConversationView(Guid id)
+        {
+            return
+                ConversationViews.FirstOrDefault(v => v.Conversation.Id == id);
+        }
+
         private void ConversationSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var conversation = SelectedConversation.Conversation;
@@ -317,14 +329,28 @@ namespace Rozmawiator
             });
         }
 
-        private void ConversationOnParticipantConnected(ClientApi.Conversation conversation, Guid guid)
+        private async void ConversationOnParticipantConnected(ClientApi.Conversation conversation, Guid guid)
         {
-            
+            await ConversationService.UpdateConversation(conversation.Id);
+            Dispatcher.Invoke(() =>
+            {
+                var conversationControl = GetConversationControl(conversation.Id);
+                conversationControl?.Update();
+
+                var conversationView = GetConversationView(conversation.Id);
+                conversationView?.Update();
+            });
         }
 
-        private void ConversationOnParticipantDisconnected(ClientApi.Conversation conversation, Guid guid)
+        private async void ConversationOnParticipantDisconnected(ClientApi.Conversation conversation, Guid guid)
         {
-            
+            await ConversationService.UpdateConversation(conversation.Id);
+
+            var conversationControl = GetConversationControl(conversation.Id);
+            conversationControl?.Update();
+
+            var conversationView = GetConversationView(conversation.Id);
+            conversationView?.Update();
         }
 
         private void CallRequestControlOnAccepted(CallRequestControl callRequestControl)
@@ -406,6 +432,27 @@ namespace Rozmawiator
             });
         }
 
+        private void OnResultUserAddToConversation(SearchUsersControl search, User user)
+        {
+            if (SelectedConversation == null)
+            {
+                return;
+            }
+
+            var conversation =
+                ClientService.Client.Conversations.FirstOrDefault(c => c.Id == SelectedConversation.Conversation.Id);
+
+            conversation?.AddUser(user.Id);
+        }
+
+        private void OnResultUserAddToNewConversation(SearchUsersControl arg1, User user)
+        {
+            ClientService.Client.CreateConversation((con) =>
+            {
+                con.AddUser(user.Id);
+            });
+        }
+
         #endregion
 
 
@@ -447,5 +494,7 @@ namespace Rozmawiator
         #endregion
 
         #endregion
+
+        
     }
 }

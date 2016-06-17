@@ -36,6 +36,37 @@ namespace Rozmawiator.Data
             }).ToList();
         }
 
+        public static async Task UpdateConversation(Guid id)
+        {
+            var response = await RestService.ConversationApi.Get(RestService.CurrentToken, id);
+
+            if (response.Error != null)
+            {
+                throw new RestErrorException(response.Error);
+            }
+
+            var conversationViewModel = response.GetModel<ConversationViewModel>();
+            await UserService.AddUsers(conversationViewModel.Participants);
+            var conversation = new Conversation
+            {
+                Id = conversationViewModel.Id,
+                Participants = UserService.Users.Where(u => conversationViewModel.Participants.Contains(u.Id)).ToList()
+            };
+
+            var localConversation = Conversations.FirstOrDefault(c => c.Id == conversation.Id);
+            if (localConversation == null)
+            {
+                Conversations.Add(conversation);
+                localConversation = conversation;
+            }
+            else
+            {
+                localConversation.Participants = conversation.Participants;
+            }
+
+            await GetMoreMessages(localConversation);
+        }
+
         public static async Task<Conversation> AddConversation(params Guid[] participants)
         {
             await UserService.AddUsers(participants);
@@ -50,7 +81,8 @@ namespace Rozmawiator.Data
 
         public static async Task GetMoreMessages(Conversation conversation, int page = 0, int count = 100)
         {
-            var filter = Filter.CreateNew.Set("ConversationId", conversation.Id);
+            //var filter = Filter.CreateNew.Set("ConversationId", conversation.Id);
+            var filter = new Filter {["ConversationId"] = conversation.Id};
             HttpResponse response;
             if (conversation.Messages.Any())
             {

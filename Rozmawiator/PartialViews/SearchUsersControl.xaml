@@ -12,8 +12,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-        <Controls:ExtendedTextBox x:Name="SearchBox" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="23" KeyDown="SearchBox_KeyDown"/>
-        <ScrollViewer Grid.Row="1">
+        <Controls:ExtendedTextBox x:Name="SearchBox" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="23" KeyDown="SearchBox_KeyDown" Width="Auto" Description="Szukaj"/>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
             <StackPanel x:Name="ResultPanel"></StackPanel>
         </ScrollViewer>
     </Grid>

@@ -50,6 +50,11 @@ namespace Rozmawiator.Controls
         public void Update()
         {
             var participants = _conversation.Participants.Where(p => p.Id != UserService.LoggedUser.Id).ToArray();
+            if (!participants.Any())
+            {
+                return;
+            }
+            
             ParticipantsNicknames.Content = participants.Select(p => p.Nickname).Aggregate((a,b) => a + ", " + b);
             Avatar.Source = participants.FirstOrDefault(p => p.Avatar != null)?.Avatar ?? Resources["DefaultAvatar"] as ImageSource;
         }

@@ -19,7 +19,7 @@ namespace Rozmawiator.Communication.Server
             set { MessageType = (byte) value; }
         }
 
-        public new static ServerMessage Create(Guid senderId)
+        public static ServerMessage Create(Guid senderId)
         {
             return new ServerMessage(senderId);
         }

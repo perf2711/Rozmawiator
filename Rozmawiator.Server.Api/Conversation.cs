@@ -52,14 +52,33 @@ namespace Rozmawiator.Server.Api
             return _participants.Contains(client);
         }
 
+        public void JoinOffline(Guid clientId)
+        {
+            using (var database = new RozmawiatorDb())
+            {
+                var user = database.Users.Find(clientId);
+                if (user == null)
+                {
+                    return;
+                }
+                var conversation = database.Conversations.Find(Id);
+
+                conversation.Participants.Add(user);
+                database.SaveChanges();
+            }
+
+            Broadcast(ConversationMessage.Create(Server.ServerId, Id).NewUser(clientId));
+        }
+
         public void Join(Client client)
         {
             _participants.Add(client);
 
             using (var database = new RozmawiatorDb())
             {
-                var conversation = database.Conversations.First();
-                conversation.Participants.Add(client.User);
+                var conversation = database.Conversations.Find(Id);
+                var user = database.Users.Find(client.User.Id);
+                conversation.Participants.Add(user);
                 database.SaveChanges();
             }
 
@@ -79,7 +98,7 @@ namespace Rozmawiator.Server.Api
             switch (message.Type)
             {
                 case ConversationMessageType.AddUser:
-                    Join(Server.GetClient(message.GetGuidContent()));
+                    HandleAddUser(message);
                     break;
                 case ConversationMessageType.Bye:
                     Disconnect(Server.GetClient(message.SenderId));
@@ -123,6 +142,20 @@ namespace Rozmawiator.Server.Api
             Call.Join(Server.GetClient(message.SenderId));
             Server.Send(Server.GetClient(message.SenderId), ServerMessage.Create(Id).Ok(Call.Id.ToByteArray()));
             Broadcast(ConversationMessage.Create(Server.ServerId, Id).CallRequest(Call.Id), message.SenderId);
+        }
+
+        private void HandleAddUser(ConversationMessage message)
+        {
+            var id = message.GetGuidContent();
+            var client = Server.GetClient(id);
+            if (client == null)
+            {
+                JoinOffline(id);
+            }
+            else
+            {
+                Join(client);
+            }
         }
 
         private void HandleCallResponse(ConversationMessage message)

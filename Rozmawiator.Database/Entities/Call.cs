@@ -18,7 +18,7 @@ namespace Rozmawiator.Database.Entities
         public Guid ConversationId { get; set; }
 
         [ForeignKey("ConversationId")]
-        public Conversation Conversation { get; set; }
+        public virtual Conversation Conversation { get; set; }
         public virtual ICollection<User> Participants { get; set; }
 
     }

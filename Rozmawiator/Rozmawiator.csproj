@@ -81,6 +81,9 @@
     <Compile Include="Controls\ParticipantsInfoControl.xaml.cs">
       <DependentUpon>ParticipantsInfoControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\UserInfoControl.xaml.cs">
+      <DependentUpon>UserInfoControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\UserThumbnailControl.xaml.cs">
       <DependentUpon>UserThumbnailControl.xaml</DependentUpon>
     </Compile>
@@ -140,6 +143,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\ParticipantsInfoControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\UserInfoControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -273,6 +280,14 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Icons\blackIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Icons\add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Icons\addRectangle.png" />
+    <Resource Include="Images\Icons\blackRectangle.png" />
+    <Resource Include="Images\Icons\rightRectangle.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

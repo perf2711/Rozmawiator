@@ -32,7 +32,7 @@ namespace Rozmawiator.Controls
             set
             {
                 _conversation = value;
-                SetLayout();
+                Update();
             }
         }
 
@@ -70,7 +70,7 @@ namespace Rozmawiator.Controls
             });
         }
 
-        private void SetLayout()
+        public void Update()
         {
             var users = _conversation.Participants.Where(u => u.Nickname != UserService.LoggedUser.Nickname).ToArray();
             if (!users.Any())

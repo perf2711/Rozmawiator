@@ -42,7 +42,14 @@
             <Border BorderThickness="0,0,0,2" BorderBrush="Coral" Background="LightCoral">
                 <partialViews:LoggedUserInfoControl x:Name="LoggedUserInfoControl"/>
             </Border>
-            <ListBox x:Name="ConversationList" Grid.Row="1" SelectionChanged="ConversationSelectionChanged" SelectionMode="Single" Grid.RowSpan="1"/>
+            <TabControl Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <TabItem Header="Konwersacje" Width="Auto">
+                    <ListBox x:Name="ConversationList" Grid.Row="1" SelectionChanged="ConversationSelectionChanged" SelectionMode="Single" Grid.RowSpan="1"/>        
+                </TabItem>
+                <TabItem Header="Szukaj">
+                    <partialViews:SearchUsersControl AddToConversation="OnResultUserAddToConversation" AddToNewConversation="OnResultUserAddToNewConversation"/>
+                </TabItem>
+            </TabControl>
         </Grid>
 
         <Grid x:Name="ConversationGrid" Grid.Row="1" Grid.Column="1">

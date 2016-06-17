@@ -55,7 +55,7 @@ namespace Rozmawiator.RestClient
             return await HttpHelper.Get(BaseUrl + url, token);
         }
 
-        public async Task<HttpResponse> SetAvatar(TokenModel token)
+        public Task<HttpResponse> SetAvatar(TokenModel token)
         {
             throw new NotImplementedException();
         }

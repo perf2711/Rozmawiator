@@ -26,6 +26,12 @@ namespace Rozmawiator.Controls
             set { Image.SetValue(Image.SourceProperty, value); }
         }
 
+        public ImageSource IconDim
+        {
+            get { return (ImageSource)ImageDim.GetValue(Image.SourceProperty); }
+            set { ImageDim.SetValue(Image.SourceProperty, value); }
+        }
+
         public event Action<ImageButton, RoutedEventArgs> Click;
 
         public ImageButton()

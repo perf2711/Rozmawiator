@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="Rozmawiator.Controls.UserInfoControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Rozmawiator.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="40" d:DesignWidth="200" >
+    <UserControl.Resources>
+        <ImageSource x:Key="DefaultAvatar" >../Images/DefaultAvatar.png</ImageSource>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40"/>
+            <ColumnDefinition Width="121*"/>
+            <ColumnDefinition Width="40"/>
+        </Grid.ColumnDefinitions>
+        <Image x:Name="Icon" Source="{StaticResource DefaultAvatar}" Margin="2"/>
+        <Label x:Name="Nickname" Grid.Column="1" Content="Nickname" VerticalAlignment="Center" Margin="2,6" FontSize="14" Grid.ColumnSpan="2"/>
+        <local:ImageButton Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Width="20" Height="40" Icon="../Images/Icons/addRectangle.png" IconDim="../Images/Icons/blackRectangle.png"  Click="OnAddClick"/>
+        <local:ImageButton Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center" Width="20" Height="40" Icon="../Images/Icons/rightRectangle.png" IconDim="../Images/Icons/blackRectangle.png"  Click="OnAddExistingClick"/>
+
+    </Grid>
+</UserControl>

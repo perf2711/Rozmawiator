@@ -10,19 +10,10 @@ using Rozmawiator.Communication.Server;
 
 namespace Rozmawiator.Communication
 {
-    public class Message : IMessage
+    public abstract class Message : IMessage
     {
         public const int MaxLength = 65535;
         public static int HeaderLength { get; } = 17;
-
-        protected Message()
-        {
-        }
-
-        public static IMessage Create(Guid senderId)
-        {
-            return new Message {SenderId = senderId};
-        }
 
         public Guid SenderId { get; set; }
         public byte MessageType { get; set; }

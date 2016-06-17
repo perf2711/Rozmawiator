@@ -31,6 +31,8 @@ namespace Rozmawiator.ClientApi
         public ReadOnlyObservableCollection<Conversation> Conversations { get; }
         private readonly ObservableCollection<Conversation> _conversations;
 
+        private readonly object _conversationLock = new object();
+
         public List<ExpectedMessage> ExpectedMessages { get; }
 
         public event Action<Client, ServerMessage> Connected;
@@ -121,24 +123,44 @@ namespace Rozmawiator.ClientApi
             await _client.SendAsync(bytes, bytes.Length);
         }
 
-        public void CreateConversation()
+        public void CreateConversation(Action<Conversation> callback = null)
         {
-            ExpectedMessages.Add(new ExpectedMessage(ServerMessageType.Ok, OnConversationCreated));
+            var expectedMessage = new ExpectedMessage(ServerMessageType.Ok, OnConversationCreated);
+            if (callback != null)
+            {
+                expectedMessage.Arrived += (e, msg) =>
+                {
+                    var conversationId = ((ServerMessage)msg).GetGuidContent();
+                    Conversation conversation;
+                    lock (_conversationLock)
+                    {
+                        conversation = Conversations.FirstOrDefault(c => c.Id == conversationId);
+                    }
+                    callback.Invoke(conversation);
+                };
+            }
+            ExpectedMessages.Add(expectedMessage);
             Send(ServerMessage.Create(Id).CreateConversation());
         }
 
         public void LoadConversation(Guid conversationId, params Guid[] participants)
         {
             var conversation = new Conversation(conversationId, this, participants);
-            _conversations.Add(conversation);
+            lock (_conversationLock)
+            {
+                _conversations.Add(conversation);
+            }
             NewConversation?.Invoke(this, conversation);
         }
 
         private void OnConversationCreated(ExpectedMessage expectedMessage, IMessage message)
         {
-            var conversationId = ((ConversationMessage) message).GetGuidContent();
+            var conversationId = ((ServerMessage) message).GetGuidContent();
             var conversation = new Conversation(conversationId, this);
-            _conversations.Add(conversation);
+            lock (_conversationLock)
+            {
+                _conversations.Add(conversation);
+            }
             NewConversation?.Invoke(this, conversation);
         }
 
@@ -215,12 +237,19 @@ namespace Rozmawiator.ClientApi
         private void HandleConversationMessage(ConversationMessage message)
         {
             var conversationId = message.GetConversationId();
-            var conversation = _conversations.FirstOrDefault(c => c.Id == conversationId);
+            Conversation conversation;
+            lock (_conversationLock)
+            {
+                conversation = _conversations.FirstOrDefault(c => c.Id == conversationId);
+            }
 
             if (conversation == null)
             {
                 conversation = new Conversation(conversationId, this);
-                _conversations.Add(conversation);
+                lock (_conversationLock)
+                {
+                    _conversations.Add(conversation);
+                }
                 NewConversation?.Invoke(this, conversation);
             }
 
