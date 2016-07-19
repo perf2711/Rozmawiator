@@ -15,7 +15,7 @@ namespace Rozmawiator.Data
             
         }
 
-        public static string BaseUrl = "http://192.168.173.1:8080";
+        public static string BaseUrl = "http://188.226.229.215:8080";
 
         public static TokenModel CurrentToken { get; set; }
 
