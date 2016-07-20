@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Net;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -48,6 +49,7 @@ namespace Rozmawiator.Server
             App.Server.ConversationCreated += OnConversationCreate;
             App.Server.ConversationClosed += OnConversationClose;
             App.Server.ConversationUpdate += OnConversationUpdate;
+            App.Server.MessageSent += OnMessageSent;
 
             InitializeComponent();
         }
@@ -185,6 +187,24 @@ namespace Rozmawiator.Server
             }
         }
 
+        private void OnMessageSent(IPEndPoint endpoint, IMessage message)
+        {
+            switch (message.Category)
+            {
+                case MessageCategory.Server:
+                    LogSelfMessage(endpoint, message as ServerMessage);
+                    break;
+                case MessageCategory.Conversation:
+                    LogSelfMessage(endpoint, message as ConversationMessage);
+                    break;
+                case MessageCategory.Call:
+                    LogSelfMessage(endpoint, message as CallMessage);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         private void LogMessage(IPEndPoint endpoint, ServerMessage message, bool appendContent = true, bool guidContent = false)
         {
             Log($"{message.SenderId} [{endpoint}] <{message.Type}> " + (appendContent ? (guidContent ? message.GetGuidContent().ToString() : message.GetStringContent()) : ""));
@@ -200,9 +220,19 @@ namespace Rozmawiator.Server
             Log($"{message.SenderId} [{endpoint}] <{message.Type}> CallID:{message.GetCallId()} : " + (appendContent ? (guidContent ? message.GetGuidContent().ToString() : message.GetStringContent()) : ""));
         }
 
-        private void LogSelfMessage(Message message, bool appendContent = true)
+        private void LogSelfMessage(IPEndPoint endpoint, ServerMessage message, bool appendContent = true, bool guidContent = false)
         {
-            Log($"Server <{message.MessageType}> " + (appendContent ? message.GetStringContent() : ""));
+            Log($"Server [to {endpoint}] <{message.Type}> " + (appendContent ? (guidContent ? message.GetGuidContent().ToString() : message.GetStringContent()) : ""));
+        }
+
+        private void LogSelfMessage(IPEndPoint endpoint, ConversationMessage message, bool appendContent = true, bool guidContent = false)
+        {
+            Log($"Server [to {endpoint}] <{message.Type}> ConvID:{message.GetConversationId()} : " + (appendContent ? (guidContent ? message.GetGuidContent().ToString() : message.GetStringContent()) : ""));
+        }
+
+        private void LogSelfMessage(IPEndPoint endpoint, CallMessage message, bool appendContent = true, bool guidContent = false)
+        {
+            Log($"Server [to {endpoint}] <{message.Type}> CallID:{message.GetCallId()} : " + (appendContent ? (guidContent ? message.GetGuidContent().ToString() : message.GetStringContent()) : ""));
         }
 
         private void Log(string text, bool appendDate = true)
@@ -301,6 +331,18 @@ namespace Rozmawiator.Server
                 LogSelfMessage(message);
             }
             */
+        }
+
+        private void ConsoleBox_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            var obj = sender as TextBox;
+            if (obj == null)
+            {
+                return;
+            }
+
+            obj.CaretIndex = obj.Text.Length;
+            obj.ScrollToEnd();
         }
     }
 }

@@ -156,9 +156,16 @@ namespace Rozmawiator.ClientApi
         private void OnConversationCreated(ExpectedMessage expectedMessage, IMessage message)
         {
             var conversationId = ((ServerMessage) message).GetGuidContent();
-            var conversation = new Conversation(conversationId, this);
+            Conversation conversation;
+            
             lock (_conversationLock)
             {
+                if (_conversations.Any(c => c.Id == conversationId))
+                {
+                    return;
+                }
+
+                conversation = new Conversation(conversationId, this);
                 _conversations.Add(conversation);
             }
             NewConversation?.Invoke(this, conversation);

@@ -40,6 +40,7 @@ namespace Rozmawiator.Server.Api
 
         public event Action<IPEndPoint, IMessage> NewMessage;
         public event Action<DateTime, string> DebugMessage;
+        public event Action<IPEndPoint, IMessage> MessageSent;
 
         public event NotifyCollectionChangedEventHandler ClientListChanged;
         public event Action<Client> ClientConnected;
@@ -125,12 +126,14 @@ namespace Rozmawiator.Server.Api
         public void Send(Client receiver, Message message)
         {
             Send(receiver, message.GetBytes());
+            MessageSent?.Invoke(receiver.EndPoint, message);
         }
 
         public void Send(Guid receiverId, Message message)
         {
             var receiver = _clients.FirstOrDefault(c => c.User.Id == receiverId);
             Send(receiver, message.GetBytes());
+            MessageSent?.Invoke(receiver.EndPoint, message);
         }
 
         public void Broadcast(Message message)
@@ -294,6 +297,8 @@ namespace Rozmawiator.Server.Api
 
             Debug($"{newClient.User.Id} connected ({endpoint.Address}:{endpoint.Port})");
             ClientConnected?.Invoke(newClient);
+
+            AddToExistingConversations(newClient);
         }
 
         private void HandleBye(Client sender, ServerMessage message)
@@ -328,6 +333,25 @@ namespace Rozmawiator.Server.Api
             _clients.Add(client);
 
             return client;
+        }
+
+        private void AddToExistingConversations(Client client)
+        {
+            using (var db = new RozmawiatorDb())
+            {
+                var user = db.Users.First(u => u.Id == client.Id);
+
+                //var serverConversations = conversations.Where(c => _conversations.FirstOrDefault(sc => sc.Id == c.Id) != null);
+                foreach (var serverConversation in _conversations)
+                {
+                    if (user.Conversations.FirstOrDefault(c => c.Id == serverConversation.Id) == null)
+                    {
+                        continue;
+                    }
+
+                    serverConversation.JoinMember(client);
+                }
+            }
         }
 
         private void ClientOnTimeout(Client client)

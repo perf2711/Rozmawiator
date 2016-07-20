@@ -46,12 +46,16 @@ namespace Rozmawiator.Communication
 
         public static string GetStringContent(this Message message)
         {
-            return Encoding.Unicode.GetString(message.Content);
+            return message.Content == null 
+                ? null 
+                : Encoding.Unicode.GetString(message.Content);
         }
 
         public static Guid GetGuidContent(this Message message)
         {
-            return new Guid(message.Content.Take(16).ToArray());
+            return message.Content == null
+                ? Guid.Empty
+                : new Guid(message.Content.Take(16).ToArray());
         }
 
         public static byte GetByteContent(this Message message)

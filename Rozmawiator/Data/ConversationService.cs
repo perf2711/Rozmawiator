@@ -79,6 +79,18 @@ namespace Rozmawiator.Data
             return conversation;
         }
 
+        public static async Task<Conversation> AddConversation(ClientApi.Conversation conversation)
+        {
+            await UserService.AddUsers(conversation.Participants.ToArray());
+            var con = new Conversation
+            {
+                Id = conversation.Id,
+                Participants = UserService.Users.Where(u => conversation.Participants.Contains(u.Id)).ToList()
+            };
+            Conversations.Add(con);
+            return con;
+        }
+
         public static async Task GetMoreMessages(Conversation conversation, int page = 0, int count = 100)
         {
             //var filter = Filter.CreateNew.Set("ConversationId", conversation.Id);

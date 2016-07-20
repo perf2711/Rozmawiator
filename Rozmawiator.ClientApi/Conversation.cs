@@ -74,14 +74,14 @@ namespace Rozmawiator.ClientApi
 
         private void HandleNewUser(ConversationMessage message)
         {
-            _participants.Add(message.SenderId);
-            ParticipantConnected?.Invoke(this, message.SenderId);
+            _participants.Add(message.GetGuidContent());
+            ParticipantConnected?.Invoke(this, message.GetGuidContent());
         }
 
         private void HandleUserLeft(ConversationMessage message)
         {
-            _participants.Remove(message.SenderId);
-            ParticipantDisconnected?.Invoke(this, message.SenderId);
+            _participants.Remove(message.GetGuidContent());
+            ParticipantDisconnected?.Invoke(this, message.GetGuidContent());
         }
 
         private void HandleTextMessage(ConversationMessage message)

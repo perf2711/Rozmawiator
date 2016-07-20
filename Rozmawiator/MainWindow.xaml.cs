@@ -155,8 +155,14 @@ namespace Rozmawiator
 
         private async void OnNewConversation(Client client, ClientApi.Conversation conversation)
         {
+            if (ConversationService.Conversations == null)
+            {
+                return;
+            }
+
             var conversationModel = ConversationService.Conversations.FirstOrDefault(c => c.Id == conversation.Id) ??
-                                    await ConversationService.AddConversation(conversation.Participants.ToArray());
+                                    //await ConversationService.AddConversation(conversation.Participants.ToArray());
+                                    await ConversationService.AddConversation(conversation);
 
             Dispatcher.Invoke(() =>
             {
@@ -346,11 +352,14 @@ namespace Rozmawiator
         {
             await ConversationService.UpdateConversation(conversation.Id);
 
-            var conversationControl = GetConversationControl(conversation.Id);
-            conversationControl?.Update();
+            Dispatcher.Invoke(() =>
+            {
+                var conversationControl = GetConversationControl(conversation.Id);
+                conversationControl?.Update();
 
-            var conversationView = GetConversationView(conversation.Id);
-            conversationView?.Update();
+                var conversationView = GetConversationView(conversation.Id);
+                conversationView?.Update();
+            });
         }
 
         private void CallRequestControlOnAccepted(CallRequestControl callRequestControl)

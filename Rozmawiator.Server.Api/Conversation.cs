@@ -86,6 +86,13 @@ namespace Rozmawiator.Server.Api
             ParticipantsUpdate?.Invoke(this);
         }
 
+        public void JoinMember(Client client)
+        {
+            _participants.Add(client);
+            Broadcast(ConversationMessage.Create(Server.ServerId, Id).NewUser(client.User.Id));
+            ParticipantsUpdate?.Invoke(this);
+        }
+
         public void Disconnect(Client client)
         {
             Call?.Disconnect(client);
@@ -99,7 +106,7 @@ namespace Rozmawiator.Server.Api
             {
                 case ConversationMessageType.AddUser:
                     HandleAddUser(message);
-                    break;
+                    return;
                 case ConversationMessageType.Bye:
                     Disconnect(Server.GetClient(message.SenderId));
                     break;
