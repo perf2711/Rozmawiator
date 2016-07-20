@@ -118,9 +118,20 @@ namespace Rozmawiator.Server.Api
             _listener.Close();
         }
 
+        private void Send(IPEndPoint receiver, byte[] message)
+        {
+            _listener.Send(message, message.Length, receiver);
+        }
+
         private void Send(Client receiver, byte[] message)
         {
             _listener.Send(message, message.Length, receiver.EndPoint);
+        }
+
+        public void Send(IPEndPoint receiver, Message message)
+        {
+            Send(receiver, message.GetBytes());
+            MessageSent?.Invoke(receiver, message);
         }
 
         public void Send(Client receiver, Message message)
@@ -290,6 +301,14 @@ namespace Rozmawiator.Server.Api
                     Debug($"Client {message.SenderId} with endpoint {endpoint.Address}:{endpoint.Port} does not exist in database.");
                     return;
                 }
+            }
+
+            client = GetClient(user.Id);
+            if (client != null)
+            {
+                Debug($"Client with endpoint {endpoint.Address}:{endpoint.Port} already on list ({client.User.Id}).");
+                Send(endpoint, ServerMessage.Create(ServerId).Bye("User is already connected."));
+                return;
             }
 
             var newClient = AddClient(endpoint, user);

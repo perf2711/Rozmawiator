@@ -17,7 +17,7 @@ namespace Rozmawiator.Communication.Server
         public static ServerMessage Bye(this ServerMessage message, string reason)
         {
             message.Type = ServerMessageType.Bye;
-            return message;
+            return (ServerMessage)message.AddContent(reason);
         }
 
         public static ServerMessage KeepAlive(this ServerMessage message)

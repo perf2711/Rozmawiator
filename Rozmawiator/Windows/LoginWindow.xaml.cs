@@ -17,6 +17,7 @@ using Rozmawiator.Database.ViewModels;
 using Rozmawiator.Extensions;
 using Rozmawiator.RestClient.Models;
 using Rozmawiator.Communication;
+using Rozmawiator.Communication.Server;
 
 namespace Rozmawiator.Windows
 {
@@ -172,6 +173,7 @@ namespace Rozmawiator.Windows
                 }
 
                 ClientService.Client.Connected += OnConnected;
+                ClientService.Client.ConnectError += OnConnectError;
                 ClientService.Client.Id = UserService.LoggedUser.Id;
                 ClientService.Client.Connect(server.EndPoint);
 
@@ -189,6 +191,17 @@ namespace Rozmawiator.Windows
             });
         }
 
+        private void OnConnectError(Client client, ServerMessage serverMessage)
+        {
+            this.HideLoading();
+
+            LoginUsernameBox.IsEnabled = true;
+            LoginPasswordBox.IsEnabled = true;
+            LoginButton.IsEnabled = true;
+
+            this.ShowError("Uwaga", "Nie można połączyć się z serwerem. Powód: " + serverMessage.GetStringContent());
+        }
+
         #endregion
 
         public LoginWindow()
@@ -198,7 +211,5 @@ namespace Rozmawiator.Windows
             LoginUsernameBox.Text = "tomek";
             LoginPasswordBox.Password = "fajnehaslo38";
         }
-
-        
     }
 }

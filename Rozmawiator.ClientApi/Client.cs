@@ -36,6 +36,7 @@ namespace Rozmawiator.ClientApi
         public List<ExpectedMessage> ExpectedMessages { get; }
 
         public event Action<Client, ServerMessage> Connected;
+        public event Action<Client, ServerMessage> ConnectError;
         public event Action<Client, ServerMessage> DisconnectedByServer;
         public event Action<Client, Conversation> NewConversation;
 
@@ -73,13 +74,23 @@ namespace Rozmawiator.ClientApi
             Task.Factory.StartNew(ReceiveLoop);
 
             ExpectedMessages.Add(new ExpectedMessage(ServerMessageType.Hello, OnConnected));
+            ExpectedMessages.Add(new ExpectedMessage(ServerMessageType.Bye, OnConnectError));
             ForceSend(ServerMessage.Create(Id).Hello());
         }
 
         private void OnConnected(ExpectedMessage expectedMessage, IMessage message)
         {
             State = ClientState.Connected;
+            ExpectedMessages.Clear();
             Connected?.Invoke(this, (ServerMessage) message);
+            
+        }
+
+        private void OnConnectError(ExpectedMessage expectedMessage, IMessage message)
+        {
+            State = ClientState.Disconnected;
+            ExpectedMessages.Clear();
+            ConnectError?.Invoke(this, (ServerMessage) message);
         }
 
         public void Disconnect()
