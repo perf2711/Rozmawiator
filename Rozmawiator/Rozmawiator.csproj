@@ -237,6 +237,7 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <Resource Include="Windows\Montserrat-Regular.otf" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -288,6 +289,9 @@
     <Resource Include="Images\Icons\addRectangle.png" />
     <Resource Include="Images\Icons\blackRectangle.png" />
     <Resource Include="Images\Icons\rightRectangle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\logo.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

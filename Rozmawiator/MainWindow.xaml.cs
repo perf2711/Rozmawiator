@@ -500,10 +500,14 @@ namespace Rozmawiator
 
         private Player Player { get; set; }
 
-        #endregion
 
         #endregion
 
-        
+        #endregion
+
+        private void LoggedUserInfoControl_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

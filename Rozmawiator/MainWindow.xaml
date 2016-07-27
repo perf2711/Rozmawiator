@@ -40,7 +40,7 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Border BorderThickness="0,0,0,2" BorderBrush="Coral" Background="LightCoral">
-                <partialViews:LoggedUserInfoControl x:Name="LoggedUserInfoControl"/>
+                <partialViews:LoggedUserInfoControl x:Name="LoggedUserInfoControl" Loaded="LoggedUserInfoControl_Loaded"/>
             </Border>
             <TabControl Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <TabItem Header="Konwersacje" Width="Auto">
