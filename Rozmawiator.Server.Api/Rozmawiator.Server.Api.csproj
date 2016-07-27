@@ -73,10 +73,6 @@
       <Project>{81f4bf3e-7481-41fe-a3f4-0395eb1a71a9}</Project>
       <Name>Rozmawiator.Database</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Rozmawiator.Server.Configuration\Rozmawiator.Server.Configuration.csproj">
-      <Project>{42d8f708-44f2-4cc3-a764-6e7b420d2515}</Project>
-      <Name>Rozmawiator.Server.Configuration</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

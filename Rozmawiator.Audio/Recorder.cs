@@ -22,10 +22,18 @@ namespace Rozmawiator.Audio
 
         public event Action<Recorder, byte[]> DataAvailable;
 
+        public Recorder(int deviceNumber)
+        {
+            _waveIn = new WaveIn
+            {
+                WaveFormat = _codec.RecordFormat, DeviceNumber = deviceNumber
+            };
+            _waveIn.DataAvailable += OnNewData;
+        }
+
         public Recorder()
         {
-            _waveIn = new WaveIn();
-            _waveIn.WaveFormat = _codec.RecordFormat;
+            _waveIn = new WaveIn {WaveFormat = _codec.RecordFormat};
             _waveIn.DataAvailable += OnNewData;
         }
 

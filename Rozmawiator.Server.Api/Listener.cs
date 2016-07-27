@@ -26,6 +26,8 @@ namespace Rozmawiator.Server.Api
         }
 
         public Guid ServerId { get; } = Guid.Parse("20238f7a-4dcb-405b-ac8d-f72ae7591bcb");
+        public string PublicIp { get; }
+
     
         private UdpClient _listener;
         private readonly ObservableCollection<Client> _clients;
@@ -50,12 +52,14 @@ namespace Rozmawiator.Server.Api
         public event Action<Conversation> ConversationCreated;
         public event Action<Conversation> ConversationClosed;
         public event Action<Conversation> ConversationUpdate;
-
+        
 
         public ListenerState State { get; private set; }
 
-        public Listener()
+        public Listener(string publicIp)
         {
+            PublicIp = publicIp;
+
             _clients = new ObservableCollection<Client>();
             _conversations = new ObservableCollection<Conversation>();
             Clients = new ReadOnlyObservableCollection<Client>(_clients);
@@ -65,7 +69,7 @@ namespace Rozmawiator.Server.Api
             _conversations.CollectionChanged += OnConversationCollectionChanged;
         }
 
-        public void Start()
+        public void Start(int port, int timeoutSpan = 30000)
         {
             using (var database = new RozmawiatorDb())
             {
@@ -78,14 +82,14 @@ namespace Rozmawiator.Server.Api
                     };
                     database.Servers.Add(server);
                 }
-                server.IpAddress = "188.226.229.215";
-                server.Port = Configuration.Host.ListenPort;
+                server.IpAddress = PublicIp;
+                server.Port = port;
                 server.State = ServerState.Online;
                 database.SaveChanges();
             }
 
-            Port = Configuration.Host.ListenPort;
-            TimeoutSpan = Configuration.Client.Timeout;
+            Port = port;
+            TimeoutSpan = timeoutSpan;
 
             _listener = new UdpClient(Port);
             _clients.Clear();

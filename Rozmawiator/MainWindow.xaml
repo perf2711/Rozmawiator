@@ -24,12 +24,12 @@
                 <MenuItem Header="Wyjdź"/>
             </MenuItem>
             <MenuItem Header="Opcje">
-                <MenuItem Header="Ustawienia"/>
+                <MenuItem Header="Ustawienia" Click="MenuItem_Click"/>
             </MenuItem>
             <MenuItem Header="Pomoc">
-                <MenuItem Header="Status"/>
-                <Separator/>
-                <MenuItem Header="O Rozmawiatorze"/>
+                <!--<MenuItem Header="Status"/>
+                <Separator/>-->
+                <MenuItem Header="O Rozmawiatorze" Click="MenuItem_Click_1"/>
             </MenuItem>
         </Menu>
 

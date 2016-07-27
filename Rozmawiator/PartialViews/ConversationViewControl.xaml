@@ -22,7 +22,7 @@
                 <RowDefinition/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer x:Name="MessageScrollViewer" VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="MessagesPanel" Margin="40,5">
                 </StackPanel>
             </ScrollViewer>

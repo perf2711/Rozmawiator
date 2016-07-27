@@ -17,14 +17,14 @@ namespace Rozmawiator.Server
     {
         public static Listener Server { get; set; }
 
-        public static bool StartServer()
+        public static bool StartServer(int port, int timeoutSpan = 30000)
         {
             if (Server.State == Listener.ListenerState.Listening)
             {
                 return false;
             }
 
-            Server.Start();
+            Server.Start(port, timeoutSpan);
             return true;
         }
 

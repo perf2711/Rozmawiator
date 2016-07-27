@@ -24,7 +24,6 @@
                 <Button x:Name="StartButton" Content="Start" Width="80" Margin="0,0,5,0" HorizontalAlignment="Left" Height="20" VerticalAlignment="Bottom" Click="StartButton_Click"/>
                 <Button x:Name="StopButton" Content="Stop" Width="80" Margin="0,0,5,0" HorizontalAlignment="Left" IsEnabled="False" Click="StopButton_Click"/>
             </StackPanel>
-            <Button Content="Settings" Width="80" Margin="5,5,5,5" HorizontalAlignment="Right" Click="SettingsButton_Click"/>
         </Grid>
         <Grid Grid.Row="1">
             <Grid>
@@ -37,28 +36,13 @@
                         <RowDefinition Height="20"/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" Content="Clients" HorizontalAlignment="Center" Padding="2" VerticalAlignment="Center"/>
                     <ListView Grid.Column="0" x:Name="ClientListView" Grid.Row="1" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Header="ID" Width="30" DisplayMemberBinding="{Binding Id}"/>
+                                <GridViewColumn Header="ID" Width="250" DisplayMemberBinding="{Binding Id}"/>
                                 <GridViewColumn Header="Nickname" Width="100" DisplayMemberBinding="{Binding Nickname}"/>
                                 <GridViewColumn Header="Endpoint" Width="100" DisplayMemberBinding="{Binding Endpoint}"/>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-
-                    <Label Grid.Row="0" Grid.Column="1" Content="Conversations" HorizontalAlignment="Center" Padding="2" VerticalAlignment="Center"/>
-                    <ListView Grid.Column="1" x:Name="ConversationListView" Grid.Row="1" HorizontalAlignment="Stretch" Margin="5" VerticalAlignment="Stretch">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Header="ID" Width="30" DisplayMemberBinding="{Binding Id}"/>
-                                <GridViewColumn Header="Owner" Width="150" DisplayMemberBinding="{Binding OwnerNickname}"/>
-                                <GridViewColumn Header="Clients" Width="50" DisplayMemberBinding="{Binding ClientCount}"/>
                             </GridView>
                         </ListView.View>
                     </ListView>

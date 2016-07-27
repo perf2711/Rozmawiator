@@ -1,0 +1,59 @@
+﻿<Window x:Class="Rozmawiator.Server.Windows.MessageDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Rozmawiator.Server.Windows"
+        mc:Ignorable="d"
+        Title="MessageDetailsWindow" Height="300" Width="300">
+    <Grid>
+        <StackPanel>
+            <StackPanel Margin="10,5">
+                <Label Content="Sender"/>
+                <Grid Margin="5,0,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="ID: "/>
+                    <TextBox Name="SenderIdBox" Grid.Column="1"/>
+                </Grid>
+                <Grid Margin="5,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Nickname: "/>
+                    <TextBox Name="SenderNicknameBox" Grid.Column="1"/>
+                </Grid>
+            </StackPanel>
+            <StackPanel Margin="10,5">
+                <Label Content="Receiver"/>
+                <Grid Margin="5,0,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="ID: "/>
+                    <TextBox Name="ReceiverIdBox" Grid.Column="1"/>
+                </Grid>
+                <Grid Margin="5,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="3*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Nickname: "/>
+                    <TextBox Name="ReceiverNicknameBox" Grid.Column="1"/>
+                </Grid>
+            </StackPanel>
+            <Grid Margin="10,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="Type: "/>
+                <TextBox Name="TypeBox" Grid.Column="1" Margin="5,0,0,0"/>
+            </Grid>
+        </StackPanel>
+    </Grid>
+</Window>

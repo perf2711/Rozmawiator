@@ -1,0 +1,38 @@
+﻿<Window x:Class="Rozmawiator.Windows.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Rozmawiator.Windows"
+        mc:Ignorable="d"
+        Title="Ustawienia" Height="300" Width="300" ResizeMode="NoResize">
+    <Grid>
+        <StackPanel Margin="10">
+            <Grid Margin="0,5">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Label Content="Urządzenie nagrywające"/>
+                <ComboBox Grid.Row="1" Name="RecordDeviceBox"/>
+            </Grid>
+            <Grid Margin="0,5">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Label Content="Urządzenie odtwarzające"/>
+                <ComboBox Grid.Row="1" Name="PlayDeviceBox"/>
+            </Grid>
+        </StackPanel>
+        <Grid Height="Auto" VerticalAlignment="Bottom" Margin="10" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="SaveButton" Content="Zastosuj" Margin="5,0" Width="100" Click="SaveButton_Click"/>
+            <Button x:Name="CancelButton" Content="Anuluj" Grid.Column="1" Margin="5,0" Width="100" Click="CancelButton_Click"/>
+        </Grid>
+        
+    </Grid>
+</Window>

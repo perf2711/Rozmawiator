@@ -69,8 +69,8 @@
     </Compile>
     <Compile Include="ViewModels\ClientViewModel.cs" />
     <Compile Include="ViewModels\ConversationViewModel.cs" />
-    <Compile Include="Windows\SettingsWindow.xaml.cs">
-      <DependentUpon>SettingsWindow.xaml</DependentUpon>
+    <Compile Include="Windows\MessageDetailsWindow.xaml.cs">
+      <DependentUpon>MessageDetailsWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="Controls\SettingsSectionControl.xaml">
       <SubType>Designer</SubType>
@@ -88,7 +88,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Windows\SettingsWindow.xaml">
+    <Page Include="Windows\MessageDetailsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -130,10 +130,6 @@
     <ProjectReference Include="..\Rozmawiator.Server.Api\Rozmawiator.Server.Api.csproj">
       <Project>{cb43f620-3806-4271-ae8a-d301c2bfff6c}</Project>
       <Name>Rozmawiator.Server.Api</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Rozmawiator.Server.Configuration\Rozmawiator.Server.Configuration.csproj">
-      <Project>{42d8f708-44f2-4cc3-a764-6e7b420d2515}</Project>
-      <Name>Rozmawiator.Server.Configuration</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

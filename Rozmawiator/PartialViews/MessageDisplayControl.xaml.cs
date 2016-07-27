@@ -20,6 +20,8 @@ namespace Rozmawiator.PartialViews
     {
         public Conversation Conversation { get; }
 
+        public event Action<MessageDisplayControl> OnMessagesDisplayed;
+
         public MessageDisplayControl(Conversation conversation, Guid? priorTo = null)
         {
             InitializeComponent();
@@ -42,6 +44,8 @@ namespace Rozmawiator.PartialViews
             }
 
             SetSenderInfoVisibility();
+
+            OnMessagesDisplayed?.Invoke(this);
         }
 
         public void AddMessageControl(TextMessage message)

@@ -40,15 +40,12 @@ namespace Rozmawiator.Server
 
         public MainWindow()
         {
-            App.Server = new Listener();
+            App.Server = new Listener(Properties.Settings.Default.ServerPublicIp);
 
             App.Server.NewMessage += OnNewMessage;
             App.Server.DebugMessage += OnDebugMessage;
             App.Server.ClientConnected += OnClientConnect;
             App.Server.ClientDisconnected += OnClientDisconnect;
-            App.Server.ConversationCreated += OnConversationCreate;
-            App.Server.ConversationClosed += OnConversationClose;
-            App.Server.ConversationUpdate += OnConversationUpdate;
             App.Server.MessageSent += OnMessageSent;
 
             InitializeComponent();
@@ -71,34 +68,6 @@ namespace Rozmawiator.Server
             {
                 Dispatcher.Invoke(() => ClientListView.Items.Remove(clientViewModel));
             }
-        }
-
-        private void OnConversationCreate(Conversation conversation)
-        {
-            var conversationViewModel = new ConversationViewModel
-            {
-                Conversation = conversation
-            };
-
-            Dispatcher.Invoke(() => ConversationListView.Items.Add(conversationViewModel));
-        }
-
-        private void OnConversationClose(Conversation conversation)
-        {
-            var conversationViewModel =
-                ConversationListView.Items.OfType<ConversationViewModel>().FirstOrDefault(cv => cv.Conversation == conversation);
-            if (conversationViewModel != null)
-            {
-                Dispatcher.Invoke(() => ConversationListView.Items.Remove(conversationViewModel));
-            }
-        }
-
-        private void OnConversationUpdate(Conversation conversation)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                ConversationListView.UpdateLayout();
-            });
         }
 
         private void OnDebugMessage(DateTime dateTime, string s)
@@ -247,7 +216,7 @@ namespace Rozmawiator.Server
 
         private void StartServer()
         {
-            if (!App.StartServer())
+            if (!App.StartServer(Properties.Settings.Default.Port, Properties.Settings.Default.TimeoutSpan))
             {
                 return;
             }
@@ -269,7 +238,6 @@ namespace Rozmawiator.Server
             }
 
             ClientListView.Items.Clear();
-            ConversationListView.Items.Clear();
 
             StopButton.IsEnabled = false;
             StartButton.IsEnabled = true;
@@ -288,12 +256,6 @@ namespace Rozmawiator.Server
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
             StopServer();
-        }
-
-        private void SettingsButton_Click(object sender, RoutedEventArgs e)
-        {
-            var settings = new SettingsWindow(typeof(Configuration.Client), typeof(Configuration.Host));
-            settings.ShowDialog();
         }
 
         private void OnClose(object sender, CancelEventArgs e)

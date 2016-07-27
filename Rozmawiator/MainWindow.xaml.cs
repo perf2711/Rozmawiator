@@ -5,14 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
 using Rozmawiator.Audio;
 using Rozmawiator.ClientApi;
 using Rozmawiator.Communication;
@@ -53,7 +45,7 @@ namespace Rozmawiator
             LoggedUserInfoControl.User = UserService.LoggedUser;
             SetEvents();
             new Task(async () => await UpdateData()).Start();
-            InitializeSoundDevices();
+            InitializeSoundDevices(Properties.Settings.Default.PlayDeviceId, Properties.Settings.Default.RecordDeviceId);
         }
 
         private void SetEvents()
@@ -314,6 +306,11 @@ namespace Rozmawiator
                 var conversationModel = ConversationService.Conversations.First(c => c.Id == conversation.Id);
                 var view = GetConversationView(conversationModel);
 
+                if (conversationModel.Call != null)
+                {
+                    return;
+                }
+
                 conversationModel.Call = new Call
                 {
                     Id = call.Id,
@@ -467,10 +464,10 @@ namespace Rozmawiator
 
         #region Audio
 
-        private void InitializeSoundDevices()
+        private void InitializeSoundDevices(int playDeviceId = -1, int recordDeviceId = -1)
         {
-            Recorder = new Recorder();
-            Player = new Player();
+            Recorder = recordDeviceId == -1 ? new Recorder() : new Recorder(recordDeviceId);
+            Player = playDeviceId == -1 ? new Player() : new Player(playDeviceId);
 
             Recorder.DataAvailable += OnRecorderDataAvailable;
         }
@@ -505,9 +502,24 @@ namespace Rozmawiator
 
         #endregion
 
-        private void LoggedUserInfoControl_Loaded(object sender, RoutedEventArgs e)
-        {
+        #region Menu
 
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsWindow = new SettingsWindow();
+            settingsWindow.ShowDialog();
+
+            if (settingsWindow.SettingsChanged)
+            {
+                InitializeSoundDevices(Properties.Settings.Default.PlayDeviceId, Properties.Settings.Default.RecordDeviceId);
+            }
+        }
+
+        #endregion
+
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            new AboutWindow().ShowDialog();
         }
     }
 }

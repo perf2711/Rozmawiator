@@ -11,6 +11,7 @@ namespace Rozmawiator.Server.Api
     public class Client
     {
         public Guid Id => User.Id;
+        public string Nickname => User.UserName;
         public User User { get; }
         public IPEndPoint EndPoint { get; }
         public Listener Server { get; }

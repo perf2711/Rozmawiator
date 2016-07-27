@@ -33,10 +33,17 @@ namespace Rozmawiator.Audio
             Volume = mute ? 0 : volume;
         }
 
+        public Player(int deviceNumber)
+        {
+            _waveProvider = new BufferedWaveProvider(_codec.RecordFormat) { DiscardOnBufferOverflow = true };
+
+            _waveOut = new WaveOut {DeviceNumber = deviceNumber};
+            _waveOut.Init(_waveProvider);
+        }
+
         public Player()
         {
-            _waveProvider = new BufferedWaveProvider(_codec.RecordFormat);
-            _waveProvider.DiscardOnBufferOverflow = true;
+            _waveProvider = new BufferedWaveProvider(_codec.RecordFormat) {DiscardOnBufferOverflow = true};
 
             _waveOut = new WaveOut();
             _waveOut.Init(_waveProvider);

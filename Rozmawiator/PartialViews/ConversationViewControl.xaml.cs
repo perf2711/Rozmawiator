@@ -50,6 +50,7 @@ namespace Rozmawiator.PartialViews
             if (MessagesPanel.Children.Count == 0)
             {
                 MessageDisplay = new MessageDisplayControl(Conversation);
+                MessageDisplay.OnMessagesDisplayed += MessageDisplayOnOnMessagesDisplayed;
                 MessagesPanel.Children.Add(MessageDisplay);
             }
 
@@ -59,6 +60,11 @@ namespace Rozmawiator.PartialViews
                 CallGrid.Visibility = Visibility.Collapsed;
                 CallSplitter.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void MessageDisplayOnOnMessagesDisplayed(MessageDisplayControl messageDisplayControl)
+        {
+            MessageScrollViewer.ScrollToEnd();
         }
 
         public void AddMessage(TextMessage message)
