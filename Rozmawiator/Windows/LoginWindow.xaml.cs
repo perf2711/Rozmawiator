@@ -195,9 +195,12 @@ namespace Rozmawiator.Windows
         {
             this.HideLoading();
 
-            LoginUsernameBox.IsEnabled = true;
-            LoginPasswordBox.IsEnabled = true;
-            LoginButton.IsEnabled = true;
+            Dispatcher.Invoke(() =>
+            {
+                LoginUsernameBox.IsEnabled = true;
+                LoginPasswordBox.IsEnabled = true;
+                LoginButton.IsEnabled = true;
+            });
 
             this.ShowError("Uwaga", "Nie można połączyć się z serwerem. Powód: " + serverMessage.GetStringContent());
         }
@@ -207,9 +210,6 @@ namespace Rozmawiator.Windows
         public LoginWindow()
         {
             InitializeComponent();
-            /* Debug autofill */
-            LoginUsernameBox.Text = "tomek";
-            LoginPasswordBox.Password = "fajnehaslo38";
         }
 
     }

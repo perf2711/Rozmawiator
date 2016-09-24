@@ -40,7 +40,7 @@ namespace Rozmawiator.ClientApi
         public event Action<Client, ServerMessage> DisconnectedByServer;
         public event Action<Client, Conversation> NewConversation;
 
-        private readonly UdpClient _client;
+        private UdpClient _client;
         private const int KeepAliveSpan = 1000;
         private Timer _keepAliveTimer;
         
@@ -56,6 +56,8 @@ namespace Rozmawiator.ClientApi
 
         public void Connect(IPEndPoint ipEndPoint)
         {
+            _client = new UdpClient();
+
             if (Id == Guid.Empty)
             {
                 throw new InvalidOperationException("GUID cannot be zeroes.");

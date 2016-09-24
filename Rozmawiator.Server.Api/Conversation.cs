@@ -141,7 +141,7 @@ namespace Rozmawiator.Server.Api
 
         public void CreateCall(ConversationMessage message)
         {
-            if (Call != null)
+            if (Call?.Participants?.Any() == true)
             {
                 return;
             }

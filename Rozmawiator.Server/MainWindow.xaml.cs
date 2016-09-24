@@ -201,6 +201,10 @@ namespace Rozmawiator.Server
 
         private void LogSelfMessage(IPEndPoint endpoint, CallMessage message, bool appendContent = true, bool guidContent = false)
         {
+            if (message.Type == CallMessageType.Audio)
+            {
+                return;
+            }
             Log($"Server [to {endpoint}] <{message.Type}> CallID:{message.GetCallId()} : " + (appendContent ? (guidContent ? message.GetGuidContent().ToString() : message.GetStringContent()) : ""));
         }
 
